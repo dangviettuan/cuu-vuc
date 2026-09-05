@@ -5,6 +5,7 @@ Status: **In progress**
 ## Canon locked
 
 - **Gender:** Male
+- **Age:** 25 at the beginning of the game
 - **Name:** Player-defined at New Game via text input. There is no canonical protagonist name.
 - **Role:** Authored protagonist, not a blank avatar.
 - **Origin:** Làng An Mộc, Thanh Mộc Vực.
@@ -17,20 +18,19 @@ Status: **In progress**
 
 ## Still to design
 
-1. Age at the beginning of the game
-2. Physical build and visual silhouette
-3. Hair / face / default clothing direction
-4. Degree of cosmetic customization beyond the player-entered name
-5. Personality traits in ordinary life before the inciting incident
-6. Core flaw beyond his initial moral certainty
-7. Primary fear
-8. Core emotional wound
-9. Relationship with Father before and after the reveal
-10. Relationship with Người Đồng Hành
-11. Class-selection scene and mentors
-12. Character state by chapter
-13. How each major choice alters dialogue and behavior without turning him into a completely different person
-14. How the eight ending paths emerge naturally from the same starting personality
+1. Physical build and visual silhouette
+2. Hair / face / default clothing direction
+3. Degree of cosmetic customization beyond the player-entered name
+4. Personality traits in ordinary life before the inciting incident
+5. Core flaw beyond his initial moral certainty
+6. Primary fear
+7. Core emotional wound
+8. Relationship with Father before and after the reveal
+9. Relationship with Người Đồng Hành
+10. Class-selection scene and mentors
+11. Character state by chapter
+12. How each major choice alters dialogue and behavior without turning him into a completely different person
+13. How the eight ending paths emerge naturally from the same starting personality
 
 ## Design rule
 
