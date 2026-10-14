@@ -52,8 +52,9 @@ func _create_floor() -> void:
     ground.add_child(visual)
 
 func _spawn_fighter(pos: Vector2, controlled: bool) -> Fighter:
-    var fighter := CharacterBody2D.new()
-    fighter.set_script(FighterScript)
+    var node := CharacterBody2D.new()
+    node.set_script(FighterScript)
+    var fighter: Fighter = node as Fighter
     fighter.is_player = controlled
     fighter.position = pos
     add_child(fighter)
