@@ -54,6 +54,7 @@ Turn the search for the Father into a **hunt for a culprit**. The player should 
 - **Làng Khê ruins** (Diệp's yearly visit; offered after I-3):
   - She shows him the dry stream bed and the empty houses. *"Linh Suy lấy hết, trong một mùa."*
   - **The half Mạch Ấn pulses harder here than anywhere else.** He doesn't understand why. She doesn't notice. The player may.
+  - **The Làng Khê station** at the head of the dry stream has a hollow cut into its core, **almost twice the size of the half Mạch Ấn**. The half *pulls* toward it. He chooses not to finish the thought: the first time he chooses not to know. **[Prose Ch.4; FB F2–F3]**
   - Writes `CH1_KHE_VISITED`, which Ch. IX uses for a recognition beat. **[new; FB F2–F3]**
 - **Hộ Lâm side requests** in Mộc Thành: escorts, herb runs, a cut station. These build `CH1_HOLAM_STANDING`.
 - **A dark station:** a Người Dẫn Mạch station in the Outer Forest that the cut has knocked out. It is *not* a checkpoint until he reignites it with Diệp's help. This is the first demonstration of ADR-0006. **[new]**
