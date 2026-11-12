@@ -91,7 +91,7 @@ Each mentor briefly states a view on *what strength is for* **[PB L9]**, as a li
 - **Rễ sống:** living-root hazards that regrow after being cut.
 - **Người cắt mạch:** Cương's operatives, the **first human enemies**. They use disciplined pairs and nets, and they retreat rather than die.
 - **Mini-boss: Độc Đằng (Poison Vine Colossus),** in I-4. A mass of corrupted vine that teaches poison management and cutting off its weak points.
-- **Mini-boss: the cell's squad leader,** in I-6. A human duel that teaches the class kit against a thinking opponent.
+- **Mini-boss: the cell's squad leader, Hùng,** in I-6 (a burn-scarred man with a Ty-alloy blade, who reads the protagonist's parries; he escapes into the trench). A human duel that teaches the class kit against a thinking opponent.
 
 ## 8. Main boss — Mộc Giác
 

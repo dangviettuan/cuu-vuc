@@ -16,6 +16,10 @@ Nguyên Linh is neither god nor demon. It magnifies the will and desire of being
 
 The Cửu Vực therefore function not only as geography but as a colossal containment system preventing any single will from controlling Nguyên Linh.
 
+## Physical form of a Linh Mạch
+
+Underground, a Linh Mạch is a bundle of **translucent stone fibres**, each about as thick as a human body, laid side by side and running across the land. A living Mạch glows a faint green-blue. A cut one is severed with a mirror-smooth face: still faintly lit upstream, dark downstream. Người Dẫn Mạch stations sit above these bundles and read them. **[Ch. I spec; prose Ch.6]**
+
 ## Linh Suy
 
 After centuries of separation, the Cửu Mạch are deteriorating. This is called **Linh Suy**.
