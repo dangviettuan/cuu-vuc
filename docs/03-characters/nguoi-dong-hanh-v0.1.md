@@ -75,6 +75,7 @@ The mirror is the point. He envies her for being trusted. She envies him for bei
   - This gives the Ch. VIII duel mechanical credibility.
   - It sharpens the theme: consent against necessity.
   - It feeds the Envy wound: the Father chose *her* to carry his work forward. **[new]**
+  - **Ch. X reveal:** she is **the Hội's intended Bearer**, the bonded will meant to stand at the centre of the convergence at Thiên Tâm. **[Ch. X spec §2]**
 
 ### N6. Gameplay and combat identity
 

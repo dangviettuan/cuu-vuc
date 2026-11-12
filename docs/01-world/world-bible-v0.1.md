@@ -16,7 +16,12 @@ Nine powerful people divided the Cửu Mạch to seal their source: **Nguyên Li
 - The people living on the Mạch confluence refused to leave, and the Nine declared anyone who stayed a "hostile will".
 - The Nine's White General, **Bạch Tướng**, ended the war in one night by freezing the battlefield in Hàn Sơn, his own soldiers included.
 - Before the war ended, the Nine drew up a **Charter** dividing control of the Mạch among their families. It is the origin of the Cửu Gia.
-- The full reason for the division is withheld until Ch. X.
+- **The reason (revealed in Ch. X):**
+  - The pre-division civilization channelled Nguyên Linh through **one bonded human, the Bearer (Kẻ Mang Mạch)**, using the first **Phép Ghép Mạch**.
+  - The Bearer was good, with a will that no one should suffer loss. Magnified, that will became a cage that removed loss, then risk, then choice.
+  - The council had been ten. The other **nine** divided the Mạch to cut the Bearer off.
+  - The Bearer's will dissolved into Nguyên Linh, and an echo of it remains in the source.
+  - Whoever is bonded and present at a reopened Thiên Tâm can become the next Bearer.
 
 Nguyên Linh is neither god nor demon. It magnifies the will and desire of beings that interact with it. It does not understand moral categories. Healing, domination, revenge and protection are equally valid intentions to it, and every use carries consequences.
 

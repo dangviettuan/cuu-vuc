@@ -60,6 +60,7 @@ Scope: the first pass covers four factions and five key figures. The four class 
 - **Flaw:** she treats generations as abstractions and spends present lives patiently. She has never seen a cut take effect in person. **[new]**
 - **Link to the protagonist:** she knows the Father's procedure worked, but not that the child survived (FB F4, his "last lie"). When the protagonist starts absorbing Mạch Ấn, she works it out and takes a deep interest in him. **[new]**
 - **Arc:** a voice and rumour in Ch. II, met in person in Ch. V, leads the convergence at Thiên Tâm in Ch. XI–XII. **[new; NB]**
+- **Her plan for Thiên Tâm:** the convergence reopens the source, and a bonded will at the centre channels it. Diệp is the Hội's chosen Bearer. The protagonist is the accidental one she has watched since Ch. V. **[Ch. X spec]**
 - **Lôi Trạch:** she **forbade** Cương from stopping the Ty's restoration. Let the institution fail in public, where everyone can see. Thousands died for her patience. **[Ch. IV spec §12]**
 
 ### K2. Cương — Quy Nguyên's Đoạn Mạch Sứ (the one who cuts)

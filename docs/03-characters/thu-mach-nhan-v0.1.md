@@ -99,4 +99,4 @@ Status: **v0.1 complete.** The open questions below are still pending.
 ## Open questions
 
 1. His original personal name: is it ever recovered (e.g. in Hàn Sơn records), or lost forever?
-2. The prior case he recognizes (T4): who was the other human he saw bonded with Mạch in the age of the Nine? This connects to Ch. X.
+2. ~~The prior case he recognizes (T4).~~ **Resolved (Ch. X):** the Bearer (Kẻ Mang Mạch), the first bonded human, whom he guarded before the division.
