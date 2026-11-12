@@ -42,6 +42,11 @@ Before production art, prove that these are fun:
 - one enemy
 - one boss pattern
 
+### Traversal unlocks (gear, not Mạch Ấn)
+Traversal unlocks never depend on optional Mạch Ấn, so players who refuse them never lose access:
+- Móc Câu (grappling hook): Ch. I–II
+- Áo Gió (Air Dash): Ch. VIII
+
 ### Checkpoints
 Mạch shrines and Người Dẫn Mạch stations are the checkpoints ([ADR-0006](../decisions/ADR-0006-mach-checkpoints.md)).
 

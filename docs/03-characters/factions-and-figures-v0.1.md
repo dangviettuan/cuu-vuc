@@ -112,6 +112,7 @@ Scope: the first pass covers four factions and five key figures. The four class 
 | **Tướng Đan** | Female, about 50. A royal general of Xích Sa, born in an outer settlement. The alternative ruler in Ch. III branch C, who ends up diverting the water again, without the Wall. | Ch. III §5, §11 |
 | **Ông Khảm, Cát** | The elder of Đồng Muối (about 70) and his granddaughter (about 10). The human face of the Xích Sa arithmetic. | Ch. III §5 |
 | **Hàn Sơn clans: Già Ưng, Trúc** | Descendants of the Nine's soldiers who guard the frozen battlefield. Già Ưng is the chieftain. Trúc is an ice-reader, about 20, and his guide in Ch. VI. | Ch. VI §3 |
+| **Bà Gió** | Blind elder of Làng Treo who reads the wind. Speaks for the sky-folk, who have no Charter House. | Ch. VIII §5 |
 | **Rạn, Lão Ngư** | Rạn is a diver of Cảng Triều, about 17, and his guide in Ch. VII. Lão Ngư is the port's elder, a retired whaler. | Ch. VII §6 |
 | **House Lạc** | The Cửu Gia house whose Charter share is Huyền Hải's Mạch. Its fleet attacks Cảng Triều in Ch. VII. (This is the first House to be named; the others remain open.) | Ch. VII §6 |
 | **Hùng** | Burn-scarred squad leader of Cương's cell. | Ch. I §7 |
