@@ -91,7 +91,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 |---|---|
 | Prologue | Protects his son by withholding everything. He knows the day he dreaded has come. |
 | Ch. I–IV | Absent. He leaves traces. He may intervene indirectly, e.g. ensuring a Hội cell does not harm his son, without revealing himself. **[new]** |
-| Ch. V | Meets his son openly. Does not defend himself, does not ask him to join, does not reveal the procedure. **[NB]** |
+| Ch. V | Meets his son openly. Does not defend himself, does not ask him to join, does not reveal the procedure. **[NB]** When Thủ Mạch Nhân comes to kill him, his son steps between them and loses, and the Father escapes. See [`thu-mach-nhan-v0.1.md`](thu-mach-nhan-v0.1.md) T3. |
 | Ch. IX | The truth comes out through U Minh, not through his confession. Whether he was ever going to tell is left ambiguous. **[NB]** |
 | Ch. XI–XII | Commits fully to Quy Nguyên's convergence at Thiên Tâm. His final stance toward his son depends on branch state. |
 

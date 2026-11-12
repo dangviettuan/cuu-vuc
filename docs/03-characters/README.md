@@ -45,7 +45,7 @@ Characters to lock next:
    - branching relationship state
    - role in Kẻ Thay Thế ending
 
-4. Thủ Mạch Nhân
+4. Thủ Mạch Nhân — **v0.1 complete**, see [`thu-mach-nhan-v0.1.md`](thu-mach-nhan-v0.1.md)
    - origin
    - link to Đại Phân Ly
    - power ceiling function

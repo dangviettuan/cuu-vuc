@@ -21,11 +21,12 @@
 - Người Đồng Hành (Diệp) is away at Mộc Thành during the Prologue
 - Prose chapters are numbered independently of game chapters (ADR-0005)
 - Người Đồng Hành bible v0.1: **Diệp**, female, 27, an orphan of the settlement the procedure destroyed, raised by the Father, sibling bond with no romance. Learns the truth before the protagonist. Consented bonding procedure. Duel states and fates as guidance
+- Thủ Mạch Nhân bible v0.1: male sworn guardian of the Nine (not one of them), bound into the seal and dying of Linh Suy. Ch. V: comes to kill the Father; the protagonist steps between them, loses, and the Father escapes. Phase 2 "Sealing" fight design. Asks the Nhân Gian final question
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
 ## Next design task
 
-**Character Bible v0.1** — in progress. Protagonist Bible v0.1 is complete (`docs/03-characters/protagonist-v0.1.md`). Father Bible v0.1 is complete (`docs/03-characters/father-v0.1.md`). Người Đồng Hành Bible v0.1 is complete (`docs/03-characters/nguoi-dong-hanh-v0.1.md`). Next: **Thủ Mạch Nhân**.
+**Character Bible v0.1** — in progress. Protagonist Bible v0.1 is complete (`docs/03-characters/protagonist-v0.1.md`). Father Bible v0.1 is complete (`docs/03-characters/father-v0.1.md`). Người Đồng Hành Bible v0.1 is complete (`docs/03-characters/nguoi-dong-hanh-v0.1.md`). Thủ Mạch Nhân Bible v0.1 is complete (`docs/03-characters/thu-mach-nhan-v0.1.md`). Next: **key Quy Nguyên / Trung Vực figures**.
 
 Lock:
 1. protagonist
