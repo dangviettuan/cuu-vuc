@@ -34,6 +34,7 @@ Current canonical foundation:
 - `docs/06-art/` — art direction and production rules
 - `docs/decisions/` — project ADRs and canonical decisions
 - `docs/PROJECT_STATUS.md` — current status and next work
+- `game/` — playable greybox prototype (Phaser 4 + TypeScript + Vite); see `game/README.md`
 
 ## Contributing
 
