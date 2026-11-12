@@ -1,6 +1,6 @@
 # Gameplay Bible
 
-Status: high-level direction accepted; detailed systems pending.
+Status: high-level direction accepted. **Detailed systems: see [Combat & Class Bible v0.1](combat-class-bible-v0.1.md).**
 
 ## Planned systems
 

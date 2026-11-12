@@ -1,6 +1,6 @@
 # Art Bible
 
-Status: pending Character Bible and initial combat prototype.
+Status: **see [Art Bible v0.1](art-bible-v0.1.md)** for pixel production rules, realm and character visual keys, and UI principles. To be revised after concept art and the greybox prototype.
 
 ## Direction already established
 

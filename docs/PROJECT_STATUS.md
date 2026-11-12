@@ -37,6 +37,8 @@
 - Chapter XI spec v0.1: the convergence clock (help four of eight realms), realm crises consuming every earlier flag, choice C1 (the alliance: Hội, Seal or his own), boss Lạc Quân with Cửu Ấn, the nine fragments (absorb, refuse or return)
 - Chapter XII spec v0.1: the Rim battle, Uyên, "Để con giữ" at the array, Diệp at the Seat, eight final-boss reflections built from the player's build, eight epilogues
 - ADR-0007: ending resolution by a seven-axis profile, with a gated Nhân Gian and a final act chosen among plausible destinations
+- Combat & Class Bible v0.1: core verbs and frame targets; four classes with distinct perfect defences and charge resources; attributes (WIL sets Mạch Ấn slots and seal resistance); the Mạch Ấn catalogue of 11; Tĩnh Tâm compensation for refusals; realm status systems; boss rules and alternative win conditions; greybox scope
+- Art Bible v0.1: 640×360, 16 px tiles, 48 px protagonist, boss scale bands S/M/L/XL, 60/12 fps, coloured outlines, 32-colour realm palettes, the reserved red-thread colour, Mạch visual language, realm and character keys, UI principles
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Prose Chương 4 "Bốn con đường" drafted (Ch. I stages I-2 and I-3 plus Làng Khê; reference class Kiếm Khách)
@@ -54,7 +56,7 @@
 
 ## Next design task
 
-**Combat & Class Bible** — next. **The Chapter & Quest Bible v0.1 is complete**: Prologue through Ch. XII, the ending model (ADR-0007) and the flag registry (`docs/04-chapters/`).
+**Greybox combat prototype** — next. It needs an **engine decision** (open question). Design documentation v0.1 is complete: Character, Chapter & Quest, Combat & Class, and Art bibles.
 
 Roadmap:
 
