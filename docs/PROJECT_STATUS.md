@@ -31,6 +31,7 @@
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Prose Chương 4 "Bốn con đường" drafted (Ch. I stages I-2 and I-3 plus Làng Khê; reference class Kiếm Khách)
+- Prose Chương 5 "Mộc Giác" drafted (Ch. I stages I-4 and I-5: the first absorption)
 - Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
