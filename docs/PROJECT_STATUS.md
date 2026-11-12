@@ -41,6 +41,7 @@
 - Prose Chương 7 "Thiên Kinh" drafted (Ch. II stages II-1 to II-4: Khải, Học Phường, the buried evidence)
 - Prose Chương 8 "Tàng Thư Cấm" drafted (Ch. II stages II-5 to II-9; reference path: records published)
 - Prose Chương 9 "Đồng Muối" drafted (Ch. III stages III-1 to III-4: Khảm, Cát, the Wall of Names, the Father's handwriting)
+- Prose Chương 10 "Xích Hạt" drafted (Ch. III stages III-5 to III-9; reference path: enforced; the protagonist carves Đồng Muối)
 - The Mother was Uyên's third top student, who dropped out (Father bible F1)
 - Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
