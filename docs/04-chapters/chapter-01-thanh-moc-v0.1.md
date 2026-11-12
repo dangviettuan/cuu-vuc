@@ -142,7 +142,7 @@ Sẻ is wounded, frightened and silent about his organization.
 | Option | Immediate | Delayed | Axes |
 |---|---|---|---|
 | **Hand him to the Hộ Lâm** | Ngàn applies forest law: those who cut the forest hang. It happens off-screen at dawn, and Diệp tells him. `CH1_HOLAM_STANDING` rises. | Sẻ is dead. In Ch. IX (U Minh) he is among the dead whose fate the protagonist decided. | Punishment; order |
-| **Let him go** | Ngàn is cold. Hộ Lâm standing drops. Diệp says nothing, but she approves. | **Ch. V:** in the Thiên Kinh chaos, Sẻ (now openly Quy Nguyên) repays the debt by getting the protagonist and Diệp out of a mob. | Forgiveness; trust |
+| **Let him go** | Ngàn is cold. Hộ Lâm standing drops. Diệp says nothing, but she approves. | **Ch. V:** in the Thiên Kinh chaos, Sẻ (now openly Quy Nguyên) repays the debt by getting the protagonist out of a mob. (Diệp has already left, in Ch. IV.) | Forgiveness; trust |
 | **Force answers** | He gets a Thiên Kinh safehouse location, an alternative lead in Ch. II. Diệp sees him hurt a wounded boy. | Sẻ survives and hates him. **Ch. IV:** Diệp cites this when the fracture comes: *"Em cũng từng làm đau người ta vì một mục đích."* | Control; punishment |
 
 **Weighting:** low to medium. This is the first choice with a human life at stake.

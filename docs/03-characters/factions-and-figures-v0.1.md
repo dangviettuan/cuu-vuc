@@ -81,7 +81,7 @@ Scope: the first pass covers four factions and five key figures. The four class 
 - **Story role:**
   - **Ch. II:** knew the Father and is warm toward the son. He suppresses the protagonist's evidence. This is the first institutional betrayal. **[new; NB Ch.II]**
   - **Ch. IV:** leads the Lôi Trạch restoration, which kills many people. He is a sincere man whose good intentions end in a massacre. **[new; NB Ch.IV]**
-  - **Ch. V onward:** the Cửu Gia make him their scapegoat in the chaos. His fate depends on the branch.
+  - **Ch. V onward:** the Cửu Gia make him their scapegoat in the chaos. Ch. V C2 decides whether he is freed, executed or put on public trial. He gives the protagonist the Hàn Sơn lead regardless. **[Ch. V spec]**
 
 ### K4. Xích Vương Hạo — ruler of Xích Sa
 
