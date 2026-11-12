@@ -112,6 +112,7 @@ The beast is a sow with roots growing through her flesh. When she is beaten, her
 - **Mini-bosses:** none.
 - **Main boss: Nanh Rễ (Root-Tusk)**
   - A forest sow with Linh Suy roots growing through her flesh, driven out of the forest by pain.
+  - **Concept pick A, "Living roots":** black roots break through her back with **green tips**; tusks wrapped in root; an **amber** eye (red is reserved). **[concept v0.1]**
   - **The worldview of a beast:** she protects her litter and flees what is killing her. She is not evil. The fight is a tutorial in reading tells, dodging and punishing (charge, root-burst, a desperate final phase).
   - **[new; NB rule 2]**
 - **Mạch Ấn reward: none.** The first absorption is reserved for Mộc Giác in Ch. I **[NB; FB F3]**.

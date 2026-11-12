@@ -39,6 +39,7 @@
 - ADR-0007: ending resolution by a seven-axis profile, with a gated Nhân Gian and a final act chosen among plausible destinations
 - Combat & Class Bible v0.1: core verbs and frame targets; four classes with distinct perfect defences and charge resources; attributes (WIL sets Mạch Ấn slots and seal resistance); the Mạch Ấn catalogue of 11; Tĩnh Tâm compensation for refusals; realm status systems; boss rules and alternative win conditions; greybox scope
 - Art Bible v0.1: 640×360, 16 px tiles, 48 px protagonist, boss scale bands S/M/L/XL, 60/12 fps, coloured outlines, 32-colour realm palettes, the reserved red-thread colour, Mạch visual language, realm and character keys, UI principles
+- Concept direction v0.1 picks: protagonist long coat; Diệp short-haired warden; the Father in a scholar's robe; Thủ Mạch Nhân bare-headed with white hair; Nanh Rễ with living roots; realm moods (A: Thanh Mộc, Xích Sa, U Minh, Thiên Khuyết; B: Trung Vực, Lôi Trạch, Hàn Sơn, Huyền Hải, Vân Hải)
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Prose Chương 4 "Bốn con đường" drafted (Ch. I stages I-2 and I-3 plus Làng Khê; reference class Kiếm Khách)
@@ -64,7 +65,7 @@ Roadmap:
 2. ~~Chapter & Quest Bible~~ (v0.1 complete)
 3. ~~Combat & Class Bible~~ (v0.1: `docs/05-gameplay/combat-class-bible-v0.1.md`)
 4. ~~Art Bible~~ (v0.1: `docs/06-art/art-bible-v0.1.md`)
-5. Concept art
+5. ~~Concept direction~~ (v0.1: generated pixel concepts chosen; `docs/06-art/concept-v0.1/picks.md`). Painted or hand-pixelled key art can come later and must keep the chosen silhouettes and palettes.
 6. Greybox combat prototype (Prologue S1 + Nanh Rễ is the natural first slice)
 7. Vertical slice (Prologue + Ch. I)
 

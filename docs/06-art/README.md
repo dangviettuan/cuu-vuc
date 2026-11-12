@@ -1,5 +1,7 @@
 # Art Bible
 
+**Concept direction v0.1 is chosen:** see [`concept-v0.1/picks.md`](concept-v0.1/picks.md) for the picks and exact palettes, and [`concept-v0.1/concept-lab.html`](concept-v0.1/concept-lab.html) for the generator.
+
 Status: **see [Art Bible v0.1](art-bible-v0.1.md)** for pixel production rules, realm and character visual keys, and UI principles. To be revised after concept art and the greybox prototype.
 
 ## Direction already established

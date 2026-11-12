@@ -83,6 +83,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 ### F6. Visual identity
 
 - In his fifties and looks older: sun-darkened skin, fine lines at the eyes, a slight stoop from years of kneeling at stations. **[Ch1]**
+- **Concept pick A, "Scholar's robe":** a long, dull olive **scholar's robe** (#5d5844) that still carries a trace of the top student from Thiên Kinh; **grey hair and a short grey beard**. **[concept v0.1]**
 - **Fixed marks:** the white burn scar on his left hand **[Ch1]**, and the right-thumb tell as an animation beat in cutscenes.
 - **Prologue kit:**
   - a worn leather Người Dẫn Mạch bag with a grey, frayed strap;

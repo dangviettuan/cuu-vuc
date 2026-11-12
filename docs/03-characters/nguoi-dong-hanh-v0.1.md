@@ -87,7 +87,7 @@ The mirror is the point. He envies her for being trusted. She envies him for bei
 ### N7. Visual identity
 
 - A little taller than the protagonist. Athletic, with an upright and composed stance. **[new]**
-- **Warden kit:** a green-grey layered coat, wrapped forearms and the spear across her back. **[new]**
+- **Warden kit** (**concept pick A, "Short-haired warden"**): **short, practical black hair**; a green-grey layered coat (#56685a) to mid-thigh; wrapped forearms; the spear across her back. **[concept v0.1]**
 - **Silhouette anchor:** a small wooden charm on a cord, the only object she kept from her settlement. It is never removed in any branch. **[new]**
 - **After joining Quy Nguyên:** the warden coat gives way to Hội attire. She keeps the charm. After N5, a visible bonding mark appears on her body, a deliberate echo of his hidden chest scar. **[new]**
 

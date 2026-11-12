@@ -65,6 +65,7 @@ Status: **v0.1 complete.** The open questions below are still pending.
 ### T6. Visual identity
 
 - Very tall and gaunt. He wears archaic armour and robes in a style from before Đại Phân Ly. **[new]**
+- **Concept pick B, "Bare-headed, white hair":** no helmet or hood; **long white hair** falling behind; a small grey crest; steel-grey archaic armour with a short dark cape; pale eyes. His face is visible, a warrior from the age of the Nine, not a faceless guardian. **[concept v0.1]**
 - **Nine seal marks** run across his body, one for each Mạch. Some are cracked and dim, because Linh Suy is visible on him (T1). **[new]**
 - **Weapon:** a long, plain blade and a set of ancient seal rods. **[new]**
 - **Silhouette:** stillness. He barely moves until he strikes, the opposite of the restless protagonist. **[new; PB L3]**

@@ -54,15 +54,17 @@ The Art README's items that must be locked before large-scale asset production *
 
 ## 5. Realm visual keys
 
+> **Locked mood picks (concept v0.1):** Thanh Mộc **A** · Trung Vực **B** · Xích Sa **A** · Lôi Trạch **B** · Hàn Sơn **B** · Huyền Hải **B** · Vân Hải **B** · U Minh **A** · Thiên Khuyết **A**. Where a pick was option B, the row below has been updated to that mood. Exact palette hex values are in [`concept-v0.1/picks.md`](concept-v0.1/picks.md).
+
 | Realm | Palette and light | Motifs | Mạch accent |
 |---|---|---|---|
 | **Thanh Mộc** | Deep greens, moss, warm wood. Dappled light from far above, *"đáy một cái giếng"*. | Roots as architecture, tree-towns, yellowing leaves with dark veins | Green |
-| **Trung Vực** | Red, grey and blue roof tiles; gold in Thượng Thành; cool stone. Hazy daylight. | Endless roofs, 31 windows, canals, notices on walls | Blue-green (official, "clean") |
+| **Trung Vực** | **Lamplit dusk**: indigo-violet sky, dark wine, slate and navy roofs, warm lantern gold in Thượng Thành. | Endless roofs, 31 windows, canals, notices on walls | Blue-green (official, "clean") |
 | **Xích Sa** | Ochres, rust, salt white; red Mạch-glass below. Hard noon light, starry nights. | Concentric city rings, the Great Well, the Wall of Names | Red-orange |
-| **Lôi Trạch** | Slate, silver water, black stilts; Ty blue flags. Storm light. | Copper towers, stilt-houses with copper rods | White-violet |
-| **Hàn Sơn** | Blue-whites, granite, the clans' dyed reds (muted, never the reserved red) | Glacier with frozen armies, banners in ice | Ice-cyan |
-| **Huyền Hải** | Teal, sand, shell-white; deep indigo below. Tidal light. | Stilted harbour, the whale's back as a city | Deep teal |
-| **Vân Hải** | Pale sky blues, cloud whites, sun-gold. Strong backlight. | Floating isles, rope villages, wind chimes | Pale gold-green |
+| **Lôi Trạch** | **After the storm**: green-grey haze, still dark water, copper towers; storm light reserved for strike moments. | Copper towers, stilt-houses with copper rods | White-violet |
+| **Hàn Sơn** | **Polar dusk**: violet-grey sky, dark slate peaks, cyan glacier; the clans' banners muted plum (never the reserved red) | Glacier with frozen armies, banners in ice | Ice-cyan |
+| **Huyền Hải** | **Deep-sea night**: indigo sky and water; the whale-back city's teal lights carry the scene. | Stilted harbour, the whale's back as a city | Deep teal |
+| **Vân Hải** | **Sunset over the clouds**: lilac to coral to amber sky, blush cloud sea, dark plum isle rock. | Floating isles, rope villages, wind chimes | Pale gold-green |
 | **U Minh** | Desaturated greys, mist. **Colour returns only in memories** (Làng Khê remembered is the most saturated scene in the game). | The ferry, the Gallery, faceless figures | Grey-silver; memories in their original hue |
 | **Thiên Khuyết** | Sky-brass, will-glass, white stone. Cold, clean light. **Magitech, not neon.** **[WB]** | Constructs, the Stele Hall, the Mirror, the Tenth Seat | White-gold |
 | **Thiên Tâm** | All nine accents converging. The only scene where they all appear. | The crater, nine Mạch bundles, the Source Seat | All nine |
@@ -71,10 +73,10 @@ The Art README's items that must be locked before large-scale asset production *
 
 | Character | Silhouette keys | Source |
 |---|---|---|
-| **Protagonist** | Lean; **hair tail**, **satchel strap**, **red thread** (left wrist); class gear layered on top; chest scar shown only in cutscenes | PB L1–L2 |
-| **The Father** | Slight stoop; **white burn scar on the left hand**; Dẫn Mạch bag and copper rods; Quy Nguyên attire with no bag after Ch. V; thumb-on-index-finger tell as an animation beat | FB F6 |
-| **Diệp** | Taller and upright; warden coat; **spear across her back**; **wooden charm** (never removed); a **bonding mark at the collarbone** after Ch. V | DB N7 |
-| **Thủ Mạch Nhân** | Very tall and gaunt; archaic armour; **nine seal marks**, some cracked; stillness | TB T6 |
+| **Protagonist** | Lean; **knee-length grey-green coat**; **hair tail**, **satchel strap**, **red thread** (left wrist); class gear layered on top; chest scar shown only in cutscenes | PB L1–L2; concept B |
+| **The Father** | Slight stoop; **long olive scholar's robe, grey hair and short beard**; **white burn scar on the left hand**; Dẫn Mạch bag and copper rods; Quy Nguyên attire with no bag after Ch. V; thumb-on-index-finger tell as an animation beat | FB F6 |
+| **Diệp** | Taller and upright; **short black hair**; green-grey warden coat; **spear across her back**; **wooden charm** (never removed); a **bonding mark at the collarbone** after Ch. V | DB N7 |
+| **Thủ Mạch Nhân** | Very tall and gaunt; **bare-headed, long white hair, small crest**; archaic armour with a short cape; **nine seal marks**, some cracked; stillness | TB T6; concept B |
 | **Uyên** | Small, seventy, an archivist's robe; ink-stained fingers | FF K1 |
 | **Cương** | Thin and dry; the Ty-alloy blade; earth-coloured coat; eyes that "count" | FF K2 |
 | **Khải** | Dark blue official robe; the hat only from Ch. IV; greying temples | FF K3 |

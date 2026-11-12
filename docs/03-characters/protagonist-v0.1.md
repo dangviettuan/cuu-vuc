@@ -38,7 +38,7 @@ Status: **v0.1 complete.**
 
 - Dark hair, tied back loosely, with stray strands at the front.
 - His face looks open and expressive at rest, which leaves animation room for his dry humour. He has slightly tired eyes from the start.
-- Default Prologue clothing: practical An Mộc village clothes in earth green and bark brown, cloth leg wraps and simple sandals. On his hip is the father's short **brush-knife**, a tool rather than a weapon **[Ch1: "dùng để phát cây nhiều hơn để đánh nhau"]**.
+- Default Prologue clothing (**concept pick B, "Long coat"**): a **knee-length grey-green field coat** (#4b5f45) over a tan tunic (#8a6a45), dark trousers, pale cloth leg wraps and boots. See `docs/06-art/concept-v0.1/`. On his hip is the father's short **brush-knife**, a tool rather than a weapon **[Ch1: "dùng để phát cây nhiều hơn để đánh nhau"]**.
 - The **chest scar** from childhood is normally hidden under his clothes. It is shown only in specific cutscenes. **[Ch1]**
 - Avoid: glowing marks, heroic armour, white or gold "chosen one" colour coding.
 
