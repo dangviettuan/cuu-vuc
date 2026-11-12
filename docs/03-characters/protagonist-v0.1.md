@@ -1,6 +1,6 @@
 # Protagonist Bible v0.1
 
-Status: **v0.1 complete.** The Chapter 1 candidate canon and the open questions below are still pending.
+Status: **v0.1 complete.**
 
 ## Canon locked
 
@@ -161,35 +161,11 @@ Note: in sin-aligned branches, "self-awareness" may be *refused or distorted*. I
 
 ---
 
-## Candidate canon from the Chapter 1 draft
+## Chapter 1 draft details — resolution
 
-The prose draft introduced these details. They are **not canon until approved**. Most belong to the Father bible and will be resolved there.
-
-**Protagonist**
-- He has a scar on his chest from childhood. It hurts when the hidden Mạch Ấn resonates, which implies it marks the implant site.
-- He lives in a two-person household with his father, at the edge of the village facing the forest. (The mother's fate is now locked above.)
-- The father once tore a book about Mạch Ấn out of his hands, ripping its spine.
-
-**Father**
-- He is in his fifties and looks older because of his years of station work.
-- A white burn scar runs from his left wrist to his palm. The protagonist remembers it from early childhood.
-- **Tell:** when hiding something, he rubs his right thumb over the first joint of his index finger. He is otherwise a skilled liar.
-- His kit is a worn leather Người Dẫn Mạch bag, three forearm-length copper rods engraved with leaf-vein lines, a spool of red thread and a small wooden box that is always locked.
-- He keeps an old map of Thanh Mộc with Mạch lines in faded blue ink, and a notebook of numbers.
-- Under a floorboard beneath his bed he hid a cloth bundle, burned at one corner, containing **a burned, half-broken Mạch Ấn**. Its cracks glow faintly, and it pulses in sync with the protagonist's heartbeat.
-
-**An Mộc**
-- There is a Mạch shrine (miếu Mạch) at the village entrance with a very old keeper. The keeper says: "Không phải nước đi mất. Đất không còn giữ được nó nữa."
-- Bà Dần, a villager, discovers the dry well.
-- There is a village headman (trưởng làng).
-- An evergreen tree in front of the house drops a yellow leaf with a dark vein, an early sign of Linh Suy.
-- Roots grow across the path to the Mạch station and regrow when cut.
-
----
-
-## Open questions surfaced (owner decision needed)
-
-1. **The two Mạch Ấn.** How does the burned half Mạch Ấn under the bed relate to "the first Mạch Ấn" absorbed after Mộc Giác [NB Ch.I]? Is it a relic of the childhood procedure, the other half of his implanted fragment, or something else?
+- **Protagonist and Father details** (chest scar, burn scar, tell, kit, hidden half Mạch Ấn, torn book): resolved and locked in [`father-v0.1.md`](father-v0.1.md).
+- **The two Mạch Ấn:** resolved by Father bible F3. The burned half is the spent half of his implanted fragment. It is a resonator, never absorbed, and crumbles at his first real absorption after Mộc Giác.
+- **An Mộc details** (shrine keeper, bà Dần, headman, the yellow leaf, the regrowing roots): deferred to the Prologue chapter spec.
 
 ## Design rule
 

@@ -20,10 +20,11 @@
 - Mother died as a consequence of the forbidden procedure's incident
 - Người Đồng Hành is away at Mộc Thành during the Prologue
 - Prose chapters are numbered independently of game chapters (ADR-0005)
+- Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
 ## Next design task
 
-**Character Bible v0.1** — in progress. Protagonist Bible v0.1 is complete (`docs/03-characters/protagonist-v0.1.md`). Next: **Father**, which will also resolve the Chapter 1 candidate canon.
+**Character Bible v0.1** — in progress. Protagonist Bible v0.1 is complete (`docs/03-characters/protagonist-v0.1.md`). Father Bible v0.1 is complete (`docs/03-characters/father-v0.1.md`). Next: **Người Đồng Hành**.
 
 Lock:
 1. protagonist
@@ -43,10 +44,9 @@ After Character Bible:
 
 ## Open questions deliberately not locked yet
 
-- Chapter 1 candidate canon (father's details, the hidden half Mạch Ấn, shrine keeper)
-- How the hidden half Mạch Ấn relates to the first Mạch Ấn from Mộc Giác
+- The abandoned settlement's name; the Thiên Kinh institution that trains Người Dẫn Mạch; the contents of the Father's locked box
 - Exact identity of Người Đồng Hành
-- Names of the father and major factions/characters
+- Names of major factions/characters (the Father is title-only for now)
 - Exact final boss forms per ending
 - Exact sequel/prequel hook beyond Tội Thứ Tám
 - Final engine/technical architecture decision
