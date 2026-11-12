@@ -2,10 +2,6 @@
 
 Status: **see [Art Bible v0.1](art-bible-v0.1.md)** for pixel production rules, realm and character visual keys, and UI principles. To be revised after concept art and the greybox prototype.
 
-## Concept art
-
-Concept art **already exists** but has not yet been imported into this repo. When it is imported (suggested location: `docs/06-art/concept/`), **the art takes precedence**: any visual detail in the Art Bible or the character bibles that conflicts with it will be updated to match.
-
 ## Direction already established
 
 - 2D pixel art
