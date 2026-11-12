@@ -6,7 +6,7 @@ Role name: **Người Đồng Hành** (the Companion). **Personal name (locked):
 
 ## Canon locked
 
-- **Identity:** an orphan **survivor ward**. Her home, a small forest settlement in Thanh Mộc, died because of the Father's forbidden procedure **[Father bible F2]**. The Father took her in out of guilt and raised her with his son in An Mộc.
+- **Identity:** an orphan **survivor ward**. Her home, **Làng Khê**, a small forest settlement in Thanh Mộc, died because of the Father's forbidden procedure **[Father bible F2]**. The Father took her in out of guilt and raised her with his son in An Mộc.
 - **Gender:** Female.
 - **Age:** 27 at the start of the game, two years older than the protagonist.
 - **Bond:** sibling-like. **No romance**, now or later.
@@ -33,7 +33,7 @@ Role name: **Người Đồng Hành** (the Companion). **Personal name (locked):
 | ~20 | She is 7 when the Father cuts the fragment from the node next to her settlement. Over the following season the land dies and her family dies with it. She is found among the last survivors. **[FB F2]** |
 | ~20 | The Father brings her to An Mộc. The village is told her settlement fell to early Linh Suy, the same sickness the Father's son "miraculously" survived. **[new]** |
 | ~20–9 | She grows up in the Father's house with the protagonist. The two "survivors of Linh Suy" bond as siblings. She protects him and he follows her into the forest. **[new]** |
-| ~9 | At 18 she leaves for **Mộc Thành** to apprentice with the forest wardens of Thanh Mộc (order name TBD). From then on the household is two people. **[new; Ch1 "hai cha con"]** |
+| ~9 | At 18 she leaves for **Mộc Thành** to apprentice with the **Hộ Lâm**, the forest wardens of Thanh Mộc, under Lâm Trưởng Ngàn. From then on the household is two people. **[new; Ch1 "hai cha con"]** |
 | 0 | She is a respected warden at Mộc Thành, 27 years old. **[new]** |
 
 - She **remembers** her settlement: the smell of its water, her mother's voice, the empty houses. She has always believed Linh Suy took it. **[new]**
@@ -110,11 +110,10 @@ The duel resolves into one of these persistent states, which Ch. XI–XII consum
 | Vĩnh Sinh (Desire) | If she died (state Tử), she is the candidate for resurrection, and her own philosophy condemns that choice. The Father is the alternative candidate. **[FB F8]** |
 | Vạn Mạch Chi Thân (Gluttony) | The bonded fragment in her is among the power he consumes. |
 | Thế Giới Cũ (Sloth) | She stays in the world he refused to change and keeps fighting Linh Suy without him. |
-| Nhân Gian | She becomes one of the people the new order distributes power to. She is the first to ask him the final question. **[NB]** |
+| Nhân Gian | She becomes one of the people the new order distributes power to. She is the first to ask whether the new order is truly his to impose. Thủ Mạch Nhân then asks the final question **[TB T8]**. **[NB]** |
 
 ---
 
 ## Open questions
 
-1. **Her settlement's name.** Still open from the Father bible.
-2. **The Mộc Thành warden order:** its name and its stance toward Quy Nguyên.
+None currently. Her settlement (Làng Khê) and the warden order (Hộ Lâm) are resolved in [`factions-and-figures-v0.1.md`](factions-and-figures-v0.1.md).

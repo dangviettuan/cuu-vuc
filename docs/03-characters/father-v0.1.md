@@ -25,7 +25,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 
 ### F1. Background and training
 
-- He was born in An Mộc. As a young man he was sent to **Thiên Kinh** to train as a Người Dẫn Mạch under the institution that licenses Mạch maintenance. The institution's name is TBD. It descends from the power structures built on the divided Mạch. **[new; WB, NB Ch.VI]**
+- He was born in An Mộc. As a young man he was sent to **Thiên Kinh** to train as a Người Dẫn Mạch under the **Thiên Mạch Ty**, the institution that licenses Mạch maintenance. His teacher was **Uyên** (now Hội Chủ of Quy Nguyên) and his classmate and rival was **Khải** (now Chưởng Ty); see [`factions-and-figures-v0.1.md`](factions-and-figures-v0.1.md). The Ty descends from the power structures built on the divided Mạch. **[new; WB, NB Ch.VI]**
 - He was a gifted, idealistic student, as certain of right and wrong as his son is now. He returned to An Mộc, married, and served as the district's Người Dẫn Mạch. **[new]**
 - **Story use:** in Ch. II the protagonist reaches Thiên Kinh and finds traces of the Father's past: old records, a former teacher, a reputation. These are the first hints that the Father knew far more than a village maintainer should. **[new; NB Ch.II]**
 
@@ -33,7 +33,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 
 - **Age:** The protagonist was about five. The Father was in his early thirties. **[new; consistent with Ch1: father "ngoài năm mươi", son 25]**
 - **Method:** Knowledge he had learned in Thiên Kinh and was never meant to use: how to cut a fragment from a living Linh Mạch node and bond it to a living body. **[new]**
-- **Where:** A Mạch node deep in Thanh Mộc, beside a small forest settlement. The settlement's name is TBD. **[new]**
+- **Where:** A Mạch node deep in Thanh Mộc, beside a small forest settlement, **Làng Khê**. **[new]**
 - **What happened:**
   1. Cutting the fragment destabilized the node. Over the following season the settlement's land died, its people sickened, and it was abandoned. The public record calls it an early local Linh Suy collapse. **[new; NB §3 "other people died"]**
   2. The **Mother** came with them and held the child during the bonding. The backlash passed through her, and she died. **She knew the risk to herself and chose it. The settlement never got that choice.** **[new; PB mother lock]**
@@ -59,7 +59,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 - **His cover:** He stayed in An Mộc for eighteen years as an ordinary Người Dẫn Mạch. His station measurements (**[Ch1]** the notebook of numbers, the old map with Mạch lines) fed the Hội's research. **[new]**
 - **The cut on the day the game begins:**
   - **He did not cut it himself.** But his measurements are why Thanh Mộc was chosen as the site, and he knew a cut was coming. **[new; NB Ch.I]**
-  - At the well, the third rod's vibration tells him it is happening *now*, closer to An Mộc than he was told. **[Ch1: the rod, the tell, "Không."]**
+  - At the well, the third rod's vibration tells him it is happening *now*, closer to An Mộc than he was told. **Cương**, the Hội's Đoạn Mạch Sứ, ordered it. **[Ch1: the rod, the tell, "Không."]**
   - He goes to the station to confirm, then leaves with the Hội instead of coming home. That is the voluntary departure. **[NB §5]**
 - **His last lie:** He kept his son out of the Hội's records. They know his procedure succeeded, but not that the child survived into adulthood. When the protagonist starts absorbing Mạch Ấn, that protection breaks. **[new]**
 
@@ -134,6 +134,5 @@ These points are already canon elsewhere. They are collected here and not re-dec
 
 ## Open questions
 
-1. **The abandoned settlement's name**, and whether survivors appear later (U Minh memories, or living survivors in Ch. XI).
-2. **The Thiên Kinh institution** that trains Người Dẫn Mạch: its name and its place among the Trung Vực factions.
-3. **The locked box:** what it holds and when it opens.
+1. **Làng Khê survivors:** whether any appear later besides Diệp (U Minh memories, or living survivors in Ch. XI).
+2. **The locked box:** what it holds and when it opens.

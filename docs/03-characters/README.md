@@ -1,6 +1,6 @@
 # Character Bible — Next Design Target
 
-Status: **Not yet canonized**, except where explicitly noted below.
+Status: **Character Bible v0.1 complete.** Every item below links to its locked bible.
 
 ## Canonized protagonist identity rule
 
@@ -53,6 +53,6 @@ Characters to lock next:
    - why protagonist is spared
    - later reappearance
 
-5. Quy Nguyên leadership and major faction representatives
+5. Quy Nguyên leadership and major faction representatives — **v0.1 complete**, see [`factions-and-figures-v0.1.md`](factions-and-figures-v0.1.md)
 
 Character design must precede detailed dialogue writing.
