@@ -1,6 +1,9 @@
 # Chapter & Quest Bible
 
-Status: structure exists in Narrative Bible; detailed implementation pending.
+Status: structure exists in the Narrative Bible. Specs:
+
+- [Prologue — An Mộc](prologue-an-moc-v0.1.md) — **v0.1 locked**
+- Chapter I — Thanh Mộc — next
 
 Each chapter spec should eventually define:
 

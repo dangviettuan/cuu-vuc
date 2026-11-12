@@ -42,6 +42,9 @@ Before production art, prove that these are fun:
 - one enemy
 - one boss pattern
 
+### Checkpoints
+Mạch shrines and Người Dẫn Mạch stations are the checkpoints ([ADR-0006](../decisions/ADR-0006-mach-checkpoints.md)).
+
 ### Mạch Ấn
 Boss rewards that alter build behavior rather than merely increasing stats.
 

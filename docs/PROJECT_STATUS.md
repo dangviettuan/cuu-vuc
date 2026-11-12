@@ -23,11 +23,13 @@
 - Người Đồng Hành bible v0.1: **Diệp**, female, 27, an orphan of the settlement the procedure destroyed, raised by the Father, sibling bond with no romance. Learns the truth before the protagonist. Consented bonding procedure. Duel states and fates as guidance
 - Thủ Mạch Nhân bible v0.1: male sworn guardian of the Nine (not one of them), bound into the seal and dying of Linh Suy. Ch. V: comes to kill the Father; the protagonist steps between them, loses, and the Father escapes. Phase 2 "Sealing" fight design. Asks the Nhân Gian final question
 - Factions & figures v0.1: the Cửu Gia, the Thiên Mạch Ty, the Hộ Lâm, Quy Nguyên's cell structure; Hội Chủ Uyên, Cương, Chưởng Ty Khải, Xích Vương Hạo, Lâm Trưởng Ngàn; Làng Khê
+- Prologue spec v0.1: stages S1–S8, choices C1 (tell the village or not) and C2 (spare or kill Nanh Rễ), flags `PRO_*`
+- Mạch shrines and stations are the checkpoints (ADR-0006)
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
 ## Next design task
 
-**Chapter & Quest Bible** — next. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
+**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). Next: the **Chapter I — Thanh Mộc** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
 
 Roadmap after Character Bible:
 
