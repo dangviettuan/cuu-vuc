@@ -37,7 +37,7 @@ Characters to lock next:
    - relationship evolution
    - possible fates
 
-3. Người Đồng Hành
+3. Người Đồng Hành — **v0.1 complete (Diệp)**, see [`nguoi-dong-hanh-v0.1.md`](nguoi-dong-hanh-v0.1.md)
    - relationship type
    - personality contrast
    - ideology development
