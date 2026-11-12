@@ -3,6 +3,7 @@
 ## Chương 1: Cái giếng cạn
 
 > **Trạng thái:** Prose draft v0.1  
+> **Phạm vi game:** Prologue — An Mộc (xem ADR-0005 về cách đánh số chương)  
 > Bản truyện thử nghiệm dựa trên canon hiện tại. Những chi tiết văn chương mới chưa tự động trở thành canon nếu chưa được khóa trong Character / World / Narrative Bible.
 
 Chuyện về Cửu Vực không bắt đầu bằng một trận chiến.
