@@ -14,9 +14,11 @@ In design documents, use `PLAYER_NAME` or **Protagonist** as the neutral referen
 
 Characters to lock next:
 
-1. Protagonist
+1. Protagonist — **v0.1 complete**, see [`protagonist-v0.1.md`](protagonist-v0.1.md)
    - player-defined name (canonized)
-   - age
+   - gender: male (canonized)
+   - age: 25 (canonized)
+   - fixed appearance, no customization (canonized)
    - visual silhouette
    - childhood
    - personality before the journey
