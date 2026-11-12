@@ -29,7 +29,7 @@ Characters to lock next:
    - character arc states by chapter
    - dialogue voice that remains coherent across branching choices
 
-2. Father
+2. Father — **v0.1 complete**, see [`father-v0.1.md`](father-v0.1.md)
    - identity and profession
    - role in Quy Nguyên Hội
    - forbidden childhood procedure
