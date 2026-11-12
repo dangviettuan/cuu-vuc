@@ -26,7 +26,8 @@ These points are already canon elsewhere. They are collected here and not re-dec
 ### F1. Background and training
 
 - He was born in An Mộc. As a young man he was sent to **Thiên Kinh** to train as a Người Dẫn Mạch under the **Thiên Mạch Ty**, the institution that licenses Mạch maintenance. His teacher was **Uyên** (now Hội Chủ of Quy Nguyên) and his classmate and rival was **Khải** (now Chưởng Ty); see [`factions-and-figures-v0.1.md`](factions-and-figures-v0.1.md). The Ty descends from the power structures built on the divided Mạch. **[new; WB, NB Ch.VI]**
-- He was a gifted, idealistic student, as certain of right and wrong as his son is now. He returned to An Mộc, married, and served as the district's Người Dẫn Mạch. **[new]**
+- He was a gifted, idealistic student, as certain of right and wrong as his son is now. He topped Uyên's class three years running, ahead of Khải. He returned to An Mộc, married, and served as the district's Người Dẫn Mạch. **[new]**
+- **The Mother was the third of Uyên's best students.** She dropped out in her second year and went with him to An Mộc. She understood Mạch work, which is why she understood the risk at the node and chose it (F2). The protagonist learns this only in Ch. IX. In Ch. II, the old sweeper at Học Phường mentions only "một con bé bỏ học năm thứ hai". **[Prose Ch.7]**
 - **Story use:** in Ch. II the protagonist reaches Thiên Kinh and finds traces of the Father's past: old records, a former teacher, a reputation. These are the first hints that the Father knew far more than a village maintainer should. **[new; NB Ch.II]**
 
 ### F2. The forbidden procedure (≈20 years before the game)
