@@ -30,6 +30,7 @@
 - Chapter IV spec v0.1: the protagonist anchors the Ty's restoration; killing Lôi Nha (the marsh's lightning sink) is part of the Bến Sét massacre; Cương tried to stop it against Uyên's order; Mạch Ấn Liên Lôi; choice C1 (how Diệp leaves); flags `CH4_*`
 - Chapter V spec v0.1: the city boils; Uyên in person ("Hỏi cha ngươi"); the Father and Diệp in Uyên's old classroom; Thủ Mạch Nhân scripted loss ("Đưa cha đi"); choices C1 (the demand of the Father) and C2 (Khải's fate); no Mạch Ấn; flags `CH5_*`
 - Chapter VI spec v0.1: the Hàn Sơn clans and Trúc; the frozen battlefield (the "enemy" were civilians); the Nine's Charter; young Thủ Mạch Nhân in the ice; boss Bạch Tướng; choice C1: **the first refusable Mạch Ấn** (Băng Giáp); flags `CH6_*`
+- Chapter VII spec v0.1: the original record on Huyền Kình's back; the decline starts at the division itself; the Nine predicted it and the Houses sealed the warning; the boss keeps the dying whale awake; choice C1 (the port, the record, or a pact with Cương); from Ch. VI onward Mạch Ấn absorption is optional; flags `CH7_*`
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Prose Chương 4 "Bốn con đường" drafted (Ch. I stages I-2 and I-3 plus Làng Khê; reference class Kiếm Khách)
@@ -42,7 +43,7 @@
 
 ## Next design task
 
-**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). The Chapter I — Thanh Mộc spec v0.1 is locked (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md`). The Chapter II — Trung Vực spec v0.1 is locked (`docs/04-chapters/chapter-02-trung-vuc-v0.1.md`). The Chapter III — Xích Sa spec v0.1 is locked (`docs/04-chapters/chapter-03-xich-sa-v0.1.md`). The Chapter IV — Lôi Trạch spec v0.1 is locked (`docs/04-chapters/chapter-04-loi-trach-v0.1.md`). The Chapter V — Biến Loạn spec v0.1 is locked (`docs/04-chapters/chapter-05-bien-loan-v0.1.md`). The Chapter VI — Hàn Sơn spec v0.1 is locked (`docs/04-chapters/chapter-06-han-son-v0.1.md`). Next: the **Chapter VII — Huyền Hải** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
+**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). The Chapter I — Thanh Mộc spec v0.1 is locked (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md`). The Chapter II — Trung Vực spec v0.1 is locked (`docs/04-chapters/chapter-02-trung-vuc-v0.1.md`). The Chapter III — Xích Sa spec v0.1 is locked (`docs/04-chapters/chapter-03-xich-sa-v0.1.md`). The Chapter IV — Lôi Trạch spec v0.1 is locked (`docs/04-chapters/chapter-04-loi-trach-v0.1.md`). The Chapter V — Biến Loạn spec v0.1 is locked (`docs/04-chapters/chapter-05-bien-loan-v0.1.md`). The Chapter VI — Hàn Sơn spec v0.1 is locked (`docs/04-chapters/chapter-06-han-son-v0.1.md`). The Chapter VII — Huyền Hải spec v0.1 is locked (`docs/04-chapters/chapter-07-huyen-hai-v0.1.md`). Next: the **Chapter VIII — Vân Hải** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
 
 Roadmap after Character Bible:
 

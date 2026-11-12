@@ -34,6 +34,12 @@ Its symptoms vary by realm: dying ecosystems, mutations, unstable weather, spiri
 
 If nothing changes, civilization is expected to decline slowly rather than be destroyed in one sudden apocalypse.
 
+**Root cause** (revealed in Ch. VII):
+- **The division itself** makes the Mạch decline. It began at Đại Phân Ly and has never stopped. Cuts by Quy Nguyên only steepen the curve.
+- **The Nine predicted it** ("a thousand years, perhaps less") and intended the division to be temporary.
+- **The Cửu Gia found this warning centuries ago and sealed it.**
+- The original record was entrusted to **Huyền Kình**, whose body's growth layers record the decline year by year.
+
 ## The Nine Realms
 
 ### 1. Thanh Mộc

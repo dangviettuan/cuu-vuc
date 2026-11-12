@@ -48,4 +48,6 @@ Mạch shrines and Người Dẫn Mạch stations are the checkpoints ([ADR-0006
 ### Mạch Ấn
 Boss rewards that alter build behavior rather than merely increasing stats.
 
+**Absorption rule:** through Ch. V, absorption is involuntary. **From Ch. VI onward, every absorption is a choice.** Refusals are tracked (`MA_REFUSED`) and weight the *accepting limitation vs more power* axis. Encounters from Ch. VII onward must be tuned for a variable number of Mạch Ấn.
+
 The narrative meaning is important: protagonist progressively carries the power of beings they defeat, reinforcing the question of whether accumulating power changes the person using it.
