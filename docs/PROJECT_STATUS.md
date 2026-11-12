@@ -47,6 +47,7 @@
 - Prose Chương 9 "Đồng Muối" drafted (Ch. III stages III-1 to III-4: Khảm, Cát, the Wall of Names, the Father's handwriting)
 - Prose Chương 10 "Xích Hạt" drafted (Ch. III stages III-5 to III-9; reference path: enforced; the protagonist carves Đồng Muối)
 - Prose Chương 11 "Bến Sét" drafted (Ch. IV stages IV-1 to IV-5: Khải's request, Cương at the towers, Lôi Nha, the restoration and the massacre)
+- Prose Chương 12 "Rạn" drafted (Ch. IV stages IV-6 to IV-10: the rescue, the Hội's logs, Diệp leaves with "Giữ hộ chị"; reference path: asked)
 - The Mother was Uyên's third top student, who dropped out (Father bible F1)
 - Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
@@ -59,7 +60,7 @@ Roadmap:
 
 1. ~~Character Bible~~ (v0.1 complete)
 2. ~~Chapter & Quest Bible~~ (v0.1 complete)
-3. Combat & Class Bible: the four classes, the parry, dodge and heat/cold systems, the Mạch Ấn catalogue (12 so far), and tuning for variable Mạch Ấn counts
+3. Combat & Class Bible: the four classes, the parry, dodge and heat/cold systems, the Mạch Ấn catalogue (11 designed: Rễ Giữ, Ấn Ty, Hỏa Tích, Liên Lôi, Băng Giáp, Triều Dâng, Phong Dực, Thiên Diện, Cơ Quan, Trường Thương, Cửu Ấn), and tuning for variable Mạch Ấn counts
 4. Art Bible
 5. Concept art
 6. Greybox combat prototype (Prologue S1 + Nanh Rễ is the natural first slice)
