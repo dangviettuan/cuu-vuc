@@ -180,6 +180,7 @@ export class NanhRe extends Enemy {
         break;
       }
       case "tCharge":
+        this.pose("nanh_low");
         this.b.setVelocityX(-this.facing * 12); this.telegraph(now);
         if (t > 700 * k) {
           this.swing = nextId("nanh"); this.chargeTargetX = Phaser.Math.Clamp(playerX + this.facing * 90, this.arenaMin + 50, this.arenaMax - 50);
@@ -198,14 +199,17 @@ export class NanhRe extends Enemy {
         break;
       }
       case "tSwipe":
+        this.pose("nanh_rear");
         this.b.setVelocityX(0); this.telegraph(now);
         if (t > 450 * k) { this.swing = nextId("nanh"); this.enter("swipe"); }
         break;
       case "swipe":
+        this.pose("nanh_low");
         this.b.setVelocityX(this.facing * 40);
         if (t > 170) this.enter("recover");
         break;
       case "tStomp":
+        this.pose(t > 450 * k ? "nanh0" : "nanh_rear");
         this.b.setVelocityX(0); this.telegraph(now);
         this.y = WORLD.groundY - (t > 450 * k ? 0 : Math.min(4, t / 60));
         if (t > 600 * k) {
@@ -220,6 +224,7 @@ export class NanhRe extends Enemy {
         }
         break;
       case "recover":
+        if (!this.anims.isPlaying) this.play("nanh_idle");
         this.b.setVelocityX(this.b.velocity.x * 0.85);
         if (t > (this.phase === 3 ? 450 : 750)) this.enter("idle");
         break;
@@ -232,6 +237,12 @@ export class NanhRe extends Enemy {
         this.b.setVelocityX(0);
         break;
     }
+  }
+
+  /** Hold a static windup pose (stops the idle/run animation). */
+  private pose(key: string): void {
+    if (this.anims.isPlaying) this.anims.stop();
+    if (this.texture.key !== key) this.setTexture(key);
   }
 
   private choose(dist: number): void {

@@ -45,10 +45,15 @@ npm run build      # type-check + production build into dist/
 | Choice C2 → `PRO_SOW_SPARED`, stored in `localStorage` and the scene registry | Prologue §7 | `src/scenes/Prologue.ts` |
 | Generated pixel art from the locked concept picks (protagonist B, Nanh Rễ A, Thanh Mộc A) | Art Bible; concept v0.1 | `src/art.ts` |
 
+## Level notes
+
+- **Ledges are one-way platforms.** You can walk under them and jump up through them, and each sits within a full jump's reach (≤ 42 px).
+- **Input uses an event-driven press queue** in `Prologue.ts`. Phaser's `JustDown` loses a tap that starts and ends within one frame.
+
 ## Known greybox simplifications
 
 - **The class kit is merged into the Prologue.** In the final game the Prologue has no class (PB L9); Riposte is here only to test the Kiếm Khách loop.
-- Animation is minimal: 2-frame idle, 4-frame run, and one pose each for attack and guard, plus a slash sprite.
+- **Animation v0.2:** a 6-frame breathing idle; a 6-frame run with arm swing and coat flutter; separate rising and falling jump frames; windup → strike → follow-through for light attacks; overhead → slam for the third light, heavy and riposte; dodge lean, guard, hurt and heal poses; and boss windup poses (head-down before a charge, rearing before a stomp). Feel effects: hit-stop, animated slash arcs, dust puffs, dodge afterimages, and squash-and-stretch on jump and land. Still generated, not hand-drawn.
 - No audio, no gamepad, and no save system beyond the one flag.
 - Arcade physics. Final collision feel will be decided after playtesting (ADR-0008).
 - Tuning values are the Bible's starting targets. Expect to change them after the first playtest.

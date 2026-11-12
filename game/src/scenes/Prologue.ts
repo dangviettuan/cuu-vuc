@@ -39,6 +39,9 @@ export class PrologueScene extends Phaser.Scene {
   private bossName!: Phaser.GameObjects.Text;
   private prompt!: Phaser.GameObjects.Text;
   private toastUntil = 0;
+  private hitstopUntil = 0;
+  /** Key codes pressed since the last update. Phaser clears justDown on key-up, so sub-frame taps would be lost. */
+  private pressed = new Set<string>();
 
   constructor() { super("Prologue"); }
 
@@ -59,9 +62,11 @@ export class PrologueScene extends Phaser.Scene {
     // Ground and ledges.
     this.solids = this.physics.add.staticGroup();
     this.platform(0, WORLD.groundY, WORLD.width, VIEW.height - WORLD.groundY);
-    this.platform(300, 262, 96, 12);
-    this.platform(640, 250, 64, 12);
-    this.platform(1040, 258, 80, 12);
+    // Ledges are one-way (land from above, walk underneath, jump up through) and sit
+    // ≤ 42 px above the ground so a full 48 px jump clears them.
+    this.platform(300, 270, 96, 10, true);
+    this.platform(640, 264, 64, 10, true);
+    this.platform(1040, 266, 80, 10, true);
 
     // Player.
     this.player = new Player(this, this.checkpoint.x, this.checkpoint.y);
@@ -75,7 +80,7 @@ export class PrologueScene extends Phaser.Scene {
     this.bush = new Bush(this, 470);
     this.physics.add.collider(this.player, this.bush.img);
     this.bush.onCleared = () => this.toast("Đã phát quang lối mòn.");
-    this.addHerb(672, 236);
+    this.addHerb(672, 262);
     this.addHerb(560, WORLD.groundY - 6);
     this.sign(600, "Thảo dược rừng.\nQ: dùng (hồi máu)");
     this.sign(790, "Lợn rừng hoảng loạn!\nShift: lướt né\nI: đỡ đúng lúc, rồi J: phản đòn\nK (giữ): chém mạnh");
@@ -85,7 +90,7 @@ export class PrologueScene extends Phaser.Scene {
       boar.onDeath = (bx) => { if (Math.random() < 0.6) this.addHerb(bx, WORLD.groundY - 6); };
       this.boars.push(boar);
     }
-    this.addHerb(1080, 242);
+    this.addHerb(1080, 264);
 
     // Shrine checkpoint (ADR-0006).
     this.shrine = this.add.image(1420, WORLD.groundY, "shrine_off").setOrigin(0.5, 1).setDepth(5);
@@ -118,6 +123,8 @@ export class PrologueScene extends Phaser.Scene {
       herb: K.Q, interact: K.E, one: K.ONE, two: K.TWO, restart: K.R, debug: K.F1,
     }) as Record<string, Phaser.Input.Keyboard.Key>;
     this.input.keyboard!.addCapture([K.SPACE, K.UP, K.DOWN, K.LEFT, K.RIGHT, K.F1]);
+    this.input.keyboard!.on("keydown", (e: KeyboardEvent) => { if (!e.repeat) this.pressed.add(e.code); });
+    this.pressed.clear();
 
     // HUD.
     this.hud = this.add.graphics().setScrollFactor(0).setDepth(100);
@@ -142,11 +149,34 @@ export class PrologueScene extends Phaser.Scene {
     return t;
   }
 
-  private platform(x: number, y: number, w: number, h: number): void {
+  private platform(x: number, y: number, w: number, h: number, oneWay = false): void {
     this.add.tileSprite(x, y, w, Math.min(h, 16), "ground").setOrigin(0).setDepth(2);
     if (h > 16) this.add.tileSprite(x, y + 16, w, h - 16, "dirt").setOrigin(0).setDepth(2);
     const r = this.add.rectangle(x + w / 2, y + h / 2, w, h).setVisible(false);
     this.solids.add(r);
+    if (oneWay) {
+      const cc = (r.body as Phaser.Physics.Arcade.StaticBody).checkCollision;
+      cc.down = false; cc.left = false; cc.right = false;
+    }
+  }
+
+  /** Short dust puffs at the feet (jump, land, dodge). */
+  private puff(x: number, y: number, n = 3, dir = 0): void {
+    for (let i = 0; i < n; i++) {
+      const d = this.add.image(x + (i - (n - 1) / 2) * 5, y - 2, "dust").setDepth(9).setAlpha(0.8).setScale(0.7);
+      this.tweens.add({
+        targets: d, x: d.x + (dir || (i - (n - 1) / 2)) * 10, y: d.y - 6 - i * 2, alpha: 0, scale: 1.3,
+        duration: 320 + i * 40, ease: "Quad.out", onComplete: () => d.destroy(),
+      });
+    }
+  }
+
+  /** Brief freeze on impact so hits read as heavy. */
+  private hitstop(ms: number): void {
+    if (this.hitstopUntil > this.time.now) return;
+    this.hitstopUntil = this.time.now + ms;
+    this.physics.world.pause();
+    this.time.delayedCall(ms, () => this.physics.world.resume());
   }
 
   private sign(x: number, text: string): void {
@@ -164,7 +194,11 @@ export class PrologueScene extends Phaser.Scene {
   private toast(s: string, ms = 1800): void { this.toastText.setText(s); this.toastUntil = this.time.now + ms; }
 
   private onPlayerEvent(k: string): void {
-    if (k === "parry") { this.toast("Đỡ! Bấm J để phản đòn.", 900); this.cameras.main.shake(70, 0.004); }
+    const p = this.player;
+    if (k === "jump") this.puff(p.x, p.y, 2);
+    if (k === "land") this.puff(p.x, p.y, 4);
+    if (k === "dodge") this.puff(p.x, p.y, 3, -p.facing);
+    if (k === "parry") { this.toast("Đỡ! Bấm J để phản đòn.", 900); this.cameras.main.shake(70, 0.004); this.hitstop(90); }
     if (k === "perfectDodge") this.toast("Né hoàn hảo!", 700);
     if (k === "riposte") this.toast("Phản đòn!", 600);
     if (k === "heal") this.toast(`Dùng thảo dược (+${PLAYER.herbHeal})`, 900);
@@ -237,20 +271,20 @@ export class PrologueScene extends Phaser.Scene {
 
   update(time: number, delta: number): void {
     const k = this.keys;
-    const JD = Phaser.Input.Keyboard.JustDown;
-    if (JD(k.debug)) this.showDebug = !this.showDebug;
-    if (this.finished && JD(k.restart)) { this.scene.restart(); return; }
+    const tap = (...codes: string[]) => codes.some((c) => this.pressed.has(c));
+    if (tap("F1")) this.showDebug = !this.showDebug;
+    if (this.finished && tap("KeyR")) { this.pressed.clear(); this.scene.restart(); return; }
     if (this.choosing) {
-      if (JD(k.one)) this.choose(true);
-      else if (JD(k.two)) this.choose(false);
+      if (tap("Digit1", "Numpad1")) this.choose(true);
+      else if (tap("Digit2", "Numpad2")) this.choose(false);
     }
     const c: Controls = {
       left: k.left.isDown || k.left2.isDown, right: k.right.isDown || k.right2.isDown,
       jumpHeld: k.jump.isDown || k.jump2.isDown || k.jump3.isDown,
-      jumpPressed: JD(k.jump) || JD(k.jump2) || JD(k.jump3),
-      lightPressed: JD(k.light), heavyHeld: k.heavy.isDown,
-      dodgePressed: JD(k.dodge) || JD(k.dodge2), parryPressed: JD(k.parry),
-      herbPressed: JD(k.herb),
+      jumpPressed: tap("Space", "KeyW", "ArrowUp"),
+      lightPressed: tap("KeyJ"), heavyHeld: k.heavy.isDown,
+      dodgePressed: tap("ShiftLeft", "ShiftRight", "KeyL"), parryPressed: tap("KeyI"),
+      herbPressed: tap("KeyQ"),
     };
     if (this.choosing || this.finished) { c.lightPressed = false; c.heavyHeld = false; }
     this.player.update(time, delta, c);
@@ -262,7 +296,7 @@ export class PrologueScene extends Phaser.Scene {
         h.taken = true; h.img.destroy(); this.player.herbs++; this.toast("Nhặt được thảo dược.", 900);
       }
     }
-    if (JD(k.interact) && Math.abs(this.player.x - this.shrine.x) < 30) {
+    if (tap("KeyE") && Math.abs(this.player.x - this.shrine.x) < 30) {
       this.checkpoint = { x: this.shrine.x + 20, y: WORLD.groundY };
       this.shrine.setTexture("shrine_on");
       this.player.hp = PLAYER.maxHp;
@@ -282,7 +316,15 @@ export class PrologueScene extends Phaser.Scene {
     const ph = this.player.currentHit();
     if (ph) {
       const targets: Hittable[] = [this.bush, ...this.boars, this.boss];
-      for (const t of targets) if (t.isAlive() && overlaps(ph.rect, t.hurtbox())) { t.takeHit(ph); this.cameras.main.shake(40, 0.002); }
+      for (const t of targets) {
+        if (!t.isAlive() || !overlaps(ph.rect, t.hurtbox())) continue;
+        const before = (t as { hp?: number }).hp;
+        t.takeHit(ph);
+        if ((t as { hp?: number }).hp !== before) {
+          this.cameras.main.shake(ph.guardBreak ? 90 : 45, ph.guardBreak ? 0.005 : 0.0025);
+          this.hitstop(ph.guardBreak ? 80 : 45);
+        }
+      }
     }
     // Enemies → player.
     const incoming: EnemyHit[] = [...this.boars.flatMap((b) => b.hits()), ...this.boss.hits()];
@@ -290,6 +332,7 @@ export class PrologueScene extends Phaser.Scene {
     const hb = this.player.hurtbox();
     for (const h of incoming) if (overlaps(h.rect, hb)) this.player.receive(h);
 
+    this.pressed.clear();
     this.drawHud(time);
     this.drawDebug(ph?.rect ?? null, incoming);
   }
