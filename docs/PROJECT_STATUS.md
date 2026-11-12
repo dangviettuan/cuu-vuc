@@ -27,6 +27,7 @@
 - Mạch shrines and stations are the checkpoints (ADR-0006)
 - Chapter II spec v0.1: Khải buries the evidence; Mặc names the Hội; the Restricted Archive (the Father's "Phép Ghép Mạch" record, decline records predating Quy Nguyên); boss Giám Mạch Hằng; Mạch Ấn Ấn Ty (Ty seals are carved from Mạch); choice C1 (the records); flags `CH2_*`
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
+- Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 

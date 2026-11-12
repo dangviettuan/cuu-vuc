@@ -41,7 +41,7 @@ Turn the search for the Father into a **hunt for a culprit**. The player should 
 
 | # | Stage | Content |
 |---|---|---|
-| I-1 | **Mộc Thành** | He arrives with the Father's dropped rod. **Reunion with Diệp.** He reports to Ngàn, who is short of wardens because the forest is turning. Diệp says the hard thing (§12, beat 1). |
+| I-1 | **Mộc Thành** | He arrives with the Father's dropped rod. **Reunion with Diệp.** He reports to Ngàn, who is short of wardens because the forest is turning. Diệp says the hard thing (§12, beat 1). **He does not tell Diệp about the half Mạch Ấn**, the first time he withholds something from her. She finds out only when she witnesses the absorption in I-5. **[Prose Ch.3]** |
 | I-2 | **Bốn Con Đường** (Four Paths) | Diệp introduces the four mentors (§5). **The player chooses a class**, followed by a short training stage that teaches the class kit. |
 | I-3 | **Dấu giày** (Boot prints) | He follows the boot prints from the station into the Outer Forest with Diệp. Consumes `PRO_VILLAGE_TOLD` (the lost family) and `PRO_SOW_SPARED` (the herd blocking a route, or the dead litter). |
 | I-4 | **Rừng Sâu** | The corrupted forest: poison, root hazards, root-corrupted beasts. Living-root barriers open with the half Mạch Ấn. **Mini-boss: Độc Đằng.** |

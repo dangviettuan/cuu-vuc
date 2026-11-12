@@ -55,6 +55,8 @@ Role name: **Người Đồng Hành** (the Companion). **Personal name (locked):
 | **Fear** | Being helpless while loved ones are in danger | **Being a burden**: being kept alive at someone else's expense *again*. |
 | **Wound** | Protected but never trusted by the Father | **Trusted but never sure she was loved.** She suspects the Father took her in out of duty, not love. |
 
+**Concrete seed [Prose Ch.3]:** the Father tied the red thread on her wrist only once, on her first trip into the forest, and never again. He tied it on his son every time. She jokes that "the forest knew her by then".
+
 The mirror is the point. He envies her for being trusted. She envies him for being the Father's real son. Only his envy can become an ending. **[new; NB ending IV]**
 
 ### N4. Learning the truth before him
