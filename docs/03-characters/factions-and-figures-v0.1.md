@@ -2,7 +2,7 @@
 
 Status: **v0.1 complete.** The open questions below are still pending.
 
-Scope: the first pass covers four factions and five key figures. The four class mentors at Mộc Thành are deferred.
+Scope: the first pass covers four factions and five key figures. The four class mentors are defined in the Chapter I spec (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md` §5).
 
 ## Canon locked (from existing bibles)
 
