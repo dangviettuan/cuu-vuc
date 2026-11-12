@@ -3,7 +3,8 @@
 Status: structure exists in the Narrative Bible. Specs:
 
 - [Prologue — An Mộc](prologue-an-moc-v0.1.md) — **v0.1 locked**
-- Chapter I — Thanh Mộc — next
+- [Chapter I — Thanh Mộc](chapter-01-thanh-moc-v0.1.md) — **v0.1 locked**
+- Chapter II — Trung Vực — next
 
 Each chapter spec should eventually define:
 

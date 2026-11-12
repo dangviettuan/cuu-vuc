@@ -25,11 +25,12 @@
 - Factions & figures v0.1: the Cửu Gia, the Thiên Mạch Ty, the Hộ Lâm, Quy Nguyên's cell structure; Hội Chủ Uyên, Cương, Chưởng Ty Khải, Xích Vương Hạo, Lâm Trưởng Ngàn; Làng Khê
 - Prologue spec v0.1: stages S1–S8, choices C1 (tell the village or not) and C2 (spare or kill Nanh Rễ), flags `PRO_*`
 - Mạch shrines and stations are the checkpoints (ADR-0006)
+- Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
 ## Next design task
 
-**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). Next: the **Chapter I — Thanh Mộc** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
+**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). The Chapter I — Thanh Mộc spec v0.1 is locked (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md`). Next: the **Chapter II — Trung Vực** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
 
 Roadmap after Character Bible:
 
@@ -42,7 +43,7 @@ Roadmap after Character Bible:
 
 ## Open questions deliberately not locked yet
 
-- The Father's locked box; Làng Khê survivors; the Cửu Gia house names; the four class mentors
+- The Father's locked box; Làng Khê survivors; the Cửu Gia house names
 - Remaining minor character names (the Father is title-only for now)
 - Exact final boss forms per ending
 - Exact sequel/prequel hook beyond Tội Thứ Tám

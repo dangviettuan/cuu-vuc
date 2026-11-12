@@ -113,5 +113,4 @@ Scope: the first pass covers four factions and five key figures. The four class 
 ## Open questions
 
 1. The names of the Cửu Gia houses and their individual characteristics. These are deferred to the Trung Vực realm or chapter spec.
-2. The four class mentors at Mộc Thành.
-3. The contents of the Father's locked box. Still open.
+2. The contents of the Father's locked box. Still open.
