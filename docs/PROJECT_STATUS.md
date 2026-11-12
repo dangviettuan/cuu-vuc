@@ -25,6 +25,7 @@
 - Factions & figures v0.1: the Cửu Gia, the Thiên Mạch Ty, the Hộ Lâm, Quy Nguyên's cell structure; Hội Chủ Uyên, Cương, Chưởng Ty Khải, Xích Vương Hạo, Lâm Trưởng Ngàn; Làng Khê
 - Prologue spec v0.1: stages S1–S8, choices C1 (tell the village or not) and C2 (spare or kill Nanh Rễ), flags `PRO_*`
 - Mạch shrines and stations are the checkpoints (ADR-0006)
+- Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 

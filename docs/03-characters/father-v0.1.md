@@ -89,7 +89,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 
 | Phase | The Father's position |
 |---|---|
-| Prologue | Protects his son by withholding everything. He knows the day he dreaded has come. |
+| Prologue | Protects his son by withholding everything. He knows the day he dreaded has come. At the station he **deliberately leaves the third copper rod** in the grass. He never drops tools, so it is his only farewell: he knows his son will come despite the warning. **[Prose Ch.2]** |
 | Ch. I–IV | Absent. He leaves traces. He may intervene indirectly, e.g. ensuring a Hội cell does not harm his son, without revealing himself. **[new]** |
 | Ch. V | Meets his son openly. Does not defend himself, does not ask him to join, does not reveal the procedure. **[NB]** When Thủ Mạch Nhân comes to kill him, his son steps between them and loses, and the Father escapes. See [`thu-mach-nhan-v0.1.md`](thu-mach-nhan-v0.1.md) T3. |
 | Ch. IX | The truth comes out through U Minh, not through his confession. Whether he was ever going to tell is left ambiguous. **[NB]** |

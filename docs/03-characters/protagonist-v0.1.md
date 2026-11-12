@@ -31,7 +31,7 @@ Status: **v0.1 complete.**
 - **Three silhouette anchors that never change across class equipment** **[new]**:
   1. a short tail of tied-back hair;
   2. a diagonal satchel strap: the father's spare Người Dẫn Mạch tool bag, taken from the father's room in the Prologue **[Ch1: "túi dụng cụ phụ"]**;
-  3. a loop of **red thread** around his left wrist, taken from the father's kit **[Ch1: "một cuộn chỉ đỏ"]**. It is the protagonist's single readable colour accent at pixel scale.
+  3. a loop of **red thread** around his left wrist, taken from the father's kit **[Ch1: "một cuộn chỉ đỏ"]**. It is the protagonist's single readable colour accent at pixel scale. **Origin:** after the childhood illness, the Father tied a loop of red thread on his left wrist every time they went into the forest, "để rừng biết con là người nhà". He reties it himself in the Prologue. **[Prose Ch.2]**
 - Class gear (armour, weapon, cloak shape) sits *on top of* these anchors. It never replaces them. **[GB: class is a path, not a new identity]**
 
 ### L2. Hair / face / default clothing
