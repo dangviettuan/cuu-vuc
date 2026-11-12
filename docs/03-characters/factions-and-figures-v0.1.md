@@ -111,6 +111,8 @@ Scope: the first pass covers four factions and five key figures. The four class 
 | **Thư Lại Mặc** | Middle-aged Ty archivist and Quy Nguyên mole. Names the Hội in Ch. II and is captured there. | Ch. II §6 |
 | **Tướng Đan** | Female, about 50. A royal general of Xích Sa, born in an outer settlement. The alternative ruler in Ch. III branch C, who ends up diverting the water again, without the Wall. | Ch. III §5, §11 |
 | **Ông Khảm, Cát** | The elder of Đồng Muối (about 70) and his granddaughter (about 10). The human face of the Xích Sa arithmetic. | Ch. III §5 |
+| **Hàn Sơn clans: Già Ưng, Trúc** | Descendants of the Nine's soldiers who guard the frozen battlefield. Già Ưng is the chieftain. Trúc is an ice-reader, about 20, and his guide in Ch. VI. | Ch. VI §3 |
+| **Hùng** | Burn-scarred squad leader of Cương's cell. | Ch. I §7 |
 | **Sẻ** | About 19. An operative in Cương's cell, left behind at the Cut. | Ch. I §13 |
 | **The four mentors** | Lão Trụ, Én, Bà Rêu, Toản | Ch. I §5 |
 

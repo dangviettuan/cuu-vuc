@@ -12,6 +12,12 @@ Public history describes the event as a catastrophe. The hidden truth is that it
 
 Nine powerful people divided the Cửu Mạch to seal their source: **Nguyên Linh**.
 
+**The war of division** (revealed in Ch. VI):
+- The people living on the Mạch confluence refused to leave, and the Nine declared anyone who stayed a "hostile will".
+- The Nine's White General, **Bạch Tướng**, ended the war in one night by freezing the battlefield in Hàn Sơn, his own soldiers included.
+- Before the war ended, the Nine drew up a **Charter** dividing control of the Mạch among their families. It is the origin of the Cửu Gia.
+- The full reason for the division is withheld until Ch. X.
+
 Nguyên Linh is neither god nor demon. It magnifies the will and desire of beings that interact with it. It does not understand moral categories. Healing, domination, revenge and protection are equally valid intentions to it, and every use carries consequences.
 
 The Cửu Vực therefore function not only as geography but as a colossal containment system preventing any single will from controlling Nguyên Linh.

@@ -8,7 +8,8 @@ Status: structure exists in the Narrative Bible. Specs:
 - [Chapter III — Xích Sa](chapter-03-xich-sa-v0.1.md) — **v0.1 locked**
 - [Chapter IV — Lôi Trạch](chapter-04-loi-trach-v0.1.md) — **v0.1 locked**
 - [Chapter V — Trung Vực: Biến Loạn](chapter-05-bien-loan-v0.1.md) — **v0.1 locked**
-- Chapter VI — Hàn Sơn — next
+- [Chapter VI — Hàn Sơn](chapter-06-han-son-v0.1.md) — **v0.1 locked**
+- Chapter VII — Huyền Hải — next
 
 Each chapter spec should eventually define:
 
