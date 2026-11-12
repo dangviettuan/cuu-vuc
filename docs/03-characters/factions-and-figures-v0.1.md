@@ -36,6 +36,7 @@ Scope: the first pass covers four factions and five key figures. The four class 
 - It teaches the public history: Đại Phân Ly was a catastrophe, and Linh Suy is local, seasonal and manageable. **[new]**
 - It keeps restricted archives. The Father learned the forbidden bonding method from them **[FB F2]**.
 - **Ch. II:** it suppresses the protagonist's evidence. **Ch. IV:** it leads the well-intended restoration in Lôi Trạch that causes mass casualties. **[new; NB Ch.II, IV]**
+- **Hidden hypocrisy:** Ty **seal-emblems are made from Mạch fragments**. Its enforcers' power is carved from the system it forbids anyone to cut. Ty forge alloy has leaked into Quy Nguyên's cutting tools for decades. **[Ch. II spec]**
 
 ### G3. Hộ Lâm — the Mộc Thành wardens
 
@@ -97,6 +98,15 @@ Scope: the first pass covers four factions and five key figures. The four class 
   - **Ch. I:** the hub authority at Mộc Thành. She helps the protagonist and gives him access to the class mentors (with Diệp, DB N6).
   - **Ch. IV–V:** Diệp's departure is a personal wound for her.
   - **Later revisits to Thanh Mộc:** she shows the consequences of the cut and of the player's choices for the forest. **[new]**
+
+### Minor figures introduced in chapter specs
+
+| Figure | Who | Spec |
+|---|---|---|
+| **Giám Mạch Hằng** | Female, about 40. The Ty's Inspector-General of enforcement and Khải's lieutenant. Believes silence is mercy. Boss of Ch. II; Khải's field commander at Lôi Trạch in Ch. IV. | Ch. II §8 |
+| **Thư Lại Mặc** | Middle-aged Ty archivist and Quy Nguyên mole. Names the Hội in Ch. II and is captured there. | Ch. II §6 |
+| **Sẻ** | About 19. An operative in Cương's cell, left behind at the Cut. | Ch. I §13 |
+| **The four mentors** | Lão Trụ, Én, Bà Rêu, Toản | Ch. I §5 |
 
 ## Part C — Relationship map
 

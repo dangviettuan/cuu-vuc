@@ -117,6 +117,7 @@ Each mentor briefly states a view on *what strength is for* **[PB L9]**, as a li
 - **Tier 1 materials:** Thanh Mộc hardwood, beast hide, resin, spore sacs.
 - **First smith upgrades** in Mộc Thành.
 - **Antidote herbs:** poison management, introduced at Độc Đằng.
+- **Móc Câu (grappling hook):** Toản's parting gift in I-7, used from Ch. II onward. **[Ch. II spec §10]**
 
 ## 11. Checkpoints (ADR-0006)
 

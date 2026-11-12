@@ -25,13 +25,14 @@
 - Factions & figures v0.1: the Cửu Gia, the Thiên Mạch Ty, the Hộ Lâm, Quy Nguyên's cell structure; Hội Chủ Uyên, Cương, Chưởng Ty Khải, Xích Vương Hạo, Lâm Trưởng Ngàn; Làng Khê
 - Prologue spec v0.1: stages S1–S8, choices C1 (tell the village or not) and C2 (spare or kill Nanh Rễ), flags `PRO_*`
 - Mạch shrines and stations are the checkpoints (ADR-0006)
+- Chapter II spec v0.1: Khải buries the evidence; Mặc names the Hội; the Restricted Archive (the Father's "Phép Ghép Mạch" record, decline records predating Quy Nguyên); boss Giám Mạch Hằng; Mạch Ấn Ấn Ty (Ty seals are carved from Mạch); choice C1 (the records); flags `CH2_*`
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Chapter I spec v0.1: the four mentors (Lão Trụ, Én, Bà Rêu, Toản), Mộc Giác, the involuntary first absorption witnessed by Diệp, Cương at the Cut, choice C1 (Sẻ), flags `CH1_*`
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
 ## Next design task
 
-**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). The Chapter I — Thanh Mộc spec v0.1 is locked (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md`). Next: the **Chapter II — Trung Vực** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
+**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). The Chapter I — Thanh Mộc spec v0.1 is locked (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md`). The Chapter II — Trung Vực spec v0.1 is locked (`docs/04-chapters/chapter-02-trung-vuc-v0.1.md`). Next: the **Chapter III — Xích Sa** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
 
 Roadmap after Character Bible:
 
