@@ -1,18 +1,25 @@
 import Phaser from "phaser";
 import { registerTextures } from "../art";
-import { Player, Controls } from "../player";
-import { Boar, Bush, NanhRe, RootSpike } from "../enemies";
-import { EnemyHit, Hittable, overlaps } from "../combat";
+import { Player, Controls, PlayerEvent } from "../player";
+import { Boar, Bush, EnemyEvent, NanhRe, RootSpike } from "../enemies";
+import { EnemyHit, Hittable, PlayerHit, overlaps } from "../combat";
+import { Animator } from "../anim";
+import { HERB_GLINT, SHRINE_LIT } from "../clips";
+import { Fx } from "../fx";
 import { PLAYER, VIEW, WORLD } from "../tuning";
 
 const ARENA = { min: 1520, max: 2160 };
 const FLAG_KEY = "cuu-vuc-flags";
 
-interface Herb { img: Phaser.GameObjects.Image; taken: boolean; }
+interface Herb { img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; }
+interface Drift { img: Phaser.GameObjects.Image; x: number; y: number; vx: number; vy: number; phase: number; }
 
 /**
  * Greybox slice: Prologue S1 (forest-edge chores as tutorial) → shrine checkpoint → Nanh Rễ (S7) → choice C2.
  * Sources: docs/04-chapters/prologue-an-moc-v0.1.md, docs/05-gameplay/combat-class-bible-v0.1.md §11.
+ *
+ * Time model: `sim` is gameplay time. Hit-stop freezes `sim` (and physics, and character animation)
+ * while FX, camera shake and UI keep running on real time, so impacts read as heavy.
  */
 export class PrologueScene extends Phaser.Scene {
   private player!: Player;
@@ -20,13 +27,19 @@ export class PrologueScene extends Phaser.Scene {
   private bg!: Phaser.GameObjects.TileSprite;
   private solids!: Phaser.Physics.Arcade.StaticGroup;
   private walls!: Phaser.Physics.Arcade.StaticGroup;
+  private fx!: Fx;
   private boars: Boar[] = [];
   private bush!: Bush;
   private boss!: NanhRe;
   private roots: RootSpike[] = [];
   private herbs: Herb[] = [];
   private piglets: Phaser.GameObjects.Sprite[] = [];
+  private tufts: Phaser.GameObjects.Image[] = [];
+  private motes: Drift[] = [];
+  private leaves: Drift[] = [];
   private shrine!: Phaser.GameObjects.Image;
+  private shrineAnim!: Animator;
+  private shrineLit = false;
   private checkpoint = { x: 60, y: WORLD.groundY };
   private engaged = false;
   private finished = false;
@@ -38,15 +51,29 @@ export class PrologueScene extends Phaser.Scene {
   private hudText!: Phaser.GameObjects.Text;
   private bossName!: Phaser.GameObjects.Text;
   private prompt!: Phaser.GameObjects.Text;
+  private keyHint!: Phaser.GameObjects.Text;
+  private floatText!: Phaser.GameObjects.Text;
+  private floatUntil = 0;
   private toastUntil = 0;
-  private hitstopUntil = 0;
-  /** Key codes pressed since the last update. Phaser clears justDown on key-up, so sub-frame taps would be lost. */
+  /** Gameplay (simulation) time in ms; does not advance during hit-stop. */
+  private sim = 0;
+  private hitstopLeft = 0;
+  private hpTrail: number = PLAYER.maxHp;
+  private bossTrail = 1;
+  private lookAhead = 0;
+  private windAt = 0;
+  private frameMs = 0;
+  /** Key codes pressed since the last simulated update. Phaser clears justDown on key-up, so sub-frame taps would be lost. */
   private pressed = new Set<string>();
+  private readonly incoming: EnemyHit[] = [];
+  private readonly targets: Hittable[] = [];
 
   constructor() { super("Prologue"); }
 
   create(): void {
     registerTextures(this);
+    this.sim = 0; this.hitstopLeft = 0; this.engaged = false; this.finished = false; this.choosing = false;
+    this.boars = []; this.roots = []; this.herbs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     this.physics.world.setBounds(0, -200, WORLD.width, WORLD.height + 200);
     this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height).setRoundPixels(true).setBackgroundColor("#1b2a1e");
 
@@ -68,6 +95,9 @@ export class PrologueScene extends Phaser.Scene {
     this.platform(640, 264, 64, 10, true);
     this.platform(1040, 266, 80, 10, true);
 
+    this.fx = new Fx(this, 180);
+    this.ambience();
+
     // Player.
     this.player = new Player(this, this.checkpoint.x, this.checkpoint.y);
     this.player.body2.setCollideWorldBounds(true);
@@ -79,7 +109,8 @@ export class PrologueScene extends Phaser.Scene {
     this.sign(420, "Bụi rậm chắn lối.\nJ: chém (3 nhát liên hoàn)");
     this.bush = new Bush(this, 470);
     this.physics.add.collider(this.player, this.bush.img);
-    this.bush.onCleared = () => this.toast("Đã phát quang lối mòn.");
+    this.bush.onHit = (x, y) => { this.fx.leaves(x, y, 5); };
+    this.bush.onCleared = () => { this.toast("Đã phát quang lối mòn."); this.fx.leaves(this.bush.img.x, WORLD.groundY - 12, 12); };
     this.addHerb(672, 262);
     this.addHerb(560, WORLD.groundY - 6);
     this.sign(600, "Thảo dược rừng.\nQ: dùng (hồi máu)");
@@ -88,12 +119,15 @@ export class PrologueScene extends Phaser.Scene {
       const boar = new Boar(this, x, a, b);
       this.physics.add.collider(boar, this.solids);
       boar.onDeath = (bx) => { if (Math.random() < 0.6) this.addHerb(bx, WORLD.groundY - 6); };
+      boar.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, boar.facing, 1);
       this.boars.push(boar);
     }
     this.addHerb(1080, 264);
 
     // Shrine checkpoint (ADR-0006).
     this.shrine = this.add.image(1420, WORLD.groundY, "shrine_off").setOrigin(0.5, 1).setDepth(5);
+    this.shrineAnim = new Animator(this.shrine);
+    this.shrineLit = false;
     this.sign(1380, "Miếu Mạch.\nE: thắp (điểm hồi sinh)");
 
     // Arena + boss.
@@ -101,27 +135,23 @@ export class PrologueScene extends Phaser.Scene {
     this.boss = new NanhRe(this, 1960, ARENA.min, ARENA.max);
     this.boss.facing = -1;
     this.physics.add.collider(this.boss, this.solids);
-    this.boss.onRoots = (xs, warn) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, warn + i * 40)));
+    this.boss.onRoots = (xs, warn) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, this.sim, warn + i * 40)));
     this.boss.onDown = () => this.bossDown();
-    this.boss.onPhase = (p) => this.toast(p === 2 ? "Nanh Rễ gào lên. Rễ mọc dày hơn." : "Nanh Rễ liều mạng!");
-    this.add.image(2130, WORLD.groundY, "bush").setOrigin(0.5, 1).setDepth(9).setScale(1.3);
+    this.boss.onPhase = (p) => { this.toast(p === 2 ? "Nanh Rễ gào lên. Rễ mọc dày hơn." : "Nanh Rễ liều mạng!"); this.cameras.main.shake(220, 0.006); };
+    this.boss.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, this.boss.facing, 2.2);
+    this.add.image(2130, WORLD.groundY, "bush0").setOrigin(0.5, 1).setDepth(9);
     for (let i = 0; i < 3; i++) {
       const p = this.add.sprite(2112 + i * 12, WORLD.groundY, "piglet0").setOrigin(0.5, 1).setDepth(8);
       p.play({ key: "piglet", delay: i * 120 }); this.piglets.push(p);
     }
 
-    // Camera.
-    this.cameras.main.startFollow(this.player, true, 0.12, 0.12, 0, 40);
-    this.cameras.main.setDeadzone(60, 40);
+    // Camera: restrained smoothing, a small deadzone, and look-ahead in the facing direction.
+    this.cameras.main.startFollow(this.player, true, 0.1, 0.1, 0, 40);
+    this.cameras.main.setDeadzone(40, 36);
 
     // Input.
     const K = Phaser.Input.Keyboard.KeyCodes;
-    this.keys = this.input.keyboard!.addKeys({
-      left: K.A, right: K.D, left2: K.LEFT, right2: K.RIGHT,
-      jump: K.SPACE, jump2: K.W, jump3: K.UP,
-      light: K.J, heavy: K.K, dodge: K.SHIFT, dodge2: K.L, parry: K.I,
-      herb: K.Q, interact: K.E, one: K.ONE, two: K.TWO, restart: K.R, debug: K.F1,
-    }) as Record<string, Phaser.Input.Keyboard.Key>;
+    this.keys = this.input.keyboard!.addKeys({ left: K.A, right: K.D, left2: K.LEFT, right2: K.RIGHT, jump: K.SPACE, jump2: K.W, jump3: K.UP, heavy: K.K }) as Record<string, Phaser.Input.Keyboard.Key>;
     this.input.keyboard!.addCapture([K.SPACE, K.UP, K.DOWN, K.LEFT, K.RIGHT, K.F1]);
     this.input.keyboard!.on("keydown", (e: KeyboardEvent) => { if (!e.repeat) this.pressed.add(e.code); });
     this.pressed.clear();
@@ -136,8 +166,12 @@ export class PrologueScene extends Phaser.Scene {
     this.bossName = txt(VIEW.width / 2, VIEW.height - 40, "NANH RỄ", 10, "#ebe6dc").setOrigin(0.5, 0).setVisible(false);
     this.prompt = txt(VIEW.width / 2, 110, "", 12, "#ebe6dc", { align: "center", backgroundColor: "#0b0d11dd", padding: { x: 10, y: 8 } }).setOrigin(0.5, 0).setVisible(false);
     txt(VIEW.width / 2, VIEW.height - 15, "A/D chạy · Space nhảy · J chém · K giữ: chém mạnh · Shift né · I đỡ · Q thảo dược · E tương tác · F1 hitbox", 8, "#9aa1ad").setOrigin(0.5, 0);
+    this.keyHint = this.label(0, 0, "E", 9, "#0b0d11", { backgroundColor: "#f6e7a0", padding: { x: 3, y: 1 } }).setOrigin(0.5, 1).setDepth(50).setVisible(false);
+    this.floatText = this.label(0, 0, "", 9, "#f6e7a0").setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.toast("Việc sáng: phát quang lối mòn cho trưởng làng.");
   }
+
+  /* ------------------------------------------------------------ helpers */
 
   /**
    * Text helper. pixelArt mode makes every texture NEAREST, which shreds high-resolution text when it is
@@ -160,50 +194,115 @@ export class PrologueScene extends Phaser.Scene {
     }
   }
 
-  /** Short dust puffs at the feet (jump, land, dodge). */
-  private puff(x: number, y: number, n = 3, dir = 0): void {
-    for (let i = 0; i < n; i++) {
-      const d = this.add.image(x + (i - (n - 1) / 2) * 5, y - 2, "dust").setDepth(9).setAlpha(0.8).setScale(0.7);
-      this.tweens.add({
-        targets: d, x: d.x + (dir || (i - (n - 1) / 2)) * 10, y: d.y - 6 - i * 2, alpha: 0, scale: 1.3,
-        duration: 320 + i * 40, ease: "Quad.out", onComplete: () => d.destroy(),
-      });
+  /** Living-world details: swaying grass tufts, drifting light motes, falling Linh Suy leaves. */
+  private ambience(): void {
+    for (let x = 8; x < WORLD.width; x += 17 + ((x * 7) % 13)) {
+      const t = this.add.image(x, WORLD.groundY + 1, "tuft1").setOrigin(0.5, 1).setDepth(3);
+      t.setData("p", (x * 0.013) % (Math.PI * 2));
+      this.tufts.push(t);
+    }
+    for (let i = 0; i < 22; i++) {
+      const img = this.add.image(0, 0, "mote").setDepth(-4).setScrollFactor(0.7).setAlpha(0.7);
+      this.motes.push({ img, x: Math.random() * VIEW.width * 1.5, y: 40 + Math.random() * 240, vx: 4 + Math.random() * 6, vy: -3 - Math.random() * 4, phase: Math.random() * 6 });
+    }
+    for (let i = 0; i < 6; i++) {
+      const img = this.add.image(0, 0, "leaf0").setDepth(4);
+      this.leaves.push({ img, x: Math.random() * VIEW.width, y: -Math.random() * 300, vx: 8, vy: 22 + Math.random() * 14, phase: Math.random() * 6 });
     }
   }
 
-  /** Brief freeze on impact so hits read as heavy. */
-  private hitstop(ms: number): void {
-    if (this.hitstopUntil > this.time.now) return;
-    this.hitstopUntil = this.time.now + ms;
-    this.physics.world.pause();
-    this.time.delayedCall(ms, () => this.physics.world.resume());
+  private updateAmbience(now: number, dt: number): void {
+    const cam = this.cameras.main, sec = dt / 1000;
+    // grass: a travelling gust across the field, frames chosen from a shared wind phase (cheap: only every 120 ms)
+    if (now - this.windAt > 120) {
+      this.windAt = now;
+      const px = this.player.x;
+      for (const t of this.tufts) {
+        if (t.x < cam.scrollX - 20 || t.x > cam.scrollX + VIEW.width + 20) continue;
+        let w = Math.sin(now / 700 - t.x / 90 + (t.getData("p") as number));
+        if (Math.abs(t.x - px) < 10 && Math.abs(this.player.body2.velocity.x) > 20) w = this.player.facing; // brushed aside
+        const key = w > 0.45 ? "tuft2" : w < -0.45 ? "tuft0" : "tuft1";
+        if (t.texture.key !== key) t.setTexture(key);
+      }
+    }
+    for (const m of this.motes) {
+      m.x += m.vx * sec; m.y += m.vy * sec + Math.sin(now / 900 + m.phase) * 0.15;
+      if (m.y < 20) m.y = 300;
+      const sx = cam.scrollX * 0.7;
+      if (m.x < sx - 10) m.x += VIEW.width + 20; else if (m.x > sx + VIEW.width + 10) m.x -= VIEW.width + 20;
+      m.img.setPosition(m.x, m.y).setAlpha(0.35 + 0.35 * Math.sin(now / 500 + m.phase));
+    }
+    for (const l of this.leaves) {
+      l.x += (l.vx + Math.sin(now / 400 + l.phase) * 18) * sec; l.y += l.vy * sec;
+      if (l.y > WORLD.groundY - 2 || l.x > cam.scrollX + VIEW.width + 20) { l.y = -10 - Math.random() * 120; l.x = cam.scrollX + Math.random() * VIEW.width; }
+      l.img.setPosition(l.x, l.y);
+      const key = Math.floor(now / 160 + l.phase) % 2 ? "leaf0" : "leaf1";
+      if (l.img.texture.key !== key) l.img.setTexture(key);
+    }
   }
 
   private sign(x: number, text: string): void {
     this.add.image(x, WORLD.groundY, "sign").setOrigin(0.5, 1).setDepth(4);
-    this.label(x, WORLD.groundY - 26, text, 9, "#ebe6dc", { align: "center", backgroundColor: "#0b0d11cc", padding: { x: 4, y: 3 } })
-      .setOrigin(0.5, 1).setDepth(4);
+    this.label(x, WORLD.groundY - 26, text, 9, "#ebe6dc", { align: "center", backgroundColor: "#0b0d11cc", padding: { x: 4, y: 3 } }).setOrigin(0.5, 1).setDepth(4);
   }
 
   private addHerb(x: number, y: number): void {
-    const img = this.add.image(x, y, "herb").setOrigin(0.5, 1).setDepth(6);
-    this.tweens.add({ targets: img, y: y - 2, yoyo: true, repeat: -1, duration: 700, ease: "Sine.inOut" });
-    this.herbs.push({ img, taken: false });
+    const img = this.add.image(x, y, "herb0").setOrigin(0.5, 1).setDepth(6);
+    const anim = new Animator(img); anim.play(HERB_GLINT); anim.update(Math.random() * 1500);
+    this.herbs.push({ img, anim, baseY: y, phase: Math.random() * 6, taken: false });
   }
 
   private toast(s: string, ms = 1800): void { this.toastText.setText(s); this.toastUntil = this.time.now + ms; }
 
-  private onPlayerEvent(k: string): void {
-    const p = this.player;
-    if (k === "jump") this.puff(p.x, p.y, 2);
-    if (k === "land") this.puff(p.x, p.y, 4);
-    if (k === "dodge") this.puff(p.x, p.y, 3, -p.facing);
-    if (k === "parry") { this.toast("Đỡ! Bấm J để phản đòn.", 900); this.cameras.main.shake(70, 0.004); this.hitstop(90); }
-    if (k === "perfectDodge") this.toast("Né hoàn hảo!", 700);
-    if (k === "riposte") this.toast("Phản đòn!", 600);
-    if (k === "heal") this.toast(`Dùng thảo dược (+${PLAYER.herbHeal})`, 900);
-    if (k === "hurt") this.cameras.main.shake(90, 0.006);
-    if (k === "dead") this.time.delayedCall(1100, () => this.respawn());
+  private float(x: number, y: number, s: string): void {
+    this.floatText.setText(s).setPosition(x, y).setVisible(true).setAlpha(1);
+    this.floatUntil = this.time.now + 800;
+  }
+
+  /** Freeze gameplay briefly on impact. Scales with the hit; does not stack. */
+  private hitstop(ms: number): void {
+    if (ms <= this.hitstopLeft) return;
+    this.hitstopLeft = ms;
+    this.physics.world.pause();
+  }
+
+  private shake(strength: number): void {
+    // strength ~ damage: light 10 → small, heavy 44 → strong; capped to keep pixels readable
+    this.cameras.main.shake(40 + strength * 2.2, Math.min(0.009, 0.0012 + strength * 0.00016));
+  }
+
+  /* ------------------------------------------------------------ events */
+
+  private onPlayerEvent(k: PlayerEvent): void {
+    const p = this.player, f = p.facing;
+    switch (k) {
+      case "step": this.fx.dust(p.x - f * 4, p.y, 1, -f, 0.6); break;
+      case "skid": this.fx.dust(p.x + f * 6, p.y, 3, f, 0.8); break;
+      case "jump": this.fx.dust(p.x, p.y, 2, 0, 0.7); break;
+      case "land": this.fx.dust(p.x, p.y, 4, 0, 1); break;
+      case "dodge": this.fx.dust(p.x, p.y, 3, -f, 1); break;
+      case "ghost": this.fx.afterimage(p.texture.key, p.x, p.y, p.flipX); break;
+      case "swing": this.fx.slash(p.x + f * 4, p.y - 26 + (p.slashLevel > 0 ? 2 : 0), p.slashLevel, f, p.rising); break;
+      case "slam": this.fx.dust(p.x + f * 18, p.y, 3, f, 0.8); break;
+      case "thud": this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
+      case "parry":
+        this.toast("Đỡ! Bấm J để phản đòn.", 900);
+        this.fx.sparks(p.x + f * 12, p.y - 28, f, 10, 1.1); this.fx.impact(p.x + f * 12, p.y - 28, true);
+        this.shake(18); this.hitstop(110);
+        break;
+      case "perfectDodge": this.toast("Né hoàn hảo!", 700); this.fx.sparkle(p.x, p.y - 24, 6, 0x9fd0c0); break;
+      case "riposte": this.toast("Phản đòn!", 600); break;
+      case "heal": this.float(p.x, p.y - 50, `+${PLAYER.herbHeal}`); this.fx.sparkle(p.x, p.y - 30, 8, 0x9cf0a4); break;
+      case "hurt": this.shake(16); this.hitstop(70); this.fx.sparks(p.x, p.y - 26, -f as 1 | -1, 6, 0.8); break;
+      case "dead": this.shake(24); this.hitstop(140); this.time.delayedCall(1400, () => this.respawn()); break;
+    }
+  }
+
+  private onEnemyFx(e: EnemyEvent, x: number, y: number, facing: 1 | -1, size: number): void {
+    if (e === "step") this.fx.dust(x - facing * 10 * size, y, 1, -facing, 0.5);
+    if (e === "paw") this.fx.dust(x + facing * 8 * size, y, 1, -facing, 0.9);
+    if (e === "stomp") { this.fx.dust(x + facing * 30, y, 6, 0, 1.4); this.shake(20); }
+    if (e === "thud" || e === "dead") this.fx.dust(x, y, 5, 0, 1);
   }
 
   private respawn(): void {
@@ -211,25 +310,22 @@ export class PrologueScene extends Phaser.Scene {
     this.time.delayedCall(260, () => {
       this.player.respawn(this.checkpoint.x, this.checkpoint.y);
       this.player.clearHitMemory();
-      this.roots.forEach((r) => { r.sprite.destroy(); r.marker.destroy(); });
-      this.roots = [];
+      this.roots.forEach((r) => r.destroy()); this.roots = [];
+      this.hpTrail = PLAYER.maxHp;
       if (this.engaged && this.boss.isAlive()) {
         this.engaged = false; this.walls.clear(true, true);
-        this.boss.reset(1960); this.boss.facing = -1;
+        this.boss.reset(1960); this.boss.facing = -1; this.bossTrail = 1;
         this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height);
         this.bossName.setVisible(false);
       }
       this.cameras.main.fadeIn(300);
-      this.toast("Tỉnh lại ở miếu Mạch.");
+      this.toast(this.shrineLit ? "Tỉnh lại ở miếu Mạch." : "Tỉnh lại ở bìa rừng.");
     });
   }
 
   private engage(): void {
     this.engaged = true;
-    for (const x of [ARENA.min - 8, ARENA.max + 8]) {
-      const r = this.add.rectangle(x, WORLD.groundY / 2, 16, WORLD.groundY + 200).setVisible(false);
-      this.walls.add(r);
-    }
+    for (const x of [ARENA.min - 8, ARENA.max + 8]) this.walls.add(this.add.rectangle(x, WORLD.groundY / 2, 16, WORLD.groundY + 200).setVisible(false));
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.boss, this.walls);
     this.cameras.main.setBounds(ARENA.min, 0, ARENA.max - ARENA.min, WORLD.height);
@@ -240,7 +336,8 @@ export class PrologueScene extends Phaser.Scene {
 
   private bossDown(): void {
     this.choosing = true;
-    this.roots.forEach((r) => { r.sprite.destroy(); r.marker.destroy(); }); this.roots = [];
+    this.shake(30); this.hitstop(160);
+    this.roots.forEach((r) => r.destroy()); this.roots = [];
     this.piglets.forEach((p, i) => this.tweens.add({ targets: p, x: this.boss.x + 30 + i * 10, duration: 900, delay: 300 + i * 100 }));
     this.prompt.setText("Bầy con kêu ré từ bụi rậm.\n\n[1] Đuổi nó đi (tha)      [2] Kết liễu").setVisible(true);
   }
@@ -255,29 +352,50 @@ export class PrologueScene extends Phaser.Scene {
     } catch { /* storage unavailable: the flag still lives in the registry */ }
     this.registry.set("PRO_SOW_SPARED", spared);
     if (spared) {
-      this.boss.setTexture("nanh0").play("nanh_run"); this.boss.facing = 1;
       this.walls.clear(true, true);
-      this.tweens.add({ targets: [this.boss, ...this.piglets], x: "+=420", duration: 2600, ease: "Sine.in" });
+      this.boss.leave();
+      this.piglets.forEach((p, i) => this.tweens.add({ targets: p, x: "+=440", duration: 6200, delay: 200 + i * 120 }));
       this.toast("Nó lết đi, bầy con chạy theo. Về phía nam.", 3000);
     } else {
       this.tweens.add({ targets: this.boss, alpha: 0, duration: 1400 });
       this.piglets.forEach((p) => p.anims.stop());
       this.toast("Làng an toàn. Bầy con nằm im trong bụi rậm.", 3000);
     }
-    this.time.delayedCall(3200, () => {
-      this.prompt.setText(`Hết bản greybox.\nPRO_SOW_SPARED = ${spared}\n\nR: chơi lại`).setVisible(true);
-    });
+    this.time.delayedCall(3200, () => this.prompt.setText(`Hết bản greybox.\nPRO_SOW_SPARED = ${spared}\n\nR: chơi lại`).setVisible(true));
   }
 
+  /* ------------------------------------------------------------ frame */
+
   update(time: number, delta: number): void {
-    const k = this.keys;
+    const t0 = performance.now();
     const tap = (...codes: string[]) => codes.some((c) => this.pressed.has(c));
-    if (tap("F1")) this.showDebug = !this.showDebug;
+    if (tap("F1")) { this.showDebug = !this.showDebug; this.pressed.delete("F1"); }
     if (this.finished && tap("KeyR")) { this.pressed.clear(); this.scene.restart(); return; }
     if (this.choosing) {
       if (tap("Digit1", "Numpad1")) this.choose(true);
       else if (tap("Digit2", "Numpad2")) this.choose(false);
     }
+
+    // Real-time systems (run during hit-stop too).
+    this.fx.update(delta);
+    this.updateAmbience(time, delta);
+    this.shrineAnim.update(delta);
+    if (this.shrineLit && Math.random() < delta / 260) this.fx.motes(this.shrine.x, this.shrine.y - 30, 1);
+    for (const h of this.herbs) if (!h.taken) { h.anim.update(delta); h.img.y = Math.round(h.baseY - 1.5 - Math.sin(time / 380 + h.phase) * 1.5); }
+
+    // Hit-stop: hold simulation, keep buffered input for the next simulated frame.
+    let dt = delta;
+    if (this.hitstopLeft > 0) {
+      this.hitstopLeft -= delta;
+      if (this.hitstopLeft > 0) { this.drawHud(time, delta); return; }
+      this.physics.world.resume();
+      dt = Math.min(delta, -this.hitstopLeft);
+      this.hitstopLeft = 0;
+    }
+    this.sim += dt;
+    const now = this.sim;
+
+    const k = this.keys;
     const c: Controls = {
       left: k.left.isDown || k.left2.isDown, right: k.right.isDown || k.right2.isDown,
       jumpHeld: k.jump.isDown || k.jump2.isDown || k.jump3.isDown,
@@ -286,76 +404,108 @@ export class PrologueScene extends Phaser.Scene {
       dodgePressed: tap("ShiftLeft", "ShiftRight", "KeyL"), parryPressed: tap("KeyI"),
       herbPressed: tap("KeyQ"),
     };
-    if (this.choosing || this.finished) { c.lightPressed = false; c.heavyHeld = false; }
-    this.player.update(time, delta, c);
+    if (this.choosing || this.finished) { c.lightPressed = false; c.heavyHeld = false; c.parryPressed = false; c.dodgePressed = false; }
+    this.player.update(now, dt, c);
     this.bg.tilePositionX = this.cameras.main.scrollX * 0.15 / 4;
 
-    // Pickups and interactions.
+    // Camera look-ahead: lean ~32 px toward the facing direction, eased.
+    this.lookAhead += (-this.player.facing * 32 - this.lookAhead) * Math.min(1, dt / 400);
+    this.cameras.main.setFollowOffset(Math.round(this.lookAhead), 40);
+
+    // Pickups and interactions (with feedback).
     for (const h of this.herbs) {
       if (!h.taken && Math.abs(h.img.x - this.player.x) < 12 && Math.abs(h.img.y - this.player.y) < 30) {
-        h.taken = true; h.img.destroy(); this.player.herbs++; this.toast("Nhặt được thảo dược.", 900);
+        h.taken = true; h.img.destroy(); this.player.herbs++;
+        this.fx.sparkle(h.img.x, h.baseY - 6, 8); this.float(h.img.x, h.baseY - 14, "+1 thảo dược");
       }
     }
-    if (tap("KeyE") && Math.abs(this.player.x - this.shrine.x) < 30) {
+    const nearShrine = Math.abs(this.player.x - this.shrine.x) < 30;
+    this.keyHint.setVisible(nearShrine && !this.shrineLit).setPosition(this.shrine.x, this.shrine.y - 42 - Math.round(Math.sin(time / 250)));
+    if (tap("KeyE") && nearShrine) {
       this.checkpoint = { x: this.shrine.x + 20, y: WORLD.groundY };
-      this.shrine.setTexture("shrine_on");
       this.player.hp = PLAYER.maxHp;
+      if (!this.shrineLit) { this.shrineLit = true; this.shrineAnim.play(SHRINE_LIT); this.fx.ring(this.shrine.x, this.shrine.y - 20); this.fx.motes(this.shrine.x, this.shrine.y - 30, 8); }
       this.toast("Miếu Mạch đã thắp. Máu hồi đầy.");
     }
     if (!this.engaged && !this.finished && this.boss.isAlive() && this.player.x > ARENA.min + 30) this.engage();
 
-    // Enemies.
+    // Enemies and hazards (simulation time).
     const px = this.player.x;
     this.boars = this.boars.filter((b) => b.active);
-    this.boars.forEach((b) => b.tick(time, px));
-    this.boss.tick(time, px);
-    this.roots.forEach((r) => r.tick(time));
+    for (const b of this.boars) b.tick(now, dt, px);
+    if (this.boss.active) this.boss.tick(now, dt, px);
+    this.bush.tick(time);
+    for (const r of this.roots) if (r.tick(now)) this.fx.dust(r.x, WORLD.groundY, 2, 0, 0.8);
     this.roots = this.roots.filter((r) => !r.done);
 
     // Player → targets.
     const ph = this.player.currentHit();
     if (ph) {
-      const targets: Hittable[] = [this.bush, ...this.boars, this.boss];
-      for (const t of targets) {
-        if (!t.isAlive() || !overlaps(ph.rect, t.hurtbox())) continue;
-        const before = (t as { hp?: number }).hp;
-        t.takeHit(ph);
-        if ((t as { hp?: number }).hp !== before) {
-          this.cameras.main.shake(ph.guardBreak ? 90 : 45, ph.guardBreak ? 0.005 : 0.0025);
-          this.hitstop(ph.guardBreak ? 80 : 45);
-        }
+      this.targets.length = 0;
+      this.targets.push(this.bush, ...this.boars, this.boss);
+      for (const tg of this.targets) {
+        if (!tg.isAlive() || !overlaps(ph.rect, tg.hurtbox())) continue;
+        const before = tg.hp;
+        tg.takeHit(ph);
+        if (tg.hp !== before) this.onLanded(ph, tg);
       }
     }
     // Enemies → player.
-    const incoming: EnemyHit[] = [...this.boars.flatMap((b) => b.hits()), ...this.boss.hits()];
-    for (const r of this.roots) { const h = r.hit(time); if (h) incoming.push(h); }
+    const inc = this.incoming; inc.length = 0;
+    for (const b of this.boars) for (const h of b.hits()) inc.push(h);
+    if (this.boss.active) for (const h of this.boss.hits()) inc.push(h);
+    for (const r of this.roots) { const h = r.hitbox(now); if (h) inc.push(h); }
     const hb = this.player.hurtbox();
-    for (const h of incoming) if (overlaps(h.rect, hb)) this.player.receive(h);
+    for (const h of inc) if (overlaps(h.rect, hb)) this.player.receive(h);
 
     this.pressed.clear();
-    this.drawHud(time);
-    this.drawDebug(ph?.rect ?? null, incoming);
+    this.drawHud(time, delta);
+    this.drawDebug(ph?.rect ?? null, inc);
+    this.frameMs = this.frameMs * 0.95 + (performance.now() - t0) * 0.05;
   }
 
-  private drawHud(now: number): void {
+  /** Impact feedback for a hit that actually dealt damage: sparks, burst, shake and hit-stop by strength. */
+  private onLanded(ph: PlayerHit, tg: Hittable): void {
+    const r = tg.hurtbox();
+    const x = ph.direction > 0 ? Math.max(r.x, ph.rect.x) + 2 : Math.min(r.right, ph.rect.right) - 2;
+    const y = Math.max(r.y + 6, Math.min(r.bottom - 6, ph.rect.centerY));
+    if (tg === this.bush) { this.fx.sparks(x, y, ph.direction, 3, 0.6); this.hitstop(30); return; }
+    const big = ph.guardBreak;
+    this.fx.sparks(x, y, ph.direction, big ? 12 : 6, big ? 1.3 : 1);
+    this.fx.impact(x, y, big);
+    this.shake(ph.damage);
+    this.hitstop(big ? 70 + ph.damage : 40 + ph.damage);
+  }
+
+  private drawHud(now: number, dtMs: number): void {
     const g = this.hud, p = this.player;
+    // damage trail: the white part of the bar drains after a short delay so the size of a hit is readable
+    this.hpTrail = this.hpTrail > p.hp ? Math.max(p.hp, this.hpTrail - (dtMs / 1000) * 60) : p.hp;
     g.clear();
     g.fillStyle(0x0b0d11, 0.8).fillRect(8, 8, 124, 20);
     g.fillStyle(0x3a2a2a, 1).fillRect(10, 10, 120, 6);
-    g.fillStyle(0xb8574a, 1).fillRect(10, 10, 120 * (p.hp / PLAYER.maxHp), 6);
+    g.fillStyle(0xebe6dc, 1).fillRect(10, 10, Math.round(120 * (this.hpTrail / PLAYER.maxHp)), 6);
+    g.fillStyle(0xb8574a, 1).fillRect(10, 10, Math.round(120 * (p.hp / PLAYER.maxHp)), 6);
     g.fillStyle(0x2a3a34, 1).fillRect(10, 19, 120, 4);
-    g.fillStyle(0x62d3c3, 1).fillRect(10, 19, 120 * (p.stamina / PLAYER.maxStamina), 4);
-    for (let i = 0; i < PLAYER.maxThe; i++) {
-      g.fillStyle(i < p.the ? 0xf6e7a0 : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
-    }
+    g.fillStyle(0x62d3c3, 1).fillRect(10, 19, Math.round(120 * (p.stamina / PLAYER.maxStamina)), 4);
+    for (let i = 0; i < PLAYER.maxThe; i++) g.fillStyle(i < p.the ? 0xf6e7a0 : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
     this.hudText.setText(`Thảo dược × ${p.herbs}`);
-    if (this.engaged && this.boss.isAlive()) {
+    const boss = this.boss;
+    if (this.engaged && boss.isAlive()) {
+      const ratio = boss.hp / boss.maxHp;
+      this.bossTrail = this.bossTrail > ratio ? Math.max(ratio, this.bossTrail - (dtMs / 1000) * 0.35) : ratio;
       const w = 300, x = (VIEW.width - w) / 2, y = VIEW.height - 22;
       g.fillStyle(0x0b0d11, 0.8).fillRect(x - 2, y - 2, w + 4, 8);
       g.fillStyle(0x3a2a2a, 1).fillRect(x, y, w, 4);
-      g.fillStyle(0x7fa65a, 1).fillRect(x, y, w * (this.boss.hp / this.boss.maxHp), 4);
-    } else if (!this.boss.isAlive()) this.bossName.setVisible(false);
+      g.fillStyle(0xebe6dc, 1).fillRect(x, y, Math.round(w * this.bossTrail), 4);
+      g.fillStyle(0x7fa65a, 1).fillRect(x, y, Math.round(w * ratio), 4);
+    } else if (!boss.isAlive()) this.bossName.setVisible(false);
     this.toastText.setVisible(now < this.toastUntil);
+    if (this.floatText.visible) {
+      const left = this.floatUntil - now;
+      if (left <= 0) this.floatText.setVisible(false);
+      else this.floatText.setY(this.floatText.y - dtMs * 0.02).setAlpha(Math.min(1, left / 300));
+    }
   }
 
   private drawDebug(ph: Phaser.Geom.Rectangle | null, incoming: EnemyHit[]): void {
@@ -368,4 +518,7 @@ export class PrologueScene extends Phaser.Scene {
     for (const t of [...this.boars, this.boss]) if (t.isAlive()) { const r = t.hurtbox(); g.lineStyle(1, 0x9aa1ad, 1).strokeRect(r.x, r.y, r.width, r.height); }
     for (const h of incoming) g.lineStyle(1, h.parryable ? 0xe8b04a : 0xff5050, 1).strokeRect(h.rect.x, h.rect.y, h.rect.width, h.rect.height);
   }
+
+  /** For automated checks: average CPU ms spent in update() (smoothed). */
+  get updateCostMs(): number { return this.frameMs; }
 }

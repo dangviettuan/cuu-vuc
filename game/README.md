@@ -45,23 +45,65 @@ npm run build      # type-check + production build into dist/
 | Choice C2 → `PRO_SOW_SPARED`, stored in `localStorage` and the scene registry | Prologue §7 | `src/scenes/Prologue.ts` |
 | Generated pixel art from the locked concept picks (protagonist B, Nanh Rễ A, Thanh Mộc A) | Art Bible; concept v0.1 | `src/art.ts` |
 
+## Animation & game feel (v0.3)
+
+### Architecture
+- **`src/anim.ts`: `Animator`.** A frame-timed clip player.
+  - Each frame has its own duration, an optional **tag** (`windup` / `active` / `recovery`) and an optional **event** (`step`, `swing`, `slam`, `stomp`, `thud`, …).
+  - **Priorities:** LOCO < SETTLE < ACTION < HURT < DEAD. A lower-priority request cannot interrupt a running clip of higher priority.
+  - Re-requesting the clip that is already playing is a no-op, so there is no flicker.
+- **`src/clips.ts`: every clip in one place.** Attack clips are **built from `tuning.ts`**: the windup, active and recovery frame runs add up exactly to each attack's startup/active/recovery timings.
+- **Animation-driven hitboxes:** `Player.currentHit()` is open only on `active`-tagged frames.
+- **Gameplay and presentation are separate.** `Player.update()` runs the gameplay state machine; `Player.present()` only chooses clips.
+- **`src/fx.ts`: a pooled effects system** of 180 reusable images, stepped manually (no tweens, no per-frame allocation). It provides dust, directional sparks, impact bursts, slash arcs, afterimages, leaves, sparkles, rings and motes.
+- **Hit-stop on simulation time:** gameplay time, physics and character animation freeze, while effects, camera shake and UI keep running in real time.
+
+### What changed and why
+
+| Problem (v0.2) | Fix (v0.3) |
+|---|---|
+| Feet slid: a fixed 12 fps run on a ramping velocity | An 8-frame run whose `timeScale` follows ground speed; `runStart`, `skid` (on reversing) and `stop` settle frames |
+| Squash-and-stretch used fractional `setScale` and blurred the pixels | Removed. Drawn **takeoff / rise / apex / fall / land** frames instead |
+| Attacks had one pose per phase and swings didn't vary | 2 windup → smear + hit → follow → settle frames per swing. Three distinct swings (down-diagonal, rising, overhead slam) with smear frames; you can re-aim during windup |
+| Hit-stop paused physics but animation kept moving | Simulation-time hit-stop scaled to damage (30–115 ms); effects keep moving |
+| Weak impacts | Directional sparks, impact bursts, white flash, eased knockback (≈0.2 s ease-out), shake scaled to damage, HP and boss bars with a draining damage trail |
+| Enemies had 2 frames | Boar: idle, walk, paw (telegraph), gallop, stun, hurt, death. Nanh Rễ: idle (root sway), walk, head-down windup, gallop, rear, slam, toss, daze, flinch (only when not committed to an attack), 3-frame collapse |
+| A static world | Grass that sways in a travelling gust and is brushed aside by the player; drifting light motes; falling yellow-veined leaves; a flickering shrine with rising motes and a light ring; herbs that glint and bob; pickup sparkle with floating text; an `E` prompt; footstep dust on run contact frames; the camera leans toward the facing direction |
+| Allocations every frame | Hurtboxes, hitboxes and hit lists are reused; effects are pooled |
+
+### Measured (headless Chromium, software WebGL, 10 s of continuous boss combat)
+- **59.3 fps average, 58.1 minimum.** `update()` costs about **0.08 ms** per frame (0.24 ms peak).
+- Object count stays constant (350 → 350): **no leaks**.
+
+### What still needs real artwork
+Code can't add what isn't drawn. Every frame here is **generated from a stick-and-block pose rig**, so the following need hand-drawn pixel art to reach professional indie quality:
+1. **Protagonist turn-around and 3/4 poses.** Facing is a mirror flip; a real turn needs 2–3 drawn frames.
+2. **Coat cloth simulation.** The coat hem is a rectangle offset per frame; proper drape and flutter need hand-drawn secondary motion.
+3. **Faces and expressions.** The face is one eye pixel; hurt, effort and death need drawn faces.
+4. **Weapon and arm foreshortening** in the overhead slam and the rising slash: the rig draws straight lines.
+5. **Dodge.** A roll or slide with real body compression; the rig can only crouch.
+6. **Death fall.** A drawn tumble between the kneel and lying frames (frames 2 and 3).
+7. **Nanh Rễ.** Leg articulation (the rig slides rectangles), a real rearing pose (only the head and front legs move), and roots that react to hits.
+8. **Boar.** Gallop with spine flex, and a hit reaction from the direction of the blow.
+
+Clip timings, tags and events are already in place, so authored frames can replace generated textures one key at a time (`src/art.ts`) without touching gameplay.
+
 ## Level notes
 
 - **Ledges are one-way platforms.** You can walk under them and jump up through them, and each sits within a full jump's reach (≤ 42 px).
-- **Input uses an event-driven press queue** in `Prologue.ts`. Phaser's `JustDown` loses a tap that starts and ends within one frame.
+- **Input uses an event-driven press queue** in `Prologue.ts`. Phaser's `JustDown` loses a tap that starts and ends within one frame. Presses made during hit-stop are kept until the next simulated frame.
 
 ## Known greybox simplifications
 
 - **The class kit is merged into the Prologue.** In the final game the Prologue has no class (PB L9); Riposte is here only to test the Kiếm Khách loop.
-- **Animation v0.2:** a 6-frame breathing idle; a 6-frame run with arm swing and coat flutter; separate rising and falling jump frames; windup → strike → follow-through for light attacks; overhead → slam for the third light, heavy and riposte; dodge lean, guard, hurt and heal poses; and boss windup poses (head-down before a charge, rearing before a stomp). Feel effects: hit-stop, animated slash arcs, dust puffs, dodge afterimages, and squash-and-stretch on jump and land. Still generated, not hand-drawn.
 - No audio, no gamepad, and no save system beyond the one flag.
 - Arcade physics. Final collision feel will be decided after playtesting (ADR-0008).
 - Tuning values are the Bible's starting targets. Expect to change them after the first playtest.
 
 ## Testing
 
-A headless smoke test (Playwright with Chromium) was run during development:
-- it drove the inputs, cleared the bush, met the boars, damaged the boss and took the C2 choice;
-- it checked for runtime errors, and there were none.
-
-The script is not part of the repo yet. Adding it as `npm run smoke` is a good next step.
+Headless Chromium checks (Playwright) were run for v0.3. They are not yet in the repo, to avoid adding a dependency. Each check passed with no runtime errors:
+- **Smoke:** clear the bush, meet the boars, damage the boss, take the C2 choice.
+- **Walk-through:** walk under both ledges, land on a ledge, clear the bush with quick taps.
+- **Timing:** stride `timeScale` matches ground speed; the hitbox is open only on `active` frames.
+- **Stress:** the performance figures above.

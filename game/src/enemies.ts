@@ -1,16 +1,28 @@
 import Phaser from "phaser";
 import { ENEMY_FLASH, WORLD } from "./tuning";
 import { EnemyHit, Hittable, PlayerHit, flash } from "./combat";
+import { Animator, Clip } from "./anim";
+import { BC, NC, ROOT } from "./clips";
 
 let uid = 0;
 const nextId = (p: string) => `${p}-${++uid}`;
+const NONE: EnemyHit[] = [];
+
+export type EnemyEvent = "step" | "paw" | "stomp" | "thud" | "dead";
 
 abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
   hp: number;
+  facing: 1 | -1 = -1;
+  readonly anim: Animator;
+  protected now = 0;
   protected lastSwing = -1;
   protected flashUntil = 0;
   protected stateAt = 0;
-  facing: 1 | -1 = -1;
+  /** Knockback velocity, eased out exponentially and added on top of AI movement. */
+  protected kb = 0;
+  protected kbResist = 1;
+  private readonly hb = new Phaser.Geom.Rectangle();
+  onFx: (e: EnemyEvent, x: number, y: number) => void = () => {};
 
   constructor(scene: Phaser.Scene, x: number, y: number, tex: string, public maxHp: number) {
     super(scene, x, y, tex);
@@ -18,31 +30,40 @@ abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setOrigin(0.5, 1).setDepth(8);
+    this.anim = new Animator(this, (e) => this.onFx(e as EnemyEvent, this.x, this.y));
   }
   get b(): Phaser.Physics.Arcade.Body { return this.body as Phaser.Physics.Arcade.Body; }
   isAlive(): boolean { return this.hp > 0; }
-  hurtbox(): Phaser.Geom.Rectangle { const b = this.b; return new Phaser.Geom.Rectangle(b.x, b.y, b.width, b.height); }
+  hurtbox(): Phaser.Geom.Rectangle { const b = this.b; return this.hb.setTo(b.x, b.y, b.width, b.height); }
 
   takeHit(hit: PlayerHit): void {
     if (!this.isAlive() || hit.id === this.lastSwing) return;
     this.lastSwing = hit.id;
     this.hp = Math.max(0, this.hp - hit.damage);
-    flash(this, true); this.flashUntil = this.scene.time.now + ENEMY_FLASH;
+    flash(this, true); this.flashUntil = this.now + ENEMY_FLASH;
+    this.kb = hit.direction * (hit.guardBreak ? 150 : 90) / this.kbResist;
     this.onDamaged(hit);
   }
   protected abstract onDamaged(hit: PlayerHit): void;
   abstract hits(): EnemyHit[];
-  abstract tick(now: number, playerX: number): void;
+  abstract tick(now: number, dt: number, playerX: number): void;
 
-  protected baseTick(now: number): void {
-    if (now > this.flashUntil && this.flashUntil > 0) { flash(this, false); this.flashUntil = 0; }
+  /** Common per-frame work: flash timeout, knockback easing, facing, animation. */
+  protected finish(dt: number, aiVx: number): void {
+    if (this.flashUntil > 0 && this.now > this.flashUntil) { flash(this, false); this.flashUntil = 0; }
+    this.kb *= Math.exp(-dt / 70); // ease-out over ~0.2 s
+    if (Math.abs(this.kb) < 2) this.kb = 0;
+    if (this.b.enable) this.b.setVelocityX(aiVx + this.kb);
     this.setFlipX(this.facing < 0);
+    this.anim.update(dt);
   }
-  /** Blink amber during telegraphs: the tell must always be readable (Bible §1). */
-  protected telegraph(now: number): void {
-    if (now < this.flashUntil) return;
-    if (Math.floor(now / 90) % 2 === 0) flash(this, true, 0xe8b04a); else flash(this, false);
+  protected enterAt(): void { this.stateAt = this.now; }
+  /** Telegraph tint pulse on top of the windup frames (frames carry the pose, tint carries urgency). */
+  protected telegraph(): void {
+    if (this.now < this.flashUntil) return;
+    if (Math.floor(this.now / 90) % 2 === 0) flash(this, true, 0xe8b04a); else flash(this, false);
   }
+  protected show(c: Clip, restart = false): void { this.anim.play(c, restart, restart); }
 }
 
 /* ---------------- startled boar (thú hoảng) ---------------- */
@@ -50,59 +71,73 @@ type BoarState = "wander" | "notice" | "charge" | "stun" | "dead";
 export class Boar extends Enemy {
   state: BoarState = "wander";
   private swing = nextId("boar");
+  private readonly hit: EnemyHit;
+  private readonly hitList: EnemyHit[];
   onDeath: (x: number) => void = () => {};
 
   constructor(scene: Phaser.Scene, x: number, private minX: number, private maxX: number) {
-    super(scene, x, WORLD.groundY, "boar0", 40);
-    this.b.setSize(26, 13).setOffset(4, 8);
-    this.play("boar_run");
+    super(scene, x, WORLD.groundY, "boar_walk0", 40);
+    this.b.setSize(26, 13).setOffset(5, 9);
+    this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: 15, knockback: 0, parryable: true, onParried: () => this.parried() };
+    this.hitList = [this.hit];
+    this.show(BC.walk);
   }
 
-  private enter(s: BoarState): void { this.state = s; this.stateAt = this.scene.time.now; }
+  private enter(s: BoarState): void { this.state = s; this.enterAt(); }
+  private parried(): void { this.enter("stun"); this.stateAt -= 400; this.kb = -this.facing * 160; this.show(BC.stun); }
 
-  tick(now: number, playerX: number): void {
-    this.baseTick(now);
+  tick(now: number, dt: number, playerX: number): void {
+    this.now = now;
     const t = now - this.stateAt, dx = playerX - this.x;
+    let vx = 0;
     switch (this.state) {
       case "wander":
         if (this.x < this.minX) this.facing = 1;
         if (this.x > this.maxX) this.facing = -1;
-        this.b.setVelocityX(this.facing * 30);
-        if (Math.abs(dx) < 170) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.b.setVelocityX(0); this.play("boar_idle"); }
+        vx = this.facing * 30;
+        this.show(BC.walk);
+        this.anim.timeScale = 0.8;
+        if (Math.abs(dx) < 170) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(BC.paw, true); }
         break;
-      case "notice":
-        this.telegraph(now);
-        this.x += Math.sin(now / 30) * 0.3; // paw scrape
-        if (t > 600) { flash(this, false); this.swing = nextId("boar"); this.enter("charge"); this.play("boar_run"); }
+      case "notice": // anticipation: head down, pawing the ground
+        this.telegraph();
+        if (t > 600) { flash(this, false); this.swing = nextId("boar"); this.enter("charge"); this.show(BC.gallop, true); }
         break;
       case "charge":
-        this.b.setVelocityX(this.facing * 210);
-        if (t > 1100 || this.b.blocked.left || this.b.blocked.right) { this.enter("stun"); this.b.setVelocityX(0); this.play("boar_idle"); }
+        vx = this.facing * 210;
+        if (t > 1100 || this.b.blocked.left || this.b.blocked.right) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 60; }
         break;
       case "stun":
-        this.b.setVelocityX(this.b.velocity.x * 0.9);
-        if (t > 800) { this.enter("wander"); this.play("boar_run"); }
+        this.show(BC.stun);
+        if (t > 800) { this.enter("wander"); this.show(BC.walk); }
         break;
       case "dead":
-        this.b.setVelocityX(0);
-        this.setAlpha(Math.max(0, 1 - t / 600));
-        if (t > 600) this.destroy();
+        if (t > 700) this.setAlpha(Math.max(0, 1 - (t - 700) / 500));
+        if (t > 1200) { this.destroy(); return; }
         break;
     }
+    if (this.state !== "wander") this.anim.timeScale = 1;
+    this.finish(dt, vx);
   }
 
   hits(): EnemyHit[] {
-    if (this.state !== "charge") return [];
-    return [{
-      id: this.swing, rect: this.hurtbox(), damage: 15, knockback: this.facing * 220, parryable: true,
-      onParried: () => { this.enter("stun"); this.stateAt += -400; this.b.setVelocityX(-this.facing * 120); },
-    }];
+    if (this.state !== "charge") return NONE;
+    this.hit.id = this.swing; this.hit.rect.setTo(this.b.x, this.b.y, this.b.width, this.b.height);
+    this.hit.knockback = this.facing * 220;
+    return this.hitList;
   }
 
   protected onDamaged(hit: PlayerHit): void {
-    this.b.setVelocityX(hit.direction * 90);
-    if (this.hp <= 0) { this.enter("dead"); this.b.enable = false; this.onDeath(this.x); }
-    else if (this.state !== "charge") { this.facing = hit.direction > 0 ? -1 : 1; this.enter("stun"); this.stateAt -= 400; }
+    if (this.hp <= 0) {
+      this.enter("dead"); this.show(BC.death, true); this.onDeath(this.x); this.onFx("dead", this.x, this.y);
+      this.kb = hit.direction * 120; this.b.checkCollision.left = this.b.checkCollision.right = false;
+      return;
+    }
+    if (this.state !== "charge") {
+      this.facing = hit.direction > 0 ? -1 : 1;
+      this.enter("stun"); this.stateAt -= 400;
+      this.show(BC.hurt, true); // HURT outranks the stun loop, so stun resumes only once the flinch has played
+    }
   }
 }
 
@@ -110,197 +145,211 @@ export class Boar extends Enemy {
 export class RootSpike {
   sprite: Phaser.GameObjects.Image;
   marker: Phaser.GameObjects.Rectangle;
-  private bornAt: number;
-  private id = nextId("root");
   done = false;
-  constructor(private scene: Phaser.Scene, public x: number, private warn: number, private active = 380) {
-    this.bornAt = scene.time.now;
+  private readonly hit: EnemyHit;
+  private stage = -1;
+  constructor(scene: Phaser.Scene, public x: number, private bornAt: number, private warn: number, private active = 380) {
     this.marker = scene.add.rectangle(x, WORLD.groundY - 1, 14, 3, 0x7fa65a, 0.9).setDepth(6);
-    this.sprite = scene.add.image(x, WORLD.groundY, "root").setOrigin(0.5, 1).setDepth(7).setScale(1, 0);
+    this.sprite = scene.add.image(x, WORLD.groundY, ROOT[0]).setOrigin(0.5, 1).setDepth(7).setVisible(false);
+    this.hit = { id: nextId("root"), rect: new Phaser.Geom.Rectangle(x - 4, WORLD.groundY - 30, 8, 30), damage: 14, knockback: 0, parryable: false };
   }
-  tick(now: number): void {
+  /** Returns true on the frame the spike erupts (for dust/shake). */
+  tick(now: number): boolean {
     const t = now - this.bornAt;
-    if (t < this.warn) { this.marker.setAlpha(Math.floor(t / 80) % 2 ? 0.35 : 0.95); return; }
-    this.marker.setVisible(false);
+    if (t < this.warn) { this.marker.setAlpha(Math.floor(t / 80) % 2 ? 0.35 : 0.95).setSize(14 + (t / this.warn) * 6, 3); return false; }
     const u = t - this.warn;
-    if (u < 70) this.sprite.setScale(1, u / 70);
-    else if (u < this.active) this.sprite.setScale(1, 1);
-    else if (u < this.active + 200) this.sprite.setScale(1, 1 - (u - this.active) / 200);
-    else { this.done = true; this.sprite.destroy(); this.marker.destroy(); }
+    const stage = u < 60 ? 0 : u < this.active ? 1 : u < this.active + 160 ? 2 : 3;
+    if (stage === this.stage) return false;
+    const first = this.stage < 0;
+    this.stage = stage;
+    this.marker.setVisible(false);
+    if (stage === 3) { this.destroy(); return false; }
+    this.sprite.setVisible(true).setTexture(ROOT[stage]);
+    return first;
   }
-  hit(now: number): EnemyHit | null {
+  hitbox(now: number): EnemyHit | null {
     const u = now - this.bornAt - this.warn;
-    if (u < 40 || u > this.active) return null;
-    return { id: this.id, rect: new Phaser.Geom.Rectangle(this.x - 4, WORLD.groundY - 30, 8, 30), damage: 14, knockback: 0, parryable: false };
+    return u >= 40 && u <= this.active ? this.hit : null;
   }
-  get scene_(): Phaser.Scene { return this.scene; }
+  destroy(): void { this.done = true; this.sprite.destroy(); this.marker.destroy(); }
 }
 
 /* ---------------- Nanh Rễ (Prologue boss, scale M) ---------------- */
-type BossState = "dormant" | "idle" | "tCharge" | "charge" | "tSwipe" | "swipe" | "tStomp" | "recover" | "stagger" | "down";
+type BossState = "dormant" | "idle" | "tCharge" | "charge" | "tSwipe" | "swipe" | "tStomp" | "recover" | "stagger" | "down" | "leave";
 export class NanhRe extends Enemy {
   state: BossState = "dormant";
   private swing = nextId("nanh");
   private poise = 0;
   private chargesLeft = 0;
   private chargeTargetX = 0;
+  private stomped = false;
+  private readonly hit: EnemyHit;
+  private readonly hitList: EnemyHit[];
   onRoots: (xs: number[], warn: number) => void = () => {};
   onDown: () => void = () => {};
   onPhase: (phase: number) => void = () => {};
   private lastPhase = 1;
 
   constructor(scene: Phaser.Scene, x: number, private arenaMin: number, private arenaMax: number) {
-    super(scene, x, WORLD.groundY, "nanh0", 320);
-    this.b.setSize(66, 28).setOffset(15, 26);
-    this.play("nanh_idle");
+    super(scene, x, WORLD.groundY, "nanh_idle0", 320);
+    this.b.setSize(66, 28).setOffset(17, 26);
+    this.kbResist = 4; // heavy: barely moved by hits
+    this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: 0, knockback: 0, parryable: false };
+    this.hitList = [this.hit];
+    this.show(NC.idle);
   }
 
   get phase(): number { const r = this.hp / this.maxHp; return r > 0.55 ? 1 : r > 0.22 ? 2 : 3; }
   private speedK(): number { return this.phase === 1 ? 1 : this.phase === 2 ? 0.8 : 0.7; }
-  private enter(s: BossState): void { this.state = s; this.stateAt = this.scene.time.now; if (!s.startsWith("t")) flash(this, false); }
+  private enter(s: BossState): void { this.state = s; this.enterAt(); if (!s.startsWith("t")) flash(this, false); }
 
   wake(): void { if (this.state === "dormant") this.enter("idle"); }
   reset(x: number): void {
-    this.hp = this.maxHp; this.poise = 0; this.lastPhase = 1; this.setPosition(x, WORLD.groundY);
-    this.setTexture("nanh0"); this.play("nanh_idle"); this.b.enable = true; this.enter("dormant"); flash(this, false);
+    this.hp = this.maxHp; this.poise = 0; this.lastPhase = 1; this.kb = 0; this.stomped = false; this.setPosition(x, WORLD.groundY);
+    this.b.enable = true; this.setAlpha(1); this.enter("dormant"); flash(this, false); this.show(NC.idle, true);
   }
+  /** Spare branch (C2): she gets up and limps away to the south. */
+  leave(): void { this.enter("leave"); this.facing = 1; this.b.enable = true; this.b.checkCollision.left = this.b.checkCollision.right = false; this.show(NC.walk, true); }
 
-  tick(now: number, playerX: number): void {
-    this.baseTick(now);
+  tick(now: number, dt: number, playerX: number): void {
+    this.now = now;
     if (this.phase !== this.lastPhase && this.isAlive()) { this.lastPhase = this.phase; this.onPhase(this.phase); }
     const t = now - this.stateAt, dx = playerX - this.x, dist = Math.abs(dx);
     const k = this.speedK();
+    let vx = 0;
+    this.anim.timeScale = 1;
     switch (this.state) {
-      case "dormant": this.b.setVelocityX(0); break;
+      case "dormant": this.show(NC.idle); break;
       case "idle": {
         this.facing = dx > 0 ? 1 : -1;
-        this.b.setVelocityX(dist > 80 ? this.facing * 45 : 0);
-        if (this.anims.currentAnim?.key !== "nanh_idle") this.play("nanh_idle");
+        vx = dist > 80 ? this.facing * 45 : 0;
+        if (vx !== 0) { this.show(NC.walk); this.anim.timeScale = 0.75; } else this.show(NC.idle);
         if (t > 650 * k) this.choose(dist);
         break;
       }
-      case "tCharge":
-        this.pose("nanh_low");
-        this.b.setVelocityX(-this.facing * 12); this.telegraph(now);
+      case "tCharge": // anticipation: head down, tremble, slide back a little
+        this.show(NC.low); this.telegraph();
+        vx = -this.facing * 14;
         if (t > 700 * k) {
           this.swing = nextId("nanh"); this.chargeTargetX = Phaser.Math.Clamp(playerX + this.facing * 90, this.arenaMin + 50, this.arenaMax - 50);
-          this.enter("charge"); this.play("nanh_run");
+          this.enter("charge"); this.show(NC.gallop, true);
         }
         break;
       case "charge": {
-        const sp = this.phase === 3 ? 300 : 260;
-        this.b.setVelocityX(this.facing * sp);
+        vx = this.facing * (this.phase === 3 ? 300 : 260);
         const past = this.facing > 0 ? this.x >= this.chargeTargetX : this.x <= this.chargeTargetX;
         if (past || t > 1600 || this.x < this.arenaMin + 40 || this.x > this.arenaMax - 40) {
-          this.b.setVelocityX(0);
+          vx = 0; this.kb = this.facing * 120; // overshoot, eased out
           if (this.chargesLeft > 0) { this.chargesLeft--; this.facing = dx > 0 ? 1 : -1; this.enter("tCharge"); this.stateAt -= 300; }
-          else { this.enter("recover"); this.play("nanh_idle"); }
+          else { this.enter("recover"); this.show(NC.idle, true); }
         }
         break;
       }
       case "tSwipe":
-        this.pose("nanh_rear");
-        this.b.setVelocityX(0); this.telegraph(now);
-        if (t > 450 * k) { this.swing = nextId("nanh"); this.enter("swipe"); }
+        this.show(NC.rear); this.telegraph();
+        if (t > 450 * k) { this.swing = nextId("nanh"); this.enter("swipe"); this.show(NC.toss, true); }
         break;
       case "swipe":
-        this.pose("nanh_low");
-        this.b.setVelocityX(this.facing * 40);
+        vx = this.facing * 40;
         if (t > 170) this.enter("recover");
         break;
       case "tStomp":
-        this.pose(t > 450 * k ? "nanh0" : "nanh_rear");
-        this.b.setVelocityX(0); this.telegraph(now);
-        this.y = WORLD.groundY - (t > 450 * k ? 0 : Math.min(4, t / 60));
-        if (t > 600 * k) {
-          this.y = WORLD.groundY;
-          this.scene.cameras.main.shake(140, 0.006);
+        if (!this.stomped && t <= 450 * k) { this.show(NC.rear); this.telegraph(); }
+        if (t > 600 * k && !this.stomped) {
+          this.stomped = true; flash(this, false); this.show(NC.slam, true);
           const n = this.phase === 1 ? 3 : 5, spread = this.phase === 1 ? 40 : 34;
           const xs: number[] = [];
           for (let i = 0; i < n; i++) xs.push(playerX + (i - (n - 1) / 2) * spread);
           if (this.phase === 3) xs.push(this.x - 70, this.x + 70);
           this.onRoots(xs.map((x) => Phaser.Math.Clamp(x, this.arenaMin + 10, this.arenaMax - 10)), 520 * k);
-          this.enter("recover");
         }
+        if (this.stomped && t > 600 * k + 160) { this.stomped = false; this.enter("recover"); }
         break;
       case "recover":
-        if (!this.anims.isPlaying) this.play("nanh_idle");
-        this.b.setVelocityX(this.b.velocity.x * 0.85);
+        if (this.anim.finished || this.anim.name === "idle") this.show(NC.idle);
         if (t > (this.phase === 3 ? 450 : 750)) this.enter("idle");
         break;
       case "stagger":
-        this.b.setVelocityX(0);
-        this.x += Math.sin(now / 25) * 0.25;
+        this.show(NC.daze);
         if (t > 1100) { this.poise = 0; this.enter("idle"); }
         break;
-      case "down":
-        this.b.setVelocityX(0);
+      case "down": break;
+      case "leave":
+        vx = 70; this.show(NC.walk); this.anim.timeScale = 0.6;
         break;
     }
-  }
-
-  /** Hold a static windup pose (stops the idle/run animation). */
-  private pose(key: string): void {
-    if (this.anims.isPlaying) this.anims.stop();
-    if (this.texture.key !== key) this.setTexture(key);
+    this.finish(dt, vx);
   }
 
   private choose(dist: number): void {
     const r = Math.random();
+    const charge = () => { this.chargesLeft = this.phase === 3 ? 1 : 0; this.enter("tCharge"); };
     if (dist < 75) { if (r < 0.6) this.enter("tSwipe"); else this.enter("tStomp"); return; }
-    if (dist > 150) {
-      if (r < 0.6) { this.chargesLeft = this.phase === 3 ? 1 : 0; this.enter("tCharge"); } else this.enter("tStomp");
-      return;
-    }
-    if (r < 0.4) { this.chargesLeft = this.phase === 3 ? 1 : 0; this.enter("tCharge"); } else if (r < 0.75) this.enter("tStomp"); else this.enter("tSwipe");
+    if (dist > 150) { if (r < 0.6) charge(); else this.enter("tStomp"); return; }
+    if (r < 0.4) charge(); else if (r < 0.75) this.enter("tStomp"); else this.enter("tSwipe");
   }
 
   hits(): EnemyHit[] {
-    if (this.state === "charge")
-      return [{ id: this.swing, rect: this.hurtbox(), damage: 22, knockback: this.facing * 260, parryable: false }];
-    if (this.state === "swipe") {
-      const hb = this.hurtbox();
-      const x = this.facing > 0 ? hb.right - 6 : hb.x - 34;
-      return [{
-        id: this.swing, rect: new Phaser.Geom.Rectangle(x, hb.y - 6, 40, 34), damage: 16, knockback: this.facing * 200, parryable: true,
-        onParried: () => { this.enter("stagger"); },
-      }];
+    const h = this.hit;
+    if (this.state === "charge") {
+      h.id = this.swing; h.damage = 22; h.knockback = this.facing * 260; h.parryable = false; h.onParried = undefined;
+      h.rect.setTo(this.b.x, this.b.y, this.b.width, this.b.height);
+      return this.hitList;
     }
-    return [];
+    if (this.state === "swipe") {
+      const x = this.facing > 0 ? this.b.right - 6 : this.b.x - 34;
+      h.id = this.swing; h.damage = 16; h.knockback = this.facing * 200; h.parryable = true;
+      h.onParried = () => { this.enter("stagger"); this.show(NC.daze, true); };
+      h.rect.setTo(x, this.b.y - 6, 40, 34);
+      return this.hitList;
+    }
+    return NONE;
   }
 
   protected onDamaged(hit: PlayerHit): void {
     if (this.state === "dormant") this.wake();
     if (hit.guardBreak) this.poise += hit.damage;
     if (this.hp <= 0) {
-      this.enter("down"); this.anims.stop(); this.setTexture("nanh_down"); this.b.setVelocity(0, 0);
+      this.enter("down"); this.kb = 0; this.show(NC.collapse, true); this.b.setVelocity(0, 0);
       this.onDown(); return;
     }
-    if (this.poise >= 60 && this.state !== "charge") { this.poise = 0; this.enter("stagger"); }
+    if (this.poise >= 60 && this.state !== "charge") { this.poise = 0; this.enter("stagger"); this.show(NC.daze, true); return; }
+    // Super armour during attacks; a readable flinch only when she is not committed.
+    if (this.state === "idle" || this.state === "recover") this.show(NC.flinch, true);
   }
 }
 
 /* ---------------- brush to clear (Prologue S1 chore) ---------------- */
 export class Bush implements Hittable {
   img: Phaser.Physics.Arcade.Image;
-  private hp = 3;
+  hp = 3;
   private lastSwing = -1;
+  private shakeUntil = 0;
+  private readonly hb = new Phaser.Geom.Rectangle();
   onCleared: () => void = () => {};
+  onHit: (x: number, y: number) => void = () => {};
   constructor(scene: Phaser.Scene, x: number) {
-    this.img = scene.physics.add.staticImage(x, WORLD.groundY, "bush").setOrigin(0.5, 1).setDepth(7);
+    this.img = scene.physics.add.staticImage(x, WORLD.groundY, "bush0").setOrigin(0.5, 1).setDepth(7);
     // staticImage() already sized the body to the texture; narrow it to the trunk of the bush.
-    (this.img.body as Phaser.Physics.Arcade.StaticBody).setSize(16, 24).setOffset(5, 0);
+    (this.img.body as Phaser.Physics.Arcade.StaticBody).setSize(16, 24).setOffset(6, 0);
   }
   isAlive(): boolean { return this.hp > 0; }
-  hurtbox(): Phaser.Geom.Rectangle { const b = this.img.body as Phaser.Physics.Arcade.StaticBody; return new Phaser.Geom.Rectangle(b.x, b.y, b.width, b.height); }
+  hurtbox(): Phaser.Geom.Rectangle { const b = this.img.body as Phaser.Physics.Arcade.StaticBody; return this.hb.setTo(b.x, b.y, b.width, b.height); }
   takeHit(hit: PlayerHit): void {
     if (!this.isAlive() || hit.id === this.lastSwing) return;
     this.lastSwing = hit.id; this.hp--;
-    this.img.scene.tweens.add({ targets: this.img, x: this.img.x + hit.direction * 2, yoyo: true, duration: 50 });
+    this.shakeUntil = this.img.scene.time.now + 160;
+    this.onHit(this.img.x, this.img.y - 12);
     if (this.hp <= 0) {
       (this.img.body as Phaser.Physics.Arcade.StaticBody).enable = false;
-      this.img.scene.tweens.add({ targets: this.img, alpha: 0, scaleY: 0.2, duration: 260, onComplete: () => this.img.destroy() });
+      this.img.setVisible(false);
       this.onCleared();
     }
+  }
+  /** Leaf-shake frames while recently hit (drawn frames, not a tween). */
+  tick(now: number): void {
+    if (!this.img.visible) return;
+    const key = now < this.shakeUntil ? (Math.floor(now / 40) % 2 ? "bush1" : "bush2") : "bush0";
+    if (this.img.texture.key !== key) this.img.setTexture(key);
   }
 }

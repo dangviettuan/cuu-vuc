@@ -23,6 +23,7 @@ export type HitResult = "hit" | "dodged" | "perfectDodge" | "parried" | "ignored
 
 /** Anything the player can strike. */
 export interface Hittable {
+  hp: number;
   hurtbox(): Phaser.Geom.Rectangle;
   takeHit(hit: PlayerHit): void;
   isAlive(): boolean;
