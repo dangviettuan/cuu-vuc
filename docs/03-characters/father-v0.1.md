@@ -40,6 +40,11 @@ These points are already canon elsewhere. They are collected here and not re-dec
   2. The **Mother** came with them and held the child during the bonding. The backlash passed through her, and she died. **She knew the risk to herself and chose it. The settlement never got that choice.** **[new; PB mother lock]**
   3. The backlash burned the Father's **left hand** from wrist to palm. **[Ch1: white burn scar]**
   4. The fragment entered the child's **chest**. **[Ch1: chest scar]**
+- **As shown in U Minh (Ch. IX):**
+  - The torn page reads *"Mảnh mạch phải chia đôi… Người giữ đứa trẻ chịu dội ngược."*
+  - The Father offered to hold the child. The Mother refused: *"Anh phải làm. Em không biết làm."*
+  - Before cutting, the Father **looked down at the sleeping settlement**, and cut anyway.
+  - The Mother also **taught him the red-thread custom**. **[Ch. IX spec]**
 - **Cover story in An Mộc:** The Mother died of the same sickness that the child miraculously survived. Only the Father knows the full truth. The shrine keeper may suspect it; see F7.
 
 ### F3. The burned half Mạch Ấn (resolves the "two Mạch Ấn" question)

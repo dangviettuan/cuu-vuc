@@ -11,7 +11,8 @@ Status: structure exists in the Narrative Bible. Specs:
 - [Chapter VI — Hàn Sơn](chapter-06-han-son-v0.1.md) — **v0.1 locked**
 - [Chapter VII — Huyền Hải](chapter-07-huyen-hai-v0.1.md) — **v0.1 locked**
 - [Chapter VIII — Vân Hải](chapter-08-van-hai-v0.1.md) — **v0.1 locked**
-- Chapter IX — U Minh — next
+- [Chapter IX — U Minh](chapter-09-u-minh-v0.1.md) — **v0.1 locked**
+- Chapter X — Thiên Khuyết — next
 
 Each chapter spec should eventually define:
 
