@@ -87,6 +87,8 @@ Scope: the first pass covers four factions and five key figures. The four class 
 - **His decision:** he diverts Mạch-well water from the peripheral settlements to keep Xích Thành alive. Thousands survive, and others are knowingly abandoned. **[NB]**
 - **What keeps him from being a villain:** the **Tường Tên** (Wall of Names). He personally carves the name of every settlement he abandons into the palace wall and visits each one before its well is cut off. He refuses to forget the people he chose not to save. **[new]**
 - **Worldview:** *"A king who tries to save everyone saves no one."* **[new]**
+- **The first name on the Tường Tên is his own home village.** He tried sharing the water once, and lost it. **[Ch. III spec §11a]**
+- **The Father's numbers:** the diversion plan rests on measurements given to him by "a Người Dẫn Mạch from the north", the Father. **[Ch. III spec §12]**
 - **The mirror:** the Father saved one life at the cost of many; Xích Vương saves many at the cost of a few. This is the "one life vs many" axis in its purest form. **[new; NB §7]**
 - **Ch. III choice (guidance):** the player can enforce the diversion, break it so that everyone shares the risk and the city may fall, or overthrow him. He becomes a boss or remains an ally depending on that choice. **[NB]**
 
@@ -105,6 +107,8 @@ Scope: the first pass covers four factions and five key figures. The four class 
 |---|---|---|
 | **Giám Mạch Hằng** | Female, about 40. The Ty's Inspector-General of enforcement and Khải's lieutenant. Believes silence is mercy. Boss of Ch. II; Khải's field commander at Lôi Trạch in Ch. IV. | Ch. II §8 |
 | **Thư Lại Mặc** | Middle-aged Ty archivist and Quy Nguyên mole. Names the Hội in Ch. II and is captured there. | Ch. II §6 |
+| **Tướng Đan** | Female, about 50. A royal general of Xích Sa, born in an outer settlement. The alternative ruler in Ch. III branch C, who ends up diverting the water again, without the Wall. | Ch. III §5, §11 |
+| **Ông Khảm, Cát** | The elder of Đồng Muối (about 70) and his granddaughter (about 10). The human face of the Xích Sa arithmetic. | Ch. III §5 |
 | **Sẻ** | About 19. An operative in Cương's cell, left behind at the Cut. | Ch. I §13 |
 | **The four mentors** | Lão Trụ, Én, Bà Rêu, Toản | Ch. I §5 |
 

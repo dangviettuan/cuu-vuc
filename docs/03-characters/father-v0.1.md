@@ -61,6 +61,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
   - **He did not cut it himself.** But his measurements are why Thanh Mộc was chosen as the site, and he knew a cut was coming. **[new; NB Ch.I]**
   - At the well, the third rod's vibration tells him it is happening *now*, closer to An Mộc than he was told. **Cương**, the Hội's Đoạn Mạch Sứ, ordered it. **[Ch1: the rod, the tell, "Không."]**
   - He goes to the station to confirm, then leaves with the Hội instead of coming home. That is the voluntary departure. **[NB §5]**
+- **A pattern: his numbers decide who dies.** His Thanh Mộc measurements chose the cut site. His Xích Sa well measurements gave Xích Vương the exact diversion plan (Ch. III). He writes the numbers, and other people sign. **[Ch. III spec]**
 - **His last lie:** He kept his son out of the Hội's records. They know his procedure succeeded, but not that the child survived into adulthood. When the protagonist starts absorbing Mạch Ấn, that protection breaks. **[new]**
 
 ### F5. Personality and voice
