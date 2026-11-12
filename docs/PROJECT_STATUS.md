@@ -18,13 +18,14 @@
 - Protagonist core: personality, flaw (intolerance of uncertainty), fear (helplessness), wound (withheld truth), silhouette anchors, class choice before Mộc Giác
 - Protagonist father/companion relationship arcs; chapter states, branch voice and ending mapping as design guidance
 - Mother died as a consequence of the forbidden procedure's incident
-- Người Đồng Hành is away at Mộc Thành during the Prologue
+- Người Đồng Hành (Diệp) is away at Mộc Thành during the Prologue
 - Prose chapters are numbered independently of game chapters (ADR-0005)
+- Người Đồng Hành bible v0.1: **Diệp**, female, 27, an orphan of the settlement the procedure destroyed, raised by the Father, sibling bond with no romance. Learns the truth before the protagonist. Consented bonding procedure. Duel states and fates as guidance
 - Father bible v0.1: Thiên Kinh background, the procedure and the Mother's death, the burned half Mạch Ấn, his Quy Nguyên role (complicit in the Thanh Mộc cut, not the one who cut it), voice and look, fates as guidance
 
 ## Next design task
 
-**Character Bible v0.1** — in progress. Protagonist Bible v0.1 is complete (`docs/03-characters/protagonist-v0.1.md`). Father Bible v0.1 is complete (`docs/03-characters/father-v0.1.md`). Next: **Người Đồng Hành**.
+**Character Bible v0.1** — in progress. Protagonist Bible v0.1 is complete (`docs/03-characters/protagonist-v0.1.md`). Father Bible v0.1 is complete (`docs/03-characters/father-v0.1.md`). Người Đồng Hành Bible v0.1 is complete (`docs/03-characters/nguoi-dong-hanh-v0.1.md`). Next: **Thủ Mạch Nhân**.
 
 Lock:
 1. protagonist
@@ -45,7 +46,7 @@ After Character Bible:
 ## Open questions deliberately not locked yet
 
 - The abandoned settlement's name; the Thiên Kinh institution that trains Người Dẫn Mạch; the contents of the Father's locked box
-- Exact identity of Người Đồng Hành
+- The Mộc Thành warden order's name and stance toward Quy Nguyên
 - Names of major factions/characters (the Father is title-only for now)
 - Exact final boss forms per ending
 - Exact sequel/prequel hook beyond Tội Thứ Tám

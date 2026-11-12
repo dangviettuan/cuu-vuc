@@ -16,7 +16,7 @@ Status: **v0.1 complete.**
 - **Initial worldview:** There is a right choice and a wrong choice; good people protect others and bad people harm the innocent.
 - **Core arc:** certainty → doubt → conviction → collapse → self-awareness.
 - **Hidden origin:** As a child, he survived Linh Suy because his father used a forbidden method to implant a fragment of Linh Mạch into him. His survival came at a cost to other people.
-- **Người Đồng Hành in the Prologue:** Away from An Mộc, in Mộc Thành, when the well runs dry. They are reunited in Chapter I.
+- **Người Đồng Hành:** Diệp, a survivor ward two years older than him, raised by the Father; see [`nguoi-dong-hanh-v0.1.md`](nguoi-dong-hanh-v0.1.md). In the Prologue she is away from An Mộc, in Mộc Thành, when the well runs dry. They are reunited in Chapter I.
 - **Mother:** Died in, or as a direct consequence of, the incident caused by the forbidden procedure that saved him. The father therefore carries a double guilt: strangers *and* his wife paid for the child's survival. The exact mechanism is defined in the Father bible. The protagonist does not know this until Chapter IX (U Minh).
 - **Gameplay identity:** Class is chosen by the player and represents the path of combat he learns, not a change of protagonist identity.
 
@@ -88,7 +88,7 @@ His early moral certainty is not naïve goodness. It is how he copes with uncert
 
 ### L8. Relationship with Người Đồng Hành (protagonist side only)
 
-> The companion's identity, background and personality are deliberately left to the Người Đồng Hành bible.
+> Her identity, background and personality are defined in the Người Đồng Hành bible (Diệp).
 
 - They grew up together in An Mộc. The companion is the one person whose judgment he takes seriously, and the one who says the hard thing he does not want to hear. **[NB §4]**
 - **Seed for the Envy path:** from childhood, people around them trust, love and forgive the companion more easily. The protagonist notices this and laughs it off. **[new; required by NB ending IV]**

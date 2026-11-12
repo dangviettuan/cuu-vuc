@@ -14,6 +14,7 @@ These points are already canon elsewhere. They are collected here and not re-dec
 - **Mother:** She died in, or as a direct consequence of, that incident. The exact mechanism belongs to this bible. **[Protagonist bible]**
 - **Quy Nguyên Hội:** He is an important member. He left An Mộc **voluntarily**. He was not abducted or coerced. **[NB §5]**
 - **Core belief:** Linh Suy cannot be solved by preserving the current world structure. Refusing responsibility is worse than carrying guilt. He does not believe he is morally pure. **[NB §5]**
+- **Ward:** He raised Diệp (Người Đồng Hành), an orphan of the settlement his procedure destroyed. Between Ch. IV and V he tells her the truth, and he performs her consented bonding procedure. See [`nguoi-dong-hanh-v0.1.md`](nguoi-dong-hanh-v0.1.md).
 - **Story beats:** He disappears in the Prologue. The protagonist finds him in Ch. V, and neither can persuade the other. Ch. IX reveals the procedure. In Ch. XI he must commit to what he believes. **[NB]**
 
 ---
