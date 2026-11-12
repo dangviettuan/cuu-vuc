@@ -34,6 +34,9 @@
 - Chapter VIII spec v0.1: Quy Nguyên at its best (the evacuations); the convergence test partly works; a Nguyên Linh leak magnifies Thiên Điểu's will to protect into possession; Diệp fights alongside one last time; a two-step duel (cooperate or refuse, then spare, sever or kill) leading to the four states; Áo Gió Air Dash; flags `CH8_*`
 - Chapter IX spec v0.1: the Gallery of the dead built from flags; Làng Khê remembered; the Night at the Node from the Mother's memory; he learns Diệp knew; boss Vô Diện (the unremembered dead), beaten by defending without attacking; choices C1 (keep or release the Mother) and C2 (understand, refuse to forgive, or turn it on Diệp); flags `CH9_*`
 - Chapter X spec v0.1: the Bearer (Kẻ Mang Mạch), the first bonded human, whose kind will became a cage; the council of ten and the Nine who cut the Bearer off; the protagonist is the second Bearer and Diệp the Hội's intended third; the Mirror of Will shows the leading ending; Thủ Mạch Nhân walks with him; boss Thiên Cơ Tướng tests him and offers its army; choice C1 (command, release, or give it to Thủ Mạch Nhân); the stele rubbing allows unbonding at Thiên Tâm; flags `CH10_*`
+- Chapter XI spec v0.1: the convergence clock (help four of eight realms), realm crises consuming every earlier flag, choice C1 (the alliance: Hội, Seal or his own), boss Lạc Quân with Cửu Ấn, the nine fragments (absorb, refuse or return)
+- Chapter XII spec v0.1: the Rim battle, Uyên, "Để con giữ" at the array, Diệp at the Seat, eight final-boss reflections built from the player's build, eight epilogues
+- ADR-0007: ending resolution by a seven-axis profile, with a gated Nhân Gian and a final act chosen among plausible destinations
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Prose Chương 4 "Bốn con đường" drafted (Ch. I stages I-2 and I-3 plus Làng Khê; reference class Kiếm Khách)
@@ -50,16 +53,17 @@
 
 ## Next design task
 
-**Chapter & Quest Bible** — in progress. The Prologue — An Mộc spec v0.1 is locked (`docs/04-chapters/prologue-an-moc-v0.1.md`). The Chapter I — Thanh Mộc spec v0.1 is locked (`docs/04-chapters/chapter-01-thanh-moc-v0.1.md`). The Chapter II — Trung Vực spec v0.1 is locked (`docs/04-chapters/chapter-02-trung-vuc-v0.1.md`). The Chapter III — Xích Sa spec v0.1 is locked (`docs/04-chapters/chapter-03-xich-sa-v0.1.md`). The Chapter IV — Lôi Trạch spec v0.1 is locked (`docs/04-chapters/chapter-04-loi-trach-v0.1.md`). The Chapter V — Biến Loạn spec v0.1 is locked (`docs/04-chapters/chapter-05-bien-loan-v0.1.md`). The Chapter VI — Hàn Sơn spec v0.1 is locked (`docs/04-chapters/chapter-06-han-son-v0.1.md`). The Chapter VII — Huyền Hải spec v0.1 is locked (`docs/04-chapters/chapter-07-huyen-hai-v0.1.md`). The Chapter VIII — Vân Hải spec v0.1 is locked (`docs/04-chapters/chapter-08-van-hai-v0.1.md`). The Chapter IX — U Minh spec v0.1 is locked (`docs/04-chapters/chapter-09-u-minh-v0.1.md`). The Chapter X — Thiên Khuyết spec v0.1 is locked (`docs/04-chapters/chapter-10-thien-khuyet-v0.1.md`). Next: the **Chapter XI — Cửu Mạch** spec. **Character Bible v0.1 is complete**: the protagonist, the Father, Diệp, Thủ Mạch Nhân, and factions & figures (`docs/03-characters/`).
+**Combat & Class Bible** — next. **The Chapter & Quest Bible v0.1 is complete**: Prologue through Ch. XII, the ending model (ADR-0007) and the flag registry (`docs/04-chapters/`).
 
-Roadmap after Character Bible:
+Roadmap:
 
-1. Chapter & Quest Bible (start with the Prologue — An Mộc spec)
-2. Combat & Class Bible
-3. Art Bible
-4. Concept art
-5. Greybox combat prototype
-6. Vertical slice
+1. ~~Character Bible~~ (v0.1 complete)
+2. ~~Chapter & Quest Bible~~ (v0.1 complete)
+3. Combat & Class Bible: the four classes, the parry, dodge and heat/cold systems, the Mạch Ấn catalogue (12 so far), and tuning for variable Mạch Ấn counts
+4. Art Bible
+5. Concept art
+6. Greybox combat prototype (Prologue S1 + Nanh Rễ is the natural first slice)
+7. Vertical slice (Prologue + Ch. I)
 
 ## Open questions deliberately not locked yet
 

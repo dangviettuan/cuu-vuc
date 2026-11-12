@@ -58,7 +58,7 @@ A **dynamic area** built from flags. The dead and the living-remembered (rendere
 | `CH3_WATER = broken/overthrown` | **The cut-off dead** of the outer settlements, or of Xích Thành's rationing | Names. Only names. |
 | Always | **Cát** (alive; seen as one of those who survived because of him) | *"Em vẫn đếm. Giờ em đếm người."* |
 | `CH4_SAVED` (low / high) | **Bà Lành** and the Bến Sét dead (fewer or more) | *"Anh đứng ở giữa cái trục. Tôi đứng ở bến. Sét không chọn ai."* |
-| Always | **Lôi Nha** | It coils around nothing, still trying to draw the storm. |
+| Always (`CH4_LOINHA_KILLED`) | **Lôi Nha** | It coils around nothing, still trying to draw the storm. |
 | `CH5_KHAI = executed` | **Khải** | *"Tôi tin cậu. Cuối cùng thì cũng có người tin tôi chết vì đúng lý do."* |
 | `CH5_CIVILIAN_HARM > 0` | **Rioters** he killed | Faceless. They have no names because he never knew them. *(This links to Vô Diện, §8.)* |
 | `CH7_CHOICE = record` | **The Cảng Triều dead** | *"Anh có bản ghi. Chúng tôi có biển."* |
@@ -174,6 +174,6 @@ After seeing the Node, he must say something about the man who did it.
 | `CH9_ABSORBED` (bool) | §9 | `MA_REFUSED` |
 | `CH9_KNOWS` (always true) | IX-5 | Every later chapter |
 
-**Consumed:** nearly every prior flag (§4), plus `CH1_KHE_VISITED` (IX-4), `CH2_KHE_PAGE` (IX-7), `CH2_FATHER_FILE` (IX-5: he recognizes the torn page), `CH5_FATHER_DEMAND` (adds an inner line at IX-5: *home* → "Cha đã có lúc có nhà"; *answer* → "Cha đã trả lời rồi. Ở đây."; *why* → "Đây là lý do của cha. Không phải lý do của Hội.").
+**Consumed:** nearly every prior flag (§4), plus `PRO_KEEPER_HINT` (IX-6: if heard, he realizes the shrine keeper had seen the Father carry him home from Làng Khê's direction, *"cụ trông miếu đã biết"*), `CH1_KHE_VISITED` (IX-4), `CH2_KHE_PAGE` (IX-7), `CH2_FATHER_FILE` (IX-5: he recognizes the torn page), `CH5_FATHER_DEMAND` (adds an inner line at IX-5: *home* → "Cha đã có lúc có nhà"; *answer* → "Cha đã trả lời rồi. Ở đây."; *why* → "Đây là lý do của cha. Không phải lý do của Hội.").
 
 **Ending axes influenced:** attachment vs letting go and forgiveness vs punishment (very high); Envy weighting (C2).

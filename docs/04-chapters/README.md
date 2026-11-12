@@ -1,6 +1,6 @@
 # Chapter & Quest Bible
 
-Status: structure exists in the Narrative Bible. Specs:
+Status: **Chapter & Quest Bible v0.1 complete.** Specs:
 
 - [Prologue — An Mộc](prologue-an-moc-v0.1.md) — **v0.1 locked**
 - [Chapter I — Thanh Mộc](chapter-01-thanh-moc-v0.1.md) — **v0.1 locked**
@@ -13,7 +13,9 @@ Status: structure exists in the Narrative Bible. Specs:
 - [Chapter VIII — Vân Hải](chapter-08-van-hai-v0.1.md) — **v0.1 locked**
 - [Chapter IX — U Minh](chapter-09-u-minh-v0.1.md) — **v0.1 locked**
 - [Chapter X — Thiên Khuyết](chapter-10-thien-khuyet-v0.1.md) — **v0.1 locked**
-- Chapter XI — Cửu Mạch — next
+- [Chapter XI — Cửu Mạch](chapter-11-cuu-mach-v0.1.md) — **v0.1 locked**
+- [Chapter XII — Quy Nguyên](chapter-12-quy-nguyen-v0.1.md) — **v0.1 locked** (includes the ending resolution model; see ADR-0007)
+- [Flag Registry](flags-registry-v0.1.md) — a generated index of every flag, with its owner and its readers
 
 Each chapter spec should eventually define:
 

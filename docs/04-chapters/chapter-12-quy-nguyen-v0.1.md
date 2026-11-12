@@ -77,7 +77,7 @@ At the Source, **available final acts** are:
 
 The player chooses among them. **The last choice is real, but it only chooses between destinations the player has already made plausible.** **[NB §7: "the logical result of the person the protagonist became"]**
 
-The **Mirror of Will** (Ch. X) showed the then-leading ending. If the final act matches it, he gets an extra line: *"Mình đã thấy chỗ này rồi."* (I've seen this place before.)
+The **Mirror of Will** (Ch. X, `CH10_MIRROR`) showed the then-leading ending. If the final act matches it, he gets an extra line: *"Mình đã thấy chỗ này rồi."* (I've seen this place before.)
 
 ## 4. Critical path stages
 
