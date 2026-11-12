@@ -62,8 +62,8 @@ Roadmap:
 
 1. ~~Character Bible~~ (v0.1 complete)
 2. ~~Chapter & Quest Bible~~ (v0.1 complete)
-3. Combat & Class Bible: the four classes, the parry, dodge and heat/cold systems, the Mạch Ấn catalogue (11 designed: Rễ Giữ, Ấn Ty, Hỏa Tích, Liên Lôi, Băng Giáp, Triều Dâng, Phong Dực, Thiên Diện, Cơ Quan, Trường Thương, Cửu Ấn), and tuning for variable Mạch Ấn counts
-4. Art Bible
+3. ~~Combat & Class Bible~~ (v0.1: `docs/05-gameplay/combat-class-bible-v0.1.md`)
+4. ~~Art Bible~~ (v0.1: `docs/06-art/art-bible-v0.1.md`)
 5. Concept art
 6. Greybox combat prototype (Prologue S1 + Nanh Rễ is the natural first slice)
 7. Vertical slice (Prologue + Ch. I)
