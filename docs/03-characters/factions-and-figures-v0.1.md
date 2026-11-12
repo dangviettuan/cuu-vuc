@@ -89,7 +89,7 @@ Scope: the first pass covers four factions and five key figures. The four class 
 - **His decision:** he diverts Mạch-well water from the peripheral settlements to keep Xích Thành alive. Thousands survive, and others are knowingly abandoned. **[NB]**
 - **What keeps him from being a villain:** the **Tường Tên** (Wall of Names). He personally carves the name of every settlement he abandons into the palace wall and visits each one before its well is cut off. He refuses to forget the people he chose not to save. **[new]**
 - **Worldview:** *"A king who tries to save everyone saves no one."* **[new]**
-- **The first name on the Tường Tên is his own home village.** He tried sharing the water once, and lost it. **[Ch. III spec §11a]**
+- **The first name on the Tường Tên is his own home village, Sa Lý**, carved with no number. He tried sharing the water once, and lost it. **[Ch. III spec §11a]**
 - **The Father's numbers:** the diversion plan rests on measurements given to him by "a Người Dẫn Mạch from the north", the Father. **[Ch. III spec §12]**
 - **The mirror:** the Father saved one life at the cost of many; Xích Vương saves many at the cost of a few. This is the "one life vs many" axis in its purest form. **[new; NB §7]**
 - **Ch. III choice (guidance):** the player can enforce the diversion, break it so that everyone shares the risk and the city may fall, or overthrow him. He becomes a boss or remains an ally depending on that choice. **[NB]**
