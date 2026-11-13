@@ -1,0 +1,532 @@
+{
+ "tests": [
+  {
+   "test": "Brush blocks the path",
+   "result": "PASS",
+   "stoppedAtX": 457
+  },
+  {
+   "test": "Light combo 1→2→3 chains on input",
+   "result": "PASS",
+   "swings": [
+    "light1",
+    "light2",
+    "light3"
+   ],
+   "brushCleared": true
+  },
+  {
+   "test": "Pick up ground herb by walking over it",
+   "result": "PASS",
+   "herbs": 1
+  },
+  {
+   "test": "Jump onto ledge and take the ledge herb",
+   "result": "PASS",
+   "herbs": 2,
+   "y": 268
+  },
+  {
+   "test": "Boar 1: stand still and take the charge (baseline)",
+   "result": "HIT",
+   "hpBefore": 100,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 0
+  },
+  {
+   "test": "Boar 1: dodge THROUGH the charge",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 0
+  },
+  {
+   "test": "Boar 1: parry the charge, then riposte",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 0
+  },
+  {
+   "test": "Boar 1: jump over the charge",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 2,
+   "riposteDamage": 0
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 2,
+   "riposteDamage": 0
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 2,
+   "riposteDamage": 0
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 2,
+   "riposteDamage": 0
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 2,
+   "riposteDamage": 0
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: parry the charge (repeat)",
+   "result": "AVOIDED",
+   "hpBefore": 85,
+   "hpAfter": 85,
+   "boarState": "stun",
+   "the": 2,
+   "riposteDamage": 0
+  },
+  {
+   "test": "Boar 1 defeated",
+   "result": "FAIL",
+   "herbs": 2,
+   "hp": 85
+  },
+  {
+   "test": "Boar 1: boar 2 dodge, then heavy L0",
+   "result": "HIT",
+   "hpBefore": 70,
+   "hpAfter": 40,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: boar 2 dodge, then heavy L1",
+   "result": "HIT",
+   "hpBefore": 40,
+   "hpAfter": 25,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Boar 1: boar 2 dodge, then heavy L2",
+   "result": "HIT",
+   "hpBefore": 25,
+   "hpAfter": 10,
+   "boarState": "charge",
+   "the": 1
+  },
+  {
+   "test": "Heavy attack levels 0/1/2 land inside a boar stun window (parried, 800 ms)",
+   "result": "INFO",
+   "heavyResults": [
+    {
+     "level": 0,
+     "r": {
+      "dealt": 0
+     }
+    },
+    {
+     "level": 1,
+     "r": {
+      "dealt": 32
+     }
+    },
+    {
+     "level": 2,
+     "r": {
+      "dealt": 8
+     }
+    }
+   ]
+  },
+  {
+   "test": "Boar 2 defeated",
+   "result": "FAIL",
+   "hp": 10,
+   "herbs": 2
+  },
+  {
+   "test": "Stamina: mashing J drains stamina and eventually stops attacks",
+   "result": "FAIL",
+   "st0": 76,
+   "minSt": 39,
+   "swingsStarted": 5,
+   "presses": 14
+  },
+  {
+   "test": "Attack while airborne",
+   "result": "INFO",
+   "anims": [
+    "idle",
+    "takeoff",
+    "rise",
+    "apex",
+    "light1",
+    "land",
+    "blink"
+   ],
+   "hadActiveFrames": true,
+   "grounded": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "test": "Turn and attack: swing faces the new direction",
+   "result": "PASS",
+   "facingsDuringActive": [
+    -1
+   ]
+  },
+  {
+   "test": "Shrine lights on E and heals",
+   "result": "PASS",
+   "lit": true,
+   "hp": 100
+  }
+ ],
+ "timeline": [],
+ "damage": [
+  {
+   "amount": 15,
+   "px": 707.8,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     725,
+     "charge"
+    ],
+    [
+     1200,
+     "wander"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 15,
+   "px": 387.3,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     397,
+     "charge"
+    ],
+    [
+     1195,
+     "wander"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 15,
+   "px": 1131.2,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     361,
+     "wander"
+    ],
+    [
+     1148,
+     "charge"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 15,
+   "px": 723.5,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     707,
+     "charge"
+    ],
+    [
+     1317,
+     "wander"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 15,
+   "px": 560.7,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     578,
+     "charge"
+    ],
+    [
+     1272,
+     "wander"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 15,
+   "px": 683.2,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     667,
+     "charge"
+    ],
+    [
+     1188,
+     "wander"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 10,
+   "px": 1117.3,
+   "pState": "dead",
+   "pAnim": "death",
+   "boars": [
+    [
+     1132,
+     "charge"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  },
+  {
+   "amount": 15,
+   "px": 1211.1,
+   "pState": "hurt",
+   "pAnim": "hurt",
+   "boars": [
+    [
+     1228,
+     "charge"
+    ]
+   ],
+   "boss": [
+    1960,
+    "dormant"
+   ]
+  }
+ ],
+ "deaths": 1,
+ "combo": {
+  "totalMs": 1050,
+  "activeFrames": 19,
+  "staminaAfter": 97
+ },
+ "boar1": [
+  "HIT",
+  "AVOIDED",
+  "AVOIDED",
+  "AVOIDED"
+ ],
+ "heavy": [
+  {
+   "level": 0,
+   "r": {
+    "dealt": 0
+   }
+  },
+  {
+   "level": 1,
+   "r": {
+    "dealt": 32
+   }
+  },
+  {
+   "level": 2,
+   "r": {
+    "dealt": 8
+   }
+  }
+ ],
+ "final": {
+  "t": 81645.79999995232,
+  "sim": 79054.41666666698,
+  "p": {
+   "x": 1418.8,
+   "y": 308,
+   "vx": 0,
+   "vy": 0,
+   "state": "move",
+   "anim": "idle",
+   "tag": "",
+   "frame": "p_idle1",
+   "hp": 100,
+   "st": 100,
+   "the": 0,
+   "herbs": 3,
+   "facing": 1,
+   "grounded": true,
+   "hit": false
+  },
+  "boars": [
+   {
+    "x": 1107,
+    "state": "wander",
+    "hp": 40,
+    "facing": 1,
+    "anim": "stun",
+    "alive": true
+   }
+  ],
+  "boss": {
+   "x": 1960,
+   "state": "dormant",
+   "hp": 320,
+   "facing": -1,
+   "anim": "idle",
+   "alive": true,
+   "phase": 1
+  },
+  "roots": [],
+  "bush": false,
+  "engaged": false,
+  "choosing": false,
+  "finished": false,
+  "shrineLit": true,
+  "hitstop": false,
+  "camX": 1111,
+  "fps": 60.564275632143335
+ },
+ "frameTimes": {
+  "n": 4789,
+  "avg": 16.68,
+  "p50": 16.7,
+  "p95": 16.8,
+  "p99": 16.8,
+  "max": 33.4
+ },
+ "memory": {
+  "used": 35459351,
+  "total": 43154403
+ },
+ "objects": 345,
+ "console": {
+  "errors": [],
+  "warnings": []
+ },
+ "shots": {
+  "spawn": "shots/t00-spawn.png",
+  "sign1": "shots/t01-sign-move.png",
+  "sign2": "shots/t02-sign-brush.png",
+  "brush": "shots/t03-brush-cleared.png",
+  "ledge": "shots/t04-ledge.png",
+  "sign3": "shots/t05-sign-boar.png",
+  "boarDodge": "shots/t06-boar-after-dodge.png",
+  "boarParry": "shots/t07-boar-after-parry.png",
+  "boar1dead": "shots/t08-boar1-dead.png",
+  "air": "shots/t09-air-attack.png",
+  "shrinePrompt": "shots/t10-shrine-prompt.png",
+  "shrineLit": "shots/t11-shrine-lit.png"
+ }
+}

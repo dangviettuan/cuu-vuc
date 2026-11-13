@@ -1,0 +1,110 @@
+{
+ "accel": {
+  "framesToFirstMotion": 2,
+  "msToFullSpeed": 66,
+  "msToStop": 50,
+  "animsDuringRun": [
+   "idle",
+   "runStart",
+   "run",
+   "stop"
+  ],
+  "runTimeScaleNote": "timeScale read separately"
+ },
+ "runCycle": {
+  "pxPerCycle": 54.4,
+  "msPerCycle": 567,
+  "speed": 96,
+  "plantedFootSweepPx": 12,
+  "expectedGroundTravelPerHalfCycle": 27.2
+ },
+ "turn": {
+  "anims": [
+   "skid",
+   "run",
+   "stop"
+  ],
+  "msToReverse": 133,
+  "facingFlipsAtFrame": 0
+ },
+ "jumpTap": {
+  "heightPx": 20.8,
+  "airMs": 367,
+  "anims": [
+   "idle",
+   "takeoff",
+   "apex",
+   "fall",
+   "land",
+   "idle"
+  ]
+ },
+ "jumpHold": {
+  "heightPx": 45.6,
+  "airMs": 450,
+  "anims": [
+   "idle",
+   "takeoff",
+   "rise",
+   "apex",
+   "fall",
+   "idle",
+   "blink",
+   "idle"
+  ]
+ },
+ "airControl": {
+  "dxWhileJumpingRight": 82.8
+ },
+ "ledgeLand": {
+  "onLedge": true,
+  "y": 274,
+  "x": 399.2
+ },
+ "coyote": {
+  "leftEdgeDetected": true,
+  "jumpedAfterLeaving": true,
+  "minVy": -294
+ },
+ "jumpBuffer": {
+  "landedFrame": 2,
+  "rejumpFrame": 2,
+  "buffered": true
+ },
+ "latencyMs": {
+  "jump": 7.7,
+  "light": 13.6,
+  "dodge": 13.2,
+  "parry": 13.5
+ },
+ "idle": {
+  "distinctFrames": [
+   "p_idle4",
+   "p_idle5",
+   "p_idle0",
+   "p_idle1",
+   "p_idle2",
+   "p_idle3",
+   "p_blink"
+  ],
+  "blinked": true
+ },
+ "frameTimes": {
+  "n": 1559,
+  "avg": 16.71,
+  "p50": 16.7,
+  "p95": 16.7,
+  "p99": 16.8,
+  "max": 33.4
+ },
+ "console": {
+  "errors": [],
+  "warnings": []
+ },
+ "shots": [
+  "shots/m00-start.png",
+  "shots/m01-run-filmstrip.png",
+  "shots/m02-jump-filmstrip.png",
+  "shots/m03-idle-filmstrip.png"
+ ]
+}

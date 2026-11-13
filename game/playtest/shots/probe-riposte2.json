@@ -1,0 +1,85 @@
+[
+ {
+  "delayMs": 100,
+  "parrySucceededMsAfterI": 144,
+  "jPressedMsAfterParry": 3,
+  "stateAtJ": [
+   "move/parry/hitstop:true/the:1",
+   "move/parry/hitstop:true/the:1",
+   "move/parry/hitstop:true/the:1"
+  ],
+  "riposte": true,
+  "animsAfter": [
+   "parry",
+   "riposte",
+   "idle"
+  ],
+  "boarHp": 0
+ },
+ {
+  "delayMs": 200,
+  "parrySucceededMsAfterI": 119,
+  "jPressedMsAfterParry": 124,
+  "stateAtJ": [
+   "move/parry/hitstop:true/the:1",
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0"
+  ],
+  "riposte": true,
+  "animsAfter": [
+   "parry",
+   "riposte",
+   "idle"
+  ],
+  "boarHp": 0
+ },
+ {
+  "delayMs": 300,
+  "parrySucceededMsAfterI": 116,
+  "jPressedMsAfterParry": 227,
+  "stateAtJ": [
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0"
+  ],
+  "riposte": true,
+  "animsAfter": [
+   "riposte",
+   "idle"
+  ],
+  "boarHp": 0
+ },
+ {
+  "delayMs": 450,
+  "parrySucceededMsAfterI": 119,
+  "jPressedMsAfterParry": 373,
+  "stateAtJ": [
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0"
+  ],
+  "riposte": true,
+  "animsAfter": [
+   "riposte",
+   "idle",
+   "blink"
+  ],
+  "boarHp": 0
+ },
+ {
+  "delayMs": 600,
+  "parrySucceededMsAfterI": 118,
+  "jPressedMsAfterParry": 527,
+  "stateAtJ": [
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0",
+   "riposte/riposte/hitstop:false/the:0"
+  ],
+  "riposte": true,
+  "animsAfter": [
+   "riposte",
+   "idle"
+  ],
+  "boarHp": 0
+ }
+]

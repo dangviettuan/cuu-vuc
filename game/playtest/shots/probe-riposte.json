@@ -1,0 +1,148 @@
+[
+ {
+  "delayAfterParryMs": 120,
+  "phase": "wait",
+  "the": 0,
+  "ripostePlayed": true,
+  "gapAtActive": [
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   5,
+   3,
+   2
+  ],
+  "boarHp": [
+   40,
+   0
+  ],
+  "boarStates": [
+   "charge",
+   "stun",
+   "dead"
+  ],
+  "boarXTrail": [
+   788,
+   777,
+   781,
+   784,
+   789,
+   792,
+   792,
+   792,
+   792,
+   792,
+   792
+  ],
+  "playerAnims": [
+   "guard",
+   "parry",
+   "riposte",
+   "idle"
+  ]
+ },
+ {
+  "delayAfterParryMs": 240,
+  "phase": "timeout",
+  "the": 0,
+  "ripostePlayed": false,
+  "gapAtActive": [],
+  "boarHp": [
+   40,
+   40
+  ],
+  "boarStates": [
+   "wander"
+  ],
+  "boarXTrail": [
+   1225,
+   1222,
+   1219,
+   1216,
+   1213,
+   1210,
+   1207,
+   1204,
+   1201,
+   1198,
+   1195,
+   1192
+  ],
+  "playerAnims": [
+   "idle",
+   "light1",
+   "idle"
+  ]
+ },
+ {
+  "delayAfterParryMs": 360,
+  "phase": "timeout",
+  "the": 0,
+  "ripostePlayed": false,
+  "gapAtActive": [],
+  "boarHp": [
+   40,
+   40
+  ],
+  "boarStates": [
+   "wander"
+  ],
+  "boarXTrail": [
+   1258,
+   1255,
+   1252,
+   1249,
+   1246,
+   1243,
+   1240,
+   1237,
+   1234,
+   1231,
+   1228,
+   1225
+  ],
+  "playerAnims": [
+   "idle",
+   "light1",
+   "idle"
+  ]
+ },
+ {
+  "delayAfterParryMs": 480,
+  "phase": "timeout",
+  "the": 0,
+  "ripostePlayed": false,
+  "gapAtActive": [],
+  "boarHp": [
+   40,
+   40
+  ],
+  "boarStates": [
+   "wander"
+  ],
+  "boarXTrail": [
+   1291,
+   1288,
+   1285,
+   1282,
+   1279,
+   1276,
+   1273,
+   1270,
+   1267,
+   1264,
+   1261,
+   1258
+  ],
+  "playerAnims": [
+   "idle",
+   "light1",
+   "idle"
+  ]
+ }
+]
