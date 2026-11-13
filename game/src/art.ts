@@ -536,7 +536,7 @@ export function registerTextures(scene: Phaser.Scene): void {
   // run: 8 frames (contact, down, pass, up) × 2 with opposite arm swing; bob is lowest just after contact
   for (let i = 0; i < 8; i++) {
     const ph = (i / 8) * Math.PI * 2, c = Math.cos(ph), s = Math.sin(ph);
-    const fdx = Math.round(6 * c);
+    const fdx = Math.round(9 * c); // ±9 px stride (was ±6): planted feet now keep up with ground speed (playtest I-07)
     pose(`p_run${i}`, {
       lean: 2, bob: [1, 2, 1, 0][i % 4],
       front: { dx: fdx, lift: s > 0.3 ? Math.round(5 * s) : 0 },

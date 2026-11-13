@@ -21,6 +21,9 @@ export type PlayerEvent =
 
 const ATTACKING: ReadonlySet<State> = new Set(["light", "heavy", "riposte"]);
 const clamp = Phaser.Math.Clamp;
+/** Presses are remembered this long and consumed when the action becomes legal (playtest I-05). */
+const BUFFER_MS = 150;
+const NEVER = -1e9;
 
 /**
  * The protagonist with the greybox Kiếm Khách kit (Combat & Class Bible §2–3).
@@ -63,6 +66,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private landUntil = 0;
   private lastSpeed = 0;
   private nextBlink = 3000;
+  private bufLight = NEVER;
+  private bufDodge = NEVER;
+  private bufParry = NEVER;
   private readonly hb = new Phaser.Geom.Rectangle();
   private readonly hit: PlayerHit = { id: 0, rect: new Phaser.Geom.Rectangle(), damage: 0, guardBreak: false, direction: 1 };
   onEvent: (kind: PlayerEvent, data?: number) => void = () => {};
@@ -128,6 +134,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.wasGrounded = grounded;
     this.fallSpeed = body.velocity.y;
     if (c.jumpPressed) this.jumpBufferUntil = now + PLAYER.jumpBuffer;
+    if (c.lightPressed) this.bufLight = now;
+    if (c.dodgePressed) this.bufDodge = now;
+    if (c.parryPressed) this.bufParry = now;
+    const light = now - this.bufLight <= BUFFER_MS, dodge = now - this.bufDodge <= BUFFER_MS, parry = now - this.bufParry <= BUFFER_MS;
     if (now > this.flashUntil) flash(this, false);
     const t = now - this.stateAt;
     const dir = (c.right ? 1 : 0) - (c.left ? 1 : 0);
@@ -141,16 +151,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           this.onEvent("jump");
         }
         if (!c.jumpHeld && body.velocity.y < -60 && !this.jumpCut) { body.setVelocityY(body.velocity.y * PLAYER.jumpCutFactor); this.jumpCut = true; }
-        if (c.lightPressed && now < this.riposteUntil && this.the > 0) {
-          this.the--; this.riposteUntil = 0;
+        if (light && grounded && now < this.riposteUntil && this.the > 0) {
+          this.the--; this.riposteUntil = 0; this.bufLight = NEVER;
           this.startAttack(RIPOSTE, RIPOSTE.damage, "riposte", 2); this.onEvent("riposte");
-        } else if (c.lightPressed && this.spend(LIGHT[0].stamina)) {
+        } else if (light && grounded && this.spend(LIGHT[0].stamina)) { // no ground swing in mid-air (playtest I-10)
+          this.bufLight = NEVER;
           this.combo = 0; this.comboQueued = false; this.startAttack(LIGHT[0], LIGHT[0].damage, "light", 0);
         } else if (c.heavyHeld && grounded && this.stamina > HEAVY.stamina[0] * 0.5) {
           this.chargeAt = now; this.enter("charge"); this.anim.play(PC.charge, true, true);
-        } else if (c.dodgePressed && this.spend(DODGE.stamina)) {
+        } else if (dodge && this.spend(DODGE.stamina)) {
+          this.bufDodge = NEVER;
           this.startDodge(dir);
-        } else if (c.parryPressed && this.spend(PARRY.stamina)) {
+        } else if (parry && this.spend(PARRY.stamina)) {
+          this.bufParry = NEVER;
           this.parryAt = now; this.enter("parry"); body.setVelocityX(0); this.anim.play(PC.guard, true, true);
         } else if (c.herbPressed && this.herbs > 0 && this.hp < PLAYER.maxHp && grounded) {
           this.enter("heal"); body.setVelocityX(0); this.anim.play(PC.heal, true, true);
@@ -166,9 +179,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         if (tag === "windup") body.setVelocityX(this.facing * a.lunge * 0.25);
         else if (tag === "active") body.setVelocityX(this.facing * a.lunge);
         else this.horizontal(0, sec, 0.2);
-        if (this.state === "light" && c.lightPressed && tag !== "windup") this.comboQueued = true;
+        // a press during the windup stays buffered and queues the next hit once the swing is active
+        if (this.state === "light" && light && tag !== "windup") { this.comboQueued = true; this.bufLight = NEVER; }
         // dodge-cancel in recovery (Bible §2)
-        if (tag === "recovery" && c.dodgePressed && this.spend(DODGE.stamina)) { this.attack = null; this.startDodge(dir); break; }
+        if (tag === "recovery" && dodge && this.spend(DODGE.stamina)) { this.bufDodge = NEVER; this.attack = null; this.startDodge(dir); break; }
         const rp = this.anim.tagProgress();
         if (this.state === "light" && this.comboQueued && this.combo < 2 && tag === "recovery" && rp.t >= rp.len * 0.35) {
           if (this.spend(LIGHT[this.combo + 1].stamina)) {
@@ -248,7 +262,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     else if (this.state === "hurt") a.play(PC.hurt);
     else if (this.state === "dead") a.play(PC.death);
     this.lastSpeed = speed;
-    this.setFlipX(this.facing < 0);
+    // skid plays still facing the old direction, then turns (playtest I-11)
+    this.setFlipX(a.name === "skid" ? b.velocity.x < 0 : this.facing < 0);
   }
 
   private startDodge(dir: number): void {
@@ -291,6 +306,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
     if (this.state === "parry" && now - this.parryAt < PARRY.window && hit.parryable) {
       this.hitIds.add(hit.id);
+      // turn to face what was parried, so the riposte goes toward it (fix-pass finding: backwards parries whiffed the riposte)
+      const toward = Math.sign(hit.rect.centerX - this.x);
+      if (toward !== 0) this.facing = toward > 0 ? 1 : -1;
       this.the = Math.min(PLAYER.maxThe, this.the + 1);
       this.riposteUntil = now + RIPOSTE_WINDOW;
       this.stamina = Math.min(PLAYER.maxStamina, this.stamina + PARRY.stamina);

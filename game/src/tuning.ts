@@ -56,7 +56,7 @@ export const LIGHT: AttackDef[] = [
 
 /** Heavy attack: chargeable, 2 levels (Bible §2). */
 export const HEAVY = {
-  levelTimes: [0, 400, 900], // hold time to reach level 0/1/2
+  levelTimes: [0, 300, 600], // hold time to reach level 0/1/2 (was 400/900: too slow for any opening, playtest I-09)
   damage: [22, 32, 44],
   stamina: [18, 24, 30],
   def: { name: "heavy", startup: f(10), active: f(5), recovery: f(18), damage: 0, stamina: 0, reach: 44, height: 28, guardBreak: true, lunge: 80 } as AttackDef,

@@ -8,7 +8,7 @@ let uid = 0;
 const nextId = (p: string) => `${p}-${++uid}`;
 const NONE: EnemyHit[] = [];
 
-export type EnemyEvent = "step" | "paw" | "stomp" | "thud" | "dead";
+export type EnemyEvent = "step" | "paw" | "stomp" | "thud" | "dead" | "skid" | "tellBoar" | "tellCharge" | "tellSwipe" | "tellStomp" | "glint";
 
 abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
   hp: number;
@@ -58,10 +58,16 @@ abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
     this.anim.update(dt);
   }
   protected enterAt(): void { this.stateAt = this.now; }
-  /** Telegraph tint pulse on top of the windup frames (frames carry the pose, tint carries urgency). */
-  protected telegraph(): void {
+  /**
+   * Telegraph: an additive warm glow that *ramps up* over the windup (slow in, builds to the strike).
+   * The pose stays fully readable; localised cues (glint, dust, cracks) and a sound mark the attack type.
+   * Playtest I-03: the old full-body 90 ms amber blink erased the silhouette half the time.
+   */
+  protected telegraph(progress: number): void {
     if (this.now < this.flashUntil) return;
-    if (Math.floor(this.now / 90) % 2 === 0) flash(this, true, 0xe8b04a); else flash(this, false);
+    const p = Phaser.Math.Clamp(progress, 0, 1), k = 0.12 + 0.88 * p * p;
+    const r = Math.round(0x78 * k), g = Math.round(0x4c * k), b = Math.round(0x12 * k);
+    this.setTint((r << 16) | (g << 8) | b).setTintMode(Phaser.TintModes.ADD);
   }
   protected show(c: Clip, restart = false): void { this.anim.play(c, restart, restart); }
 }
@@ -71,12 +77,13 @@ type BoarState = "wander" | "notice" | "charge" | "stun" | "dead";
 export class Boar extends Enemy {
   state: BoarState = "wander";
   private swing = nextId("boar");
+  private near = false;
   private readonly hit: EnemyHit;
   private readonly hitList: EnemyHit[];
   onDeath: (x: number) => void = () => {};
 
   constructor(scene: Phaser.Scene, x: number, private minX: number, private maxX: number) {
-    super(scene, x, WORLD.groundY, "boar_walk0", 40);
+    super(scene, x, WORLD.groundY, "boar_walk0", 60); // 60 HP: a riposte (40) no longer one-shots it (playtest I-04)
     this.b.setSize(26, 13).setOffset(5, 9);
     this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: 15, knockback: 0, parryable: true, onParried: () => this.parried() };
     this.hitList = [this.hit];
@@ -92,19 +99,29 @@ export class Boar extends Enemy {
     let vx = 0;
     switch (this.state) {
       case "wander":
+        // Too close to charge: back off first, so every charge starts from a readable distance
+        // (fix-pass finding: after a riposte it recovered beside the player and charged point-blank, unavoidable).
+        if (Math.abs(dx) < 80) {
+          this.facing = dx > 0 ? -1 : 1; vx = this.facing * 80;
+          this.show(BC.walk); this.anim.timeScale = 1.1;
+          break;
+        }
         if (this.x < this.minX) this.facing = 1;
         if (this.x > this.maxX) this.facing = -1;
         vx = this.facing * 30;
         this.show(BC.walk);
         this.anim.timeScale = 0.8;
-        if (Math.abs(dx) < 170) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(BC.paw, true); }
+        if (Math.abs(dx) < 170) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(BC.paw, true); this.onFx("tellBoar", this.x, this.y); }
         break;
       case "notice": // anticipation: head down, pawing the ground
-        this.telegraph();
-        if (t > 600) { flash(this, false); this.swing = nextId("boar"); this.enter("charge"); this.show(BC.gallop, true); }
+        this.telegraph(t / 600);
+        if (t > 600) { flash(this, false); this.swing = nextId("boar"); this.near = false; this.enter("charge"); this.show(BC.gallop, true); }
         break;
       case "charge":
         vx = this.facing * 210;
+        // Dodged through: it skids to a stop just past the player, leaving a short punish window (playtest I-04).
+        if (Math.abs(dx) < 26) this.near = true;
+        if (this.near && dx * this.facing < -18) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 40; this.onFx("skid", this.x, this.y); break; }
         if (t > 1100 || this.b.blocked.left || this.b.blocked.right) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 60; }
         break;
       case "stun":
@@ -201,7 +218,16 @@ export class NanhRe extends Enemy {
 
   get phase(): number { const r = this.hp / this.maxHp; return r > 0.55 ? 1 : r > 0.22 ? 2 : 3; }
   private speedK(): number { return this.phase === 1 ? 1 : this.phase === 2 ? 0.8 : 0.7; }
-  private enter(s: BossState): void { this.state = s; this.enterAt(); if (!s.startsWith("t")) flash(this, false); }
+  private glinted = false;
+  private enter(s: BossState): void {
+    this.state = s; this.enterAt(); this.glinted = false;
+    if (!s.startsWith("t")) flash(this, false);
+    if (s === "tCharge") this.onFx("tellCharge", this.x, this.y);
+    if (s === "tSwipe") this.onFx("tellSwipe", this.x, this.y);
+    if (s === "tStomp") this.onFx("tellStomp", this.x, this.y);
+  }
+  /** The player died: stop attacking the body and stand still until the respawn resets the fight. */
+  stand(): void { if (this.isAlive() && this.state !== "leave") { this.enter("dormant"); this.show(NC.idle, true); } }
 
   wake(): void { if (this.state === "dormant") this.enter("idle"); }
   reset(x: number): void {
@@ -228,7 +254,7 @@ export class NanhRe extends Enemy {
         break;
       }
       case "tCharge": // anticipation: head down, tremble, slide back a little
-        this.show(NC.low); this.telegraph();
+        this.show(NC.low); this.telegraph(t / (700 * k));
         vx = -this.facing * 14;
         if (t > 700 * k) {
           this.swing = nextId("nanh"); this.chargeTargetX = Phaser.Math.Clamp(playerX + this.facing * 90, this.arenaMin + 50, this.arenaMax - 50);
@@ -241,12 +267,15 @@ export class NanhRe extends Enemy {
         if (past || t > 1600 || this.x < this.arenaMin + 40 || this.x > this.arenaMax - 40) {
           vx = 0; this.kb = this.facing * 120; // overshoot, eased out
           if (this.chargesLeft > 0) { this.chargesLeft--; this.facing = dx > 0 ? 1 : -1; this.enter("tCharge"); this.stateAt -= 300; }
+          // Phase 2+: sometimes whips round into a quick tusk sweep, so "dodge the charge, then combo" is no longer free.
+          else if (this.phase >= 2 && Math.random() < 0.45) { this.facing = dx > 0 ? 1 : -1; this.enter("tSwipe"); this.stateAt -= Math.max(0, 450 * k - 300); }
           else { this.enter("recover"); this.show(NC.idle, true); }
         }
         break;
       }
       case "tSwipe":
-        this.show(NC.rear); this.telegraph();
+        this.show(NC.rear); this.telegraph(t / (450 * k));
+        if (!this.glinted && t > 450 * k * 0.55) { this.glinted = true; this.onFx("glint", this.x + this.facing * 46, this.y - 20); }
         if (t > 450 * k) { this.swing = nextId("nanh"); this.enter("swipe"); this.show(NC.toss, true); }
         break;
       case "swipe":
@@ -254,7 +283,7 @@ export class NanhRe extends Enemy {
         if (t > 170) this.enter("recover");
         break;
       case "tStomp":
-        if (!this.stomped && t <= 450 * k) { this.show(NC.rear); this.telegraph(); }
+        if (!this.stomped && t <= 450 * k) { this.show(NC.rear); this.telegraph(t / (450 * k)); }
         if (t > 600 * k && !this.stomped) {
           this.stomped = true; flash(this, false); this.show(NC.slam, true);
           const n = this.phase === 1 ? 3 : 5, spread = this.phase === 1 ? 40 : 34;
@@ -267,7 +296,7 @@ export class NanhRe extends Enemy {
         break;
       case "recover":
         if (this.anim.finished || this.anim.name === "idle") this.show(NC.idle);
-        if (t > (this.phase === 3 ? 450 : 750)) this.enter("idle");
+        if (t > [0, 600, 450, 320][this.phase]) this.enter("idle"); // was 750/750/450: punish windows shortened (playtest I-01); tuned for a Prologue boss
         break;
       case "stagger":
         this.show(NC.daze);
@@ -298,7 +327,7 @@ export class NanhRe extends Enemy {
     }
     if (this.state === "swipe") {
       const x = this.facing > 0 ? this.b.right - 6 : this.b.x - 34;
-      h.id = this.swing; h.damage = 16; h.knockback = this.facing * 200; h.parryable = true;
+      h.id = this.swing; h.damage = 22; h.knockback = this.facing * 200; h.parryable = true;
       h.onParried = () => { this.enter("stagger"); this.show(NC.daze, true); };
       h.rect.setTo(x, this.b.y - 6, 40, 34);
       return this.hitList;

@@ -26,8 +26,8 @@ export const PC = {
     { key: "p_idle3", ms: 240 }, { key: "p_idle4", ms: 160 }, { key: "p_idle5", ms: 200 },
   ], PRI.LOCO, true),
   blink: clip("blink", [{ key: "p_idle0", ms: 90 }, { key: "p_blink", ms: 90 }, { key: "p_idle0", ms: 90 }], PRI.LOCO),
-  // 8 frames at 70 ms ≈ 14 fps at full speed; timeScale follows ground speed so feet never slide.
-  run: loop("run", ["p_run0", "p_run1", "p_run2", "p_run3", "p_run4", "p_run5", "p_run6", "p_run7"], 70, PRI.LOCO, { 0: "step", 4: "step" }),
+  // 8 frames at 60 ms ≈ 17 fps at full speed (stride ±9 px); timeScale follows ground speed so feet never slide.
+  run: loop("run", ["p_run0", "p_run1", "p_run2", "p_run3", "p_run4", "p_run5", "p_run6", "p_run7"], 60, PRI.LOCO, { 0: "step", 4: "step" }),
   runStart: clip("runStart", [{ key: "p_runStart", ms: 70 }], PRI.SETTLE),
   skid: clip("skid", [{ key: "p_skid", ms: 110, event: "skid" }], PRI.SETTLE),
   stop: clip("stop", [{ key: "p_stop", ms: 90 }], PRI.SETTLE),
