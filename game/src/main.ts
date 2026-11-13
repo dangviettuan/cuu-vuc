@@ -2,9 +2,12 @@ import Phaser from "phaser";
 import { PrologueScene } from "./scenes/Prologue";
 import { VIEW, WORLD } from "./tuning";
 
-// ADR-0008: Phaser 4, WebGL, 640×360 logical resolution, pixel art, FIT scaling.
+// ADR-0008: Phaser 4, 640×360 logical resolution, pixel art, FIT scaling.
+// Renderer: WebGL when the browser supports it, otherwise Canvas (AUTO). Tint-based effects have Canvas fallbacks (render.ts).
+// `?renderer=canvas` or `?renderer=webgl` forces one, for testing.
+const forced = new URLSearchParams(location.search).get("renderer");
 const game = new Phaser.Game({
-  type: Phaser.WEBGL,
+  type: forced === "canvas" ? Phaser.CANVAS : forced === "webgl" ? Phaser.WEBGL : Phaser.AUTO,
   parent: "game",
   width: VIEW.width,
   height: VIEW.height,

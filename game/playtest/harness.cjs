@@ -30,7 +30,9 @@ function chromiumPath() {
 async function launch({ width = 960, height = 540 } = {}) {
   const browser = await chromium.launch({
     executablePath: chromiumPath(),
-    args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--enable-precise-memory-info"],
+    // NO_WEBGL=1 launches a browser without WebGL, to test the Canvas fallback (Phaser.AUTO).
+    args: process.env.NO_WEBGL ? ["--disable-webgl", "--disable-webgl2", "--disable-3d-apis", "--enable-precise-memory-info"]
+      : ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--enable-precise-memory-info"],
   });
   const page = await browser.newPage({ viewport: { width, height } });
   const log = { errors: [], warnings: [] };

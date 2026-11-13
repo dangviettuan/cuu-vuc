@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { ENEMY_FLASH, WORLD } from "./tuning";
 import { EnemyHit, Hittable, PlayerHit, flash } from "./combat";
+import { canTint } from "./render";
 import { Animator, Clip } from "./anim";
 import { BC, NC, ROOT } from "./clips";
 
@@ -66,6 +67,8 @@ abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
   protected telegraph(progress: number): void {
     if (this.now < this.flashUntil) return;
     const p = Phaser.Math.Clamp(progress, 0, 1), k = 0.12 + 0.88 * p * p;
+    // Canvas has no tints: glow additively for the last 45% of the windup (cleared by flash(false), as the tint is).
+    if (!canTint(this)) { this.setBlendMode(p > 0.55 ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL); return; }
     const r = Math.round(0x78 * k), g = Math.round(0x4c * k), b = Math.round(0x12 * k);
     this.setTint((r << 16) | (g << 8) | b).setTintMode(Phaser.TintModes.ADD);
   }

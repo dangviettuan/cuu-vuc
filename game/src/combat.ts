@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { canTint } from "./render";
 
 /** A damaging area produced by an enemy this frame. */
 export interface EnemyHit {
@@ -33,8 +34,9 @@ export function overlaps(a: Phaser.Geom.Rectangle, b: Phaser.Geom.Rectangle): bo
   return Phaser.Geom.Intersects.RectangleToRectangle(a, b);
 }
 
-/** White hit-flash using the v4 tint API (ADR-0008). */
+/** White hit-flash using the v4 tint API (ADR-0008). On Canvas (no tints) the sprite is drawn additively instead. */
 export function flash(sprite: Phaser.GameObjects.Sprite, on: boolean, color = 0xffffff): void {
+  if (!canTint(sprite)) { sprite.setBlendMode(on ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL); return; }
   if (on) sprite.setTint(color).setTintMode(Phaser.TintModes.FILL);
   else sprite.clearTint().setTintMode(Phaser.TintModes.MULTIPLY);
 }

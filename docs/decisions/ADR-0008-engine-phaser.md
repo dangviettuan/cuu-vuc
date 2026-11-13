@@ -6,7 +6,7 @@ Status: **Accepted**
 
 Cửu Vực is built with **Phaser 4** (4.2.1 at adoption), **TypeScript** (strict) and **Vite**. The game lives in `game/`.
 
-- **Renderer:** WebGL. Phaser 4 deprecates the Canvas renderer.
+- **Renderer:** WebGL first, with **Canvas as a fallback** (`Phaser.AUTO`) for browsers or machines without WebGL. Phaser 4 deprecates the Canvas renderer, so the fallback stays minimal. It has no tints, so tint effects are drawn with an additive blend (`game/src/render.ts`). New WebGL-only features must degrade gracefully or be marked WebGL-only. *(Amended 2026-11-13: originally WebGL only.)*
 - **Display:** **640×360** logical resolution, `pixelArt: true`, `roundPixels: true` (v4 defaults it to false), and `Scale.FIT` with centring (Art Bible §2).
 - **Physics:** **Arcade** for the greybox. Whether to move to custom collision for final combat feel will be decided after the greybox.
 - **Art pipeline (greybox):** sprites are **generated at boot** from the same pixel builders as the concept generator (`docs/06-art/concept-v0.1/`), using the locked palettes. They are replaced by authored pixel art later, frame by frame.

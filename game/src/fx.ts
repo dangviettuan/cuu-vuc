@@ -20,8 +20,11 @@ interface Particle {
 export class Fx {
   private pool: Particle[] = [];
   private cursor = 0;
+  /** False on the Canvas renderer, which ignores tints (see render.ts). */
+  private readonly tints: boolean;
 
   constructor(scene: Phaser.Scene, size = 160) {
+    this.tints = scene.sys.renderer.type === Phaser.WEBGL;
     for (let i = 0; i < size; i++) {
       const img = scene.add.image(0, 0, "dust0").setVisible(false).setActive(false);
       this.pool.push({ img, alive: false, x: 0, y: 0, vx: 0, vy: 0, gravity: 0, drag: 0, age: 0, life: 1, frames: [], fade: false });
@@ -45,7 +48,7 @@ export class Fx {
     p.gravity = opt.gravity ?? 0; p.drag = opt.drag ?? 0; p.age = 0; p.life = life; p.frames = frames; p.fade = opt.fade ?? false;
     p.img.setTexture(frames[0]).setPosition(x, y).setVisible(true).setActive(true).setAlpha(opt.alpha ?? 1)
       .setDepth(opt.depth ?? 12).setOrigin(0.5).setFlip(false, false).setScrollFactor(1);
-    p.img.clearTint().setTintMode(Phaser.TintModes.MULTIPLY);
+    p.img.clearTint().setTintMode(Phaser.TintModes.MULTIPLY).setBlendMode(Phaser.BlendModes.NORMAL);
     return p.img;
   }
 
@@ -103,6 +106,7 @@ export class Fx {
   afterimage(key: string, x: number, y: number, flipX: boolean): void {
     const img = this.spawn([key], x, y, 220, { fade: true, alpha: 0.5, depth: 9 });
     img.setOrigin(0.5, 1).setFlipX(flipX).setTint(0x62d3c3).setTintMode(Phaser.TintModes.FILL);
+    if (!this.tints) img.setBlendMode(Phaser.BlendModes.ADD); // Canvas: no teal fill, so a bright additive ghost instead
   }
 
   leaves(x: number, y: number, n: number): void {
