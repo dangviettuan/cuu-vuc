@@ -3,6 +3,7 @@
 **Date:** 2026-11-13. **Build:** `main` @ `5f6abfb`, running from source with the Vite dev server.
 **Tester:** Claude, acting as QA, game designer and game-feel reviewer. **Time in game:** about 25 minutes over 6 automated sessions and 4 isolated probes.
 **Evidence:** `game/playtest/shots/` holds 40+ screenshots and per-session JSON logs. `game/playtest/*.cjs` holds the scripts, which can be re-run.
+**Update:** sections A–G describe the baseline build. **Section H** covers the fix pass made afterwards, and the re-test results.
 
 ---
 
@@ -333,6 +334,68 @@ These are things automation can't judge:
 
 ---
 
+## H. Fix pass and re-test (2026-11-13)
+
+After the report, I was asked to make the first five fixes from §F plus the quick fixes. This section lists what changed and what the same scripts measured afterwards.
+- **Before/after JSON** is kept side by side in `game/playtest/after/` (`*.before.json` is the baseline, `*.after.json` is the re-test).
+- **Same conditions as before:** real keyboard input, no state writes in sessions 1–5, and the separate `:5174` server.
+- **Probes are DEBUG-ASSISTED,** as before: a teleport sets up the test only.
+
+### What changed
+
+| Issue | Change | Files |
+|---|---|---|
+| I-01 difficulty | **Boss:** recovery after a charge or stomp is 600 / 450 / 320 ms by phase (was 750 / 750 / 450). **Phase 2+:** 45% of charges turn into a tusk-swipe follow-up. **Swipe damage:** 22 (was 16). **Herbs:** only the 2 tutorial herbs remain; there are no boar drops and no herb before the boss. | `enemies.ts`, `scenes/Prologue.ts` |
+| I-02, I-15 bodies | **Soft push-out:** the player is pushed out of any live boar or boss by half the overlap each frame, and a dodge passes through. **On player death:** the boss returns to idle (`stand()`) and stops attacking the body. | `scenes/Prologue.ts`, `enemies.ts` |
+| I-03 telegraphs | **Windups:** the full-body blink is replaced by an additive warm tint that **ramps up** over the windup, so the silhouette and pose stay readable. **Local cues:** a tusk glint at 55% of the swipe windup, dust for the charge, a sparkle for the boar's notice. **Sound:** each attack has its own warning sound. | `enemies.ts`, `scenes/Prologue.ts` |
+| I-04 single answer | **Boar:** HP is 60 (was 40), so one riposte no longer kills it. **Dodge through a boar's charge:** the boar skid-stops about 27 px past you and stays stunned for 800 ms, inside sword reach. **Boar back-off:** a boar that wanders within 80 px backs off instead of re-charging point-blank. | `enemies.ts` |
+| I-05 input | **150 ms buffer** for attack, dodge and parry; a combo press is kept from the end of the windup onward. | `player.ts` |
+| I-06 restart | `create()` resets the checkpoint, so **R** restarts at the beginning. | `scenes/Prologue.ts` |
+| I-07 foot slide | **Run stride:** ±9 px (was ±6). **Run frames:** 60 ms (was 70). | `art.ts`, `clips.ts` |
+| I-09 heavy | **Charge times:** L1 at 300 ms, L2 at 600 ms (were 400 / 900). | `tuning.ts` |
+| I-10 air attack | Attacks now require the ground (the stop-gap fix the report suggested). | `player.ts` |
+| I-11 turning | The skid pose keeps the *old* facing, then flips. | `player.ts` |
+| I-12 signs | Sign panels now float above head height, on a post. | `scenes/Prologue.ts` |
+| I-14 ending | **Camera:** stops following the player and pans to the boss when she falls. **Draw order:** the decorative bush is drawn behind her, and the piglets in front. **End card:** narrative text instead of the flag name. | `scenes/Prologue.ts` |
+| I-16 audio | **About 20 placeholder sounds**, synthesised at runtime with Web Audio: swing, hit, parry, hurt, dodge, steps, land, jump, pickup, shrine, heal, four attack warnings, stomp, roots, roar, death and boss-down. They start on the first key press. | `sfx.ts` (new) |
+| *new* parry facing | Found during the re-test: a parry made while facing **away** from the attacker succeeds, but the riposte then swings the wrong way and misses. **Fix:** a successful parry now turns the player toward what was parried. | `player.ts` |
+
+### Re-test results
+
+| Measure | Before | After | Source |
+|---|---|---|---|
+| Full run (session 3) | 1st-attempt clear in 61 s; 78 damage taken; **0 of 4 herbs used** | 1st-attempt clear in 146 s; **158 damage taken; both herbs used** (0 left; the bot's log counts 4 heal key presses, but only 2 herbs exist); every step passes | `03.*.json` |
+| Same script, during tuning | — | With harder values (recovery 450 / 350 / 250, follow-up 60%): **2 deaths, then a clear on attempt 3**; one death came with the boss on 4 HP | earlier run in this pass |
+| Idle player survives | 16.3 s | 19.3 s (also 12.5 s at the harder tuning) | `04.*.json` |
+| Jump-over-the-charge rematch | Won on 84 HP | **Died, with the boss on 24 HP** | `04.*.json` |
+| Boar: parry → riposte | One-shot (40 vs 40 HP) | 60 → 20 → 0: **needs two parries** | 03 log; `probe-riposte3.cjs` |
+| Boar: dodge through the charge | 0 punish in 16/16 | Boar skid-stuns in **3/3**; damage taken 0 | `probe-boar-dodge.cjs` (DEBUG-ASSISTED) |
+| Boss swipe parry | Unmeasurable (blocked by I-02) | **4/4** when pressed 0–60 ms before the predicted swipe; 0/6 when 180 ms early or 60 ms late. The usable window is narrow but consistent. | `probe-swipe-parry.*.json` (DEBUG-ASSISTED) |
+| Restart with R | Spawned at the shrine, x=1440 | Spawns at the start, x=60 | session 3 |
+| Run cycle | 54.4 px / 567 ms; foot slides about 15 px per step | 46.4 px / 486 ms; about 5 px per step (see note 1) | `01-movement.*.json` |
+| Mashing at 80 ms | 2 swings from 12 presses | 3 swings | `05.*.json` |
+| Mashing at 120–300 ms | 5 / 5 / 7 / 8 swings | 5 / 5 / 7 / 8 swings (unchanged) | `05.*.json` |
+| Soak frame time | p95 33.2 ms, max 750 ms | p95 16.7 ms, max 50 ms; heap 30–37 MB; objects flat at 351 | `05.*.json` |
+| Console errors | 0 | 0 in every session | all |
+
+**Notes.**
+1. **The foot-slide figure is derived, not measured from pixels.** It is half the cycle's travel minus the rig's stride (2 × 9 px). The script previously hard-coded the old stride; it now uses the new one. The slide should be checked by eye in `m01-run-filmstrip.png`.
+2. **The boss is still easy for the bot,** which reacts in 10–30 ms. A human at about 200 ms should die once or twice: the bot had to use both herbs and took 158 damage (1.6× its HP), and at slightly harder values it died twice. I settled between the two tunings because this is the Prologue's first boss. Confirm with a human (§G).
+3. **The input buffer barely changes mashing.** A press made within 150 ms of an action becoming legal now fires. Most mash presses, though, fall inside light 3's long recovery, more than 150 ms before a new string can start, so they are still dropped. **That's deliberate:** it keeps mashing from becoming a strategy. If it still feels like dropped input to a human, buffer the *first* press during light 3's recovery.
+4. **I-11 is not re-verified.** The snapshot reads the gameplay `facing` value, which still flips on frame 0. Only the drawn sprite was changed, and it needs a visual check.
+5. **The latency sample for jump was 26 ms in this run** (7.7 ms before). It's a single sample of 1–2 frames and nothing in the jump code changed, so I count it as noise.
+6. **The soak's frame times look better** (the 750 ms spike didn't recur), but this soak ran only one fight instead of four, so I-17 stays *not confirmed*.
+
+### Still open
+- **I-08:** the hero is still small.
+- **I-13:** the swipe-parry window is narrow at human reaction speed.
+- **I-17 to I-21:** the P3 items.
+- **The art roadmap in §E.**
+
+Next step: a 10-minute human playtest focused on the notes above.
+
+---
+
 ## Appendix: re-running the tests
 
 ```bash
@@ -349,7 +412,7 @@ GAME_URL=http://localhost:5173/ node playtest/03-full-run.cjs
 | `03-full-run.cjs` | Complete run from spawn to ending with no state writes |
 | `04-death-rematch.cjs` | Death, respawn, jump tactic, ending 2, telegraph shots (real input) |
 | `05-mash-and-soak.cjs` | Input mashing plus a 2-minute combat soak (real input) |
-| `probe-*.cjs` | **DEBUG-ASSISTED** isolated measurements (teleport for setup only) |
+| `probe-*.cjs` | **DEBUG-ASSISTED** isolated measurements (teleport for setup only); `probe-riposte3` (boar takes two ripostes) and `probe-boar-dodge` (skid-stop) were added in the fix pass |
 
 **Notes on `02-tutorial-boars.cjs` (early version):**
 - Its first pass had bugs in the script itself: walk timeouts, plus a riposte check that read the meter before the parry had resolved.

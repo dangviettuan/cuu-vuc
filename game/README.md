@@ -94,18 +94,20 @@ Clip timings, tags and events are already in place, so authored frames can repla
 
 - **Ledges are one-way platforms.** You can walk under them and jump up through them, and each sits within a full jump's reach (≤ 42 px).
 - **Input uses an event-driven press queue** in `Prologue.ts`. Phaser's `JustDown` loses a tap that starts and ends within one frame. Presses made during hit-stop are kept until the next simulated frame.
+- **Attack, dodge and parry are buffered for 150 ms** (`player.ts`, `BUFFER_MS`). A press made just before an action becomes legal still fires. Attacks need the player to be on the ground; there is no air attack yet.
+- **Bodies push apart.** The player is pushed out of boars and the boss each frame (`Prologue.separate()`). A dodge passes through with i-frames.
 
 ## Known greybox simplifications
 
 - **The class kit is merged into the Prologue.** In the final game the Prologue has no class (PB L9); Riposte is here only to test the Kiếm Khách loop.
 - **Weapon:** the greybox uses the Kiếm Khách **straight sword**: a 24 px blade, drawn at the same length in every pose, with a crossguard and a hip scabbard. Reach past the body edge is 36 px (light 1–2), 40 px (light 3) and 44 px (heavy, riposte). In the final game the Prologue uses the brush-knife (PB L2); the class weapon comes in Chapter I.
-- No audio, no gamepad, and no save system beyond the one flag.
+- **Audio is placeholder only:** every sound is synthesised at runtime in `src/sfx.ts` (Web Audio, no asset files). It starts on the first key press. There is no gamepad support and no save system beyond the one flag.
 - Arcade physics. Final collision feel will be decided after playtesting (ADR-0008).
 - Tuning values are the Bible's starting targets. Expect to change them after the first playtest.
 
 ## Testing
 
-Headless Chromium checks (Playwright) were run for v0.3. They are not yet in the repo, to avoid adding a dependency. Each check passed with no runtime errors:
+The autonomous playtest scripts are in `playtest/`, and the findings are in [PLAYTEST_REPORT.md](PLAYTEST_REPORT.md). Section H of that report covers the fix pass and its re-test. The checks below were the original v0.3 checks:
 - **Smoke:** clear the bush, meet the boars, damage the boss, take the C2 choice.
 - **Walk-through:** walk under both ledges, land on a ledge, clear the bush with quick taps.
 - **Timing:** stride `timeScale` matches ground speed; the hitbox is open only on `active` frames.
