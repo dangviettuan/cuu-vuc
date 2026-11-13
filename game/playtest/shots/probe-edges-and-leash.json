@@ -1,0 +1,20 @@
+{
+ "leftEdge": {
+  "minPx": 17,
+  "worstLeftMarginPx": 5,
+  "clippedFrames": 0,
+  "samples": 120
+ },
+ "leash": {
+  "reachedArena": true,
+  "playerDied": false,
+  "boarsAlive": [
+   912,
+   1251
+  ],
+  "maxBoarXDuringFight": 1367,
+  "boarsInsideArenaFrames": 0,
+  "fightFrames": 151
+ },
+ "errors": []
+}

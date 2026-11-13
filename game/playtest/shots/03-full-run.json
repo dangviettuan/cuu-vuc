@@ -32,6 +32,22 @@
    "hp": 100
   },
   {
+   "name": "respawn at shrine after death #1",
+   "ok": true,
+   "x": 1440,
+   "hp": 100,
+   "bossHp": 320,
+   "bossState": "dormant"
+  },
+  {
+   "name": "respawn at shrine after death #2",
+   "ok": true,
+   "x": 1440,
+   "hp": 100,
+   "bossHp": 320,
+   "bossState": "dormant"
+  },
+  {
    "name": "ending choice 1 (spare) recorded",
    "ok": true
   },
@@ -44,8 +60,26 @@
  "attempts": [
   {
    "attempt": 1,
+   "result": "died",
+   "seconds": 195,
+   "bossHpLeft": 34,
+   "bossPhase": 3,
+   "startHp": 100,
+   "herbsLeft": 2
+  },
+  {
+   "attempt": 2,
+   "result": "died",
+   "seconds": 69,
+   "bossHpLeft": 50,
+   "bossPhase": 3,
+   "startHp": 100,
+   "herbsLeft": 2
+  },
+  {
+   "attempt": 3,
    "result": "won",
-   "seconds": 133,
+   "seconds": 56,
    "bossHpLeft": 0,
    "bossPhase": 3,
    "startHp": 100,
@@ -58,10 +92,18 @@
   "shots/f03-boss-intro-a1.png",
   "shots/f04-phase2-a1.png",
   "shots/f04-phase3-a1.png",
+  "shots/f05-death-a1.png",
+  "shots/f03-boss-intro-a2.png",
+  "shots/f04-phase2-a2.png",
+  "shots/f04-phase3-a2.png",
+  "shots/f05-death-a2.png",
+  "shots/f03-boss-intro-a3.png",
+  "shots/f04-phase2-a3.png",
+  "shots/f04-phase3-a3.png",
   "shots/f06-choice.png",
   "shots/f07-ending-spare.png"
  ],
- "minutes": 2.8,
+ "minutes": 6.1,
  "botLog": {
   "boar": [
    {
@@ -79,44 +121,33 @@
     "boarHpAfter": 0
    },
    {
-    "mode": "parry",
-    "parried": true,
-    "riposte": true,
-    "hit": false,
-    "boarHpAfter": 20
+    "mode": "dodge",
+    "hitDuringDodge": false,
+    "punishDealt": 36
    },
    {
-    "mode": "parry",
-    "parried": true,
-    "riposte": true,
-    "hit": false,
-    "boarHpAfter": 0
+    "mode": "dodge",
+    "hitDuringDodge": false,
+    "punishDealt": 24
    }
   ],
   "boss": [
    {
-    "t": 2,
+    "t": 1.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 4.3,
     "phase": 1,
     "kind": "charge",
     "tactic": "dodge",
     "avoided": true
    },
    {
-    "t": 4.6,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 5,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 6.6,
+    "t": 6.7,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
@@ -130,15 +161,7 @@
     "n": 3
    },
    {
-    "t": 8.3,
-    "phase": 1,
-    "kind": "swipe",
-    "parried": false,
-    "hit": false,
-    "dealt": 0
-   },
-   {
-    "t": 9.4,
+    "t": 7.9,
     "phase": 1,
     "kind": "punish",
     "window": "recover",
@@ -146,56 +169,748 @@
     "gotHit": false
    },
    {
-    "t": 10.7,
+    "t": 8.8,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 9.5,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 10.9,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 11.6,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 0,
+    "gotHit": false
+   },
+   {
+    "t": 13.5,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 16.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 19.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 22.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 30.9,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 35.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 38.6,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 41.5,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 46.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 49.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 51.6,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
     "n": 3
    },
    {
-    "t": 11.1,
+    "t": 52,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
     "n": 3
    },
    {
-    "t": 13.4,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 16.3,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 19.2,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 24,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 26.4,
+    "t": 53.6,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
     "n": 3
    },
    {
-    "t": 26.8,
+    "t": 54,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 55.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 56.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 58.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 61.1,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 64,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 66.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 69.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 72.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 75.5,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 81.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 82.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 84.3,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 87.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 90.1,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 93,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 97.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 100.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 105.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 105.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 108,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 112.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 115.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 115.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 117.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 117.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 119.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 119.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 121.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 121.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 123.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 123.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 125.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 125.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 127.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 127.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 130.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 132.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 133,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 134.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 135.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 136.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 137.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 139.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 142.1,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 144.9,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 149.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 149.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 151.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 154.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 157.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 157.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 159.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 160.8,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 162.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 162.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 164.9,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 169.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 172.6,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 175.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 180.3,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 184.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 185,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 187.3,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 188.1,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 190.2,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": true,
+    "hit": false,
+    "dealt": 60
+   },
+   {
+    "t": 190.9,
+    "phase": 2,
+    "kind": "punish",
+    "window": "stagger",
+    "dealt": 26,
+    "gotHit": false
+   },
+   {
+    "t": 191.8,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 192.5,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 193.3,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 193.9,
+    "phase": 3,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 20,
+    "gotHit": false
+   },
+   {
+    "t": 194.7,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 194.7,
+    "phase": 3,
+    "kind": "death"
+   },
+   {
+    "t": 2.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 4.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 5.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 6.5,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 7.6,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 9.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 11.6,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 16,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 16.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 18,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 18.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 20.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 23.6,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 28,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
@@ -209,197 +924,14 @@
     "n": 3
    },
    {
-    "t": 28.9,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 31.2,
+    "t": 30.6,
     "phase": 1,
     "kind": "charge",
     "tactic": "dodge",
     "avoided": true
    },
    {
-    "t": 35.5,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 35.9,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 38,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 40.9,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 43.3,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 43.7,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 45.8,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 48.7,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 51.6,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 56.4,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 59.3,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 62.2,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 65.1,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 68,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 70.8,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 73.8,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 76.2,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 76.6,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 78.9,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 83.7,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 86.1,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 86.5,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 88.1,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 88.5,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 89.8,
-    "phase": 1,
-    "kind": "swipe",
-    "parried": false,
-    "hit": false,
-    "dealt": 0
-   },
-   {
-    "t": 90.9,
+    "t": 31.4,
     "phase": 1,
     "kind": "punish",
     "window": "recover",
@@ -407,7 +939,7 @@
     "gotHit": false
    },
    {
-    "t": 93,
+    "t": 33.7,
     "phase": 1,
     "kind": "swipe",
     "parried": true,
@@ -415,7 +947,7 @@
     "dealt": 60
    },
    {
-    "t": 93.7,
+    "t": 34.4,
     "phase": 1,
     "kind": "punish",
     "window": "stagger",
@@ -423,7 +955,7 @@
     "gotHit": false
    },
    {
-    "t": 94.5,
+    "t": 35.2,
     "phase": 2,
     "kind": "swipe",
     "parried": false,
@@ -431,7 +963,7 @@
     "dealt": 0
    },
    {
-    "t": 95.3,
+    "t": 35.9,
     "phase": 2,
     "kind": "punish",
     "window": "recover",
@@ -439,64 +971,56 @@
     "gotHit": false
    },
    {
-    "t": 96.1,
-    "phase": 2,
-    "kind": "swipe",
-    "parried": false,
-    "hit": true,
-    "dealt": 0
-   },
-   {
-    "t": 96.4,
-    "phase": 2,
-    "kind": "swipe-late-dodge",
-    "hit": false
-   },
-   {
-    "t": 97.1,
-    "phase": 2,
-    "kind": "punish",
-    "window": "recover",
-    "dealt": 36,
-    "gotHit": false
-   },
-   {
-    "t": 98.1,
+    "t": 37.1,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 98.6,
+    "t": 37.5,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 100.4,
+    "t": 39.3,
     "phase": 2,
     "kind": "charge",
     "tactic": "dodge",
     "avoided": true
    },
    {
-    "t": 105.5,
+    "t": 44.9,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 105.9,
+    "t": 45.4,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 108,
+    "t": 46.6,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 47,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 49,
     "phase": 2,
     "kind": "swipe",
     "parried": true,
@@ -504,7 +1028,7 @@
     "dealt": 60
    },
    {
-    "t": 108.6,
+    "t": 49.7,
     "phase": 3,
     "kind": "punish",
     "window": "stagger",
@@ -512,126 +1036,7 @@
     "gotHit": false
    },
    {
-    "t": 109.4,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 109.8,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 110.8,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 111.2,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 112.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 114,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 116.5,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 117.5,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 119.6,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 120.6,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 122.3,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 122.7,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 124.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 125,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 128.5,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 128.9,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 130.3,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 130.9,
+    "t": 50.5,
     "phase": 3,
     "kind": "swipe",
     "parried": false,
@@ -639,15 +1044,407 @@
     "dealt": 0
    },
    {
-    "t": 131.6,
+    "t": 52.4,
     "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 53,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 56.4,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 56.9,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 58.9,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": false
+   },
+   {
+    "t": 59.4,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 59.8,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 60.1,
+    "phase": 3,
+    "kind": "swipe-late-dodge",
+    "hit": false
+   },
+   {
+    "t": 61.9,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": false
+   },
+   {
+    "t": 62.4,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 62.9,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 63.1,
+    "phase": 3,
+    "kind": "swipe-late-dodge",
+    "hit": false
+   },
+   {
+    "t": 64.6,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 65,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 67.3,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 67.7,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 68.9,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 69.4,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 69.4,
+    "phase": 3,
+    "kind": "death"
+   },
+   {
+    "t": 1.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 2.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 4.3,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 6.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 7.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 9.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 11.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 12.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 14.6,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 19.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 21.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 22.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 23.5,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 24.6,
+    "phase": 1,
     "kind": "punish",
     "window": "recover",
-    "dealt": 0,
+    "dealt": 36,
     "gotHit": false
    },
    {
-    "t": 132.4,
+    "t": 26.7,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": true,
+    "hit": false,
+    "dealt": 60
+   },
+   {
+    "t": 27.5,
+    "phase": 1,
+    "kind": "punish",
+    "window": "stagger",
+    "dealt": 26,
+    "gotHit": false
+   },
+   {
+    "t": 28.4,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 29.2,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 31.3,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": true,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 33,
+    "phase": 2,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 35.5,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 35.9,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 37.1,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 37.5,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 38.8,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 39.2,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 41.1,
+    "phase": 2,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 44.7,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 45.1,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 46.4,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 46.8,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 48,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 48.4,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 50.4,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": true,
+    "hit": false,
+    "dealt": 60
+   },
+   {
+    "t": 51.1,
+    "phase": 2,
+    "kind": "punish",
+    "window": "stagger",
+    "dealt": 16,
+    "gotHit": false
+   },
+   {
+    "t": 52,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 52.9,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 53.7,
     "phase": 3,
     "kind": "swipe",
     "parried": false,
@@ -655,7 +1452,23 @@
     "dealt": 0
    },
    {
-    "t": 133.1,
+    "t": 54.4,
+    "phase": 3,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 55.1,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 55.8,
     "phase": 3,
     "kind": "punish",
     "window": "recover",
@@ -676,7 +1489,79 @@
     "amount": 22,
     "ctx": "boss",
     "pState": "hurt",
-    "boss": "swipe",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 12,
+    "ctx": "boss",
+    "pState": "dead",
+    "boss": "dormant",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "charge",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "charge",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 12,
+    "ctx": "boss",
+    "pState": "dead",
+    "boss": "dormant",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
     "boars": [],
     "roots": 0
    },
@@ -695,36 +1580,44 @@
     "boss": "recover",
     "boars": [],
     "roots": 0
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
    }
   ],
-  "deaths": 0,
+  "deaths": 2,
   "heals": 0,
   "phaseTimes": {
-   "2": 94,
-   "3": 108
+   "2": 29,
+   "3": 53
   }
  },
  "frameTimes": {
-  "n": 10102,
+  "n": 11902,
   "avg": 16.69,
   "p50": 16.7,
-  "p95": 16.8,
+  "p95": 16.7,
   "p99": 16.8,
-  "max": 83.3
+  "max": 66.7
  },
  "memory": {
   "start": {
-   "used": 31389860,
-   "total": 36456740
+   "used": 30984342,
+   "total": 39260914
   },
   "end": {
-   "used": 28889679,
-   "total": 50176579
+   "used": 29308986,
+   "total": 48550854
   }
  },
  "objects": {
-  "start": 354,
-  "end": 354
+  "start": 360,
+  "end": 360
  },
  "console": {
   "errors": [],

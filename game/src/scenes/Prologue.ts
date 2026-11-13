@@ -13,6 +13,8 @@ import { PLAYER, VIEW, WORLD } from "../tuning";
 const ARENA = { min: 1520, max: 2160 };
 /** Arena walls sit *inside* the camera bounds so the hero's drawn sprite (wider than its 10 px body) is never cut off at the edge. */
 const ARENA_WALL = 16;
+/** Same idea at the two ends of the world. */
+const EDGE = 12;
 const FLAG_KEY = "cuu-vuc-flags";
 
 interface Herb { img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; }
@@ -58,6 +60,8 @@ export class PrologueScene extends Phaser.Scene {
   private bossName!: Phaser.GameObjects.Text;
   private prompt!: Phaser.GameObjects.Text;
   private keyHint!: Phaser.GameObjects.Text;
+  /** "J" bubble over the hero while a riposte is available (cloud playtest: the I → J success needed a clear cue). */
+  private jHint!: Phaser.GameObjects.Text;
   private floatText!: Phaser.GameObjects.Text;
   private floatUntil = 0;
   private toastUntil = 0;
@@ -82,7 +86,8 @@ export class PrologueScene extends Phaser.Scene {
     this.sim = 0; this.hitstopLeft = 0; this.engaged = false; this.finished = false; this.choosing = false;
     this.checkpoint = { x: 60, y: WORLD.groundY }; // R must restart from the beginning, not the last shrine (playtest I-06)
     this.boars = []; this.roots = []; this.herbs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
-    this.physics.world.setBounds(0, -200, WORLD.width, WORLD.height + 200);
+    // Keep a margin at the world's edges: the drawn hero is wider than its 10 px body (cloud playtest: idle sprite clipped at x=0).
+    this.physics.world.setBounds(EDGE, -200, WORLD.width - EDGE * 2, WORLD.height + 200);
     this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height).setRoundPixels(true).setBackgroundColor("#1b2a1e");
 
     // Parallax: Thanh Mộc mood A (concept pick), drawn at ×4.
@@ -93,6 +98,13 @@ export class PrologueScene extends Phaser.Scene {
       mid.fillStyle(0x2c3a26, 1).fillRect(x, 0, w, WORLD.groundY);
       mid.fillStyle(0x354630, 1).fillRect(x + 3, 0, 2, WORLD.groundY);
     }
+    // Nanh Rễ's grove (cloud playtest): darker behind the combat lane so the bright light shafts stop competing with
+    // combat flashes, faded in over the approach; plus a landmark, a split tree with exposed roots.
+    const grove = this.add.graphics().setDepth(-7);
+    for (let i = 0; i < 8; i++) grove.fillStyle(0x0c1710, 0.06 * (i + 1)).fillRect(ARENA.min - 160 + i * 20, 0, 20, WORLD.groundY);
+    grove.fillStyle(0x0c1710, 0.48).fillRect(ARENA.min, 0, WORLD.width - ARENA.min, WORLD.groundY);
+    // at the entrance, so its dark roots frame the way in rather than sitting behind the fight
+    this.add.image(ARENA.min + 30, WORLD.groundY + 3, "split_tree").setOrigin(0.5, 1).setDepth(-3);
 
     // Ground and ledges.
     this.solids = this.physics.add.staticGroup();
@@ -123,9 +135,11 @@ export class PrologueScene extends Phaser.Scene {
     this.addHerb(672, 262);
     this.addHerb(560, WORLD.groundY - 6);
     this.sign(600, "Thảo dược rừng.\nQ: dùng (hồi máu)");
-    this.sign(790, "Lợn rừng hoảng loạn!\nShift: lướt né\nI: đỡ đúng lúc, rồi J: phản đòn\nK (giữ): chém mạnh");
-    for (const [x, a, b] of [[930, 860, 1010], [1240, 1150, 1330]] as const) {
-      const boar = new Boar(this, x, a, b);
+    // One lesson per boar (cloud playtest: three new actions on one sign was too much at once).
+    this.sign(790, "Lợn rừng hoảng loạn!\nI: đỡ ngay lúc nó lao tới\nrồi J: phản đòn");
+    this.sign(1105, "Thêm một con.\nShift: lướt né xuyên qua nó\nrồi J: chém khi nó khựng lại");
+    for (const [x, a, b, tell] of [[930, 860, 1010, 800], [1230, 1160, 1300, 600]] as const) {
+      const boar = new Boar(this, x, a, b, tell);
       this.physics.add.collider(boar, this.solids);
       boar.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, boar.facing, 1);
       this.boars.push(boar);
@@ -176,6 +190,7 @@ export class PrologueScene extends Phaser.Scene {
     this.add.rectangle(0, VIEW.height - 15, VIEW.width, 15, 0x0b0d11, 0.86).setOrigin(0).setScrollFactor(0).setDepth(100);
     txt(VIEW.width / 2, VIEW.height - 13, "A/D chạy · Space nhảy · J chém · K giữ: chém mạnh · Shift né · I đỡ · Q thảo dược · E tương tác · F1 hitbox", 9, "#e4e7ec").setOrigin(0.5, 0);
     this.keyHint = this.label(0, 0, "E", 9, "#0b0d11", { backgroundColor: "#f6e7a0", padding: { x: 3, y: 1 } }).setOrigin(0.5, 1).setDepth(50).setVisible(false);
+    this.jHint = this.label(0, 0, "J", 10, "#0b0d11", { backgroundColor: "#ffc860", padding: { x: 4, y: 1 } }).setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.floatText = this.label(0, 0, "", 9, "#f6e7a0").setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.toast("Việc sáng: phát quang lối mòn cho trưởng làng.");
   }
@@ -296,12 +311,15 @@ export class PrologueScene extends Phaser.Scene {
       case "swing": sfx.swing(p.slashLevel); this.fx.slash(p.x + f * 4, p.y - 32 + (p.slashLevel > 0 ? 2 : 0), p.slashLevel, f, p.rising); break;
       case "slam": this.fx.dust(p.x + f * 18, p.y, 3, f, 0.8); break;
       case "thud": this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
-      case "parry":
+      case "parry": {
         sfx.parry();
-        this.toast("Đỡ! Bấm J để phản đòn.", 900);
-        this.fx.sparks(p.x + f * 12, p.y - 28, f, 10, 1.1); this.fx.impact(p.x + f * 12, p.y - 28, true);
+        this.toast("Đỡ được! J: phản đòn", 900);
+        // Compact, warm burst at the blade (cloud playtest: pale flashes were lost against the light shafts).
+        const bx = p.x + f * 14, by = p.y - 34;
+        this.fx.sparks(bx, by, f, 7, 0.75); this.fx.impact(bx, by, false); this.fx.sparkle(bx, by, 6, 0xffc860);
         this.shake(18); this.hitstop(110);
         break;
+      }
       case "perfectDodge": this.toast("Né hoàn hảo!", 700); this.fx.sparkle(p.x, p.y - 24, 6, 0x9fd0c0); break;
       case "riposte": this.toast("Phản đòn!", 600); break;
       case "heal": sfx.heal(); this.float(p.x, p.y - 50, `+${PLAYER.herbHeal}`); this.fx.sparkle(p.x, p.y - 30, 8, 0x9cf0a4); break;
@@ -315,7 +333,7 @@ export class PrologueScene extends Phaser.Scene {
     if (e === "paw") this.fx.dust(x + facing * 8 * size, y, 1, -facing, 0.9);
     if (e === "stomp") { this.fx.dust(x + facing * 30, y, 6, 0, 1.4); this.shake(20); sfx.stomp(); }
     if (e === "thud" || e === "dead") this.fx.dust(x, y, 5, 0, 1);
-    if (e === "skid") { this.fx.dust(x + facing * 8, y, 4, facing, 1.2); sfx.step(); }
+    if (e === "skid") { this.fx.dust(x + facing * 12 * size, y, 3 + Math.round(size * 2), facing, 1 + size * 0.2); sfx.step(); }
     // Localised telegraph cues (playtest I-03): where the attack comes from, plus a distinct sound per attack.
     if (e === "tellBoar") { sfx.tellBoar(); this.fx.dust(x + facing * 10, y, 2, -facing, 0.8); }
     if (e === "tellCharge") { sfx.tellCharge(); this.fx.dust(x - facing * 26, y, 5, -facing, 1.3); }
@@ -460,7 +478,10 @@ export class PrologueScene extends Phaser.Scene {
     if (this.boss.active) this.boss.tick(now, dt, px);
     this.bush.tick(time);
     this.separate();
-    for (const r of this.roots) if (r.tick(now)) { this.fx.dust(r.x, WORLD.groundY, 2, 0, 0.8); sfx.roots(); }
+    for (const r of this.roots) {
+      if (r.tick(now)) { this.fx.dust(r.x, WORLD.groundY, 2, 0, 0.8); sfx.roots(); }
+      else if (r.warning(now) && Math.random() < dt / 110) this.fx.dust(r.x + (Math.random() - 0.5) * 10, WORLD.groundY, 1, 0, 0.35); // low dirt specks: "this spot"
+    }
     this.roots = this.roots.filter((r) => !r.done);
 
     // Player → targets.
@@ -485,6 +506,9 @@ export class PrologueScene extends Phaser.Scene {
 
     this.pressed.clear();
     this.syncOutline();
+    const rip = this.player.riposteReady(now);
+    this.jHint.setVisible(rip);
+    if (rip) this.jHint.setPosition(this.player.x, this.player.y - 56 - (Math.floor(time / 120) % 2));
     this.drawHud(time, delta);
     this.drawDebug(ph?.rect ?? null, inc);
     this.frameMs = this.frameMs * 0.95 + (performance.now() - t0) * 0.05;

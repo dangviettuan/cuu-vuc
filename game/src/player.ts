@@ -85,6 +85,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.anim.play(PC.idle);
   }
 
+  /** True while a parry has opened the riposte window and a Thế pip is available (drives the on-screen J prompt). */
+  riposteReady(now: number): boolean { return now < this.riposteUntil && this.the > 0 && !this.isDead(); }
   get body2(): Phaser.Physics.Arcade.Body { return this.body as Phaser.Physics.Arcade.Body; }
   get grounded(): boolean { return this.body2.blocked.down || this.body2.touching.down; }
   isDead(): boolean { return this.state === "dead"; }

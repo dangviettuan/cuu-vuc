@@ -1,0 +1,12 @@
+{
+ "boar1": true,
+ "boss": "timeout",
+ "shots": {
+  "h01-parry-j-prompt": true,
+  "h05-root-warning": true,
+  "h02-charge-windup": true,
+  "h03-charge-skid": true,
+  "h04-winded": true
+ },
+ "errors": []
+}

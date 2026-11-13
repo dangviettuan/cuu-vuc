@@ -397,6 +397,26 @@ The cloud-browser playtest had no WebGL, so the game now falls back to Canvas (`
 
 **Regression check:** full playthroughs on WebGL and on Canvas both pass every step. Frame time p95 is 16.8 / 16.7 ms, with no errors and no object growth.
 
+### Follow-up 2: cloud-browser retest feedback
+This retest was by direct play, on Canvas. The tester confirmed the HUD fix and asked for attacks that are easier to read, especially when the player, boars and boss are close together.
+
+| Feedback | Change | Evidence |
+|---|---|---|
+| **P2:** the sprite is clipped at the world's left edge | World physics bounds keep a 12 px margin at both ends. | `probe-edges-and-leash.cjs` (real input). Hold A at spawn and release. **Before:** 89/120 frames clipped, worst −7 px. **After:** 0/120, margin 5 px. `g01-left-edge.png` |
+| **P1:** two boars followed the player into the boss fight | **Leash:** a boar only notices a player within 120 px of its territory. **Charges:** stop 140 px past the territory. **Return:** a boar outside its range walks home. **When cornered at the leash:** it stands and faces the player instead of backing off further. **Opening beat:** Nanh Rễ waits about 0.7 s after waking before her first attack. | Same probe: clear the brush, then run straight to the arena without fighting. **Before:** both boars were inside the arena for 134/151 fight frames (x=1742, 1772). **After:** 0/151; the boars stay home (x=912, 1251). |
+| **P1:** the boar lesson gives three new actions at once | **One lesson per boar.** Boar 1's sign teaches *I then J* only, and its notice windup is longer (800 ms). Boar 2 has its own sign for *Shift through, then J*. Heavy attack is left to the controls strip. **Riposte cue:** a gold **J** bubble appears over the hero while a riposte is available, and the toast reads "Đỡ được! J: phản đòn". | `h01-parry-j-prompt.png` |
+| **P1:** enemy windup and recovery need more emphasis | **Charge windup:** her head is lowered much further, the hind legs are pushed back, and the front hooves are planted, with ploughed dirt. **End of a charge:** a new braced **skid** pose (head thrown up, legs braced, dust), then a **winded** loop (head down, mouth open, roots drooping) for the counter window. **Bug fixed:** the stagger daze loop no longer outlasts the stagger. | `h02-charge-windup`, `h03-charge-skid`, `h04-winded` |
+| **P1:** pale flashes compete with the light shafts; a parry needs a burst at the blade; root warnings should sit low | **Parry:** a compact gold burst at the blade (smaller sparks, a small impact, gold sparkle). **Root warning:** an amber line flat on the ground over a dark crack. It grows and brightens through the warning, flickers just before the eruption, and low dirt specks rise from the spot. | `h01`, `h05-root-warning.png` |
+| **P2:** the arena needs a landmark; quiet the bright lighting behind the combat lane | **The grove:** the background behind the arena is darkened, faded in over the approach, so the light shafts are muted. **Landmark:** a split tree with exposed roots and a faint Mạch-green glow in the split, placed at the arena entrance so its roots don't sit behind the fight. | `h00-arena-grove.png` |
+
+**Regression check:**
+- **Movement:** unchanged.
+- **Full playthrough on WebGL:** every step passes; two deaths, then a clear.
+- **Full playthrough on Canvas:** every step passes; cleared on the first attempt.
+- **Both:** p95 16.7 ms, no errors, objects flat.
+
+The screenshots in `probe-readability.cjs` are taken during bot play. Its boss half is DEBUG-ASSISTED (a teleport to the arena).
+
 ### Still open
 - **I-08:** the hero is still small.
 - **I-13:** the swipe-parry window is narrow at human reaction speed.

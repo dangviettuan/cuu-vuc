@@ -328,7 +328,8 @@ export interface NanhPose {
   bob?: number;
   legs?: number; // walk phase 0–3
   gallop?: boolean;
-  pose?: "normal" | "low" | "rear" | "toss" | "slam" | "daze" | "flinch";
+  /** low = charge windup (head down, hooves planted); skid = end of a charge (braced, head up); winded = the counter window after it. */
+  pose?: "normal" | "low" | "rear" | "toss" | "slam" | "daze" | "flinch" | "skid" | "winded";
   collapse?: number; // 0 standing … 3 down
   sway?: number; // root sway (secondary motion)
 }
@@ -337,21 +338,29 @@ export function nanhRe(p: NanhPose = {}): Px {
   const body = "#6b5a4c", belly = mix(body, "#d0b89a", 0.35), root = "#2c2420", tip = "#7fa65a";
   const b = p.bob ?? 0, pose = p.pose ?? "normal", col = p.collapse ?? 0, sway = p.sway ?? 0;
   const ox = pose === "flinch" ? -3 : 0;
-  const dy = col >= 3 ? 8 : col === 2 ? 5 : col === 1 ? 2 : pose === "slam" ? 2 : 0;
-  const hy = col >= 3 ? 1 : col >= 1 ? 2 + col : pose === "low" ? 6 : pose === "rear" ? -7 : pose === "toss" ? -5 : pose === "slam" ? 4 : pose === "daze" ? 5 : 0;
-  const hx = pose === "low" ? 2 : pose === "toss" ? 3 : pose === "daze" ? -1 : 0;
+  const dy = col >= 3 ? 8 : col === 2 ? 5 : col === 1 ? 2 : pose === "slam" ? 2 : pose === "low" ? 2 : pose === "winded" ? 1 : 0;
+  // Cloud playtest: the charge windup and the skid needed far more extreme poses to read at a glance.
+  const hy = col >= 3 ? 1 : col >= 1 ? 2 + col : pose === "low" ? 10 : pose === "rear" ? -7 : pose === "toss" ? -5 : pose === "slam" ? 4 : pose === "daze" ? 5 : pose === "skid" ? -5 : pose === "winded" ? 5 : 0;
+  const hx = pose === "low" ? 5 : pose === "toss" ? 3 : pose === "daze" ? -1 : pose === "skid" ? -3 : 0;
   // legs
   if (col < 3) {
     const k = p.legs ?? 0;
     const walk = [[0, 2, 0, -2], [2, 0, -2, 0], [0, -2, 0, 2], [-2, 0, 2, 0]][k % 4];
     const gal = k % 2 === 0 ? [-4, -4, 4, 4] : [2, 2, -2, -2];
     const off = p.gallop ? gal : walk;
+    // low: hind legs pushed back, front hooves planted forward; skid: everything braced forward against momentum
+    const stance = pose === "low" ? [-4, -4, 5, 5] : pose === "skid" ? [4, 4, 8, 8] : [0, 0, 0, 0];
     ([[26, 1], [36, 0], [58, 1], [68, 0]] as const).forEach(([x, back], i) => {
       const frontLeg = x > 50;
-      const lift = (pose === "rear" && frontLeg ? 5 : 0) + (col === 1 && frontLeg ? 4 : 0) + (col === 2 ? 5 : 0);
-      const lh = Math.max(3, 12 - lift);
-      P.rect(x + off[i] + ox, 54 - lh - 1 + 0, 5, lh, back ? shade(body, 0.8) : body);
-      P.rect(x + off[i] + ox, 52, 6, 3, "#2a211c");
+      const lift = (pose === "rear" && frontLeg ? 5 : 0) + (col === 1 && frontLeg ? 4 : 0) + (col === 2 ? 5 : 0) + (pose === "low" ? 2 : 0);
+      const lh = Math.max(3, 12 - lift), hx0 = x + off[i] + stance[i] + ox;
+      P.rect(hx0, 54 - lh - 1 + 0, 5, lh, back ? shade(body, 0.8) : body);
+      P.rect(hx0, 52, 6, 3, "#2a211c");
+      // dirt ploughed up in front of planted / skidding front hooves
+      if (frontLeg && (pose === "low" || pose === "skid")) {
+        P.rect(hx0 + 6, pose === "skid" ? 50 : 52, pose === "skid" ? 4 : 3, pose === "skid" ? 5 : 3, "#4a3a2e");
+        if (pose === "skid") { P.set(hx0 + 11, 47, "#4a3a2e"); P.set(hx0 + 12, 49, "#5a4836"); }
+      }
     });
   }
   P.ell(46 + ox, 33 + b + dy, 32, col >= 3 ? 12 : 14, body);
@@ -362,13 +371,14 @@ export function nanhRe(p: NanhPose = {}): Px {
   P.set(H(92), V(41), "#2a211c"); P.set(H(92), V(43), "#2a211c");
   P.tri(H(72), V(25), H(77), V(18), H(79), V(27), shade(body, 0.85));
   const eyeOpen = col < 3 && pose !== "daze" && pose !== "flinch";
+  if (pose === "winded") P.rect(H(85), V(45), 6, 2, "#2a211c"); // mouth open, blowing
   P.set(H(81), V(33), eyeOpen ? "#e8b04a" : shade(body, 0.7)); P.set(H(82), V(33), eyeOpen ? "#e8b04a" : "#2a211c");
   const tuskUp = pose === "toss" ? -3 : 0;
   P.line(H(88), V(45), H(95), V(36) + tuskUp, "#e9e1cf", 2);
   P.line(H(86), V(46), H(92), V(40) + tuskUp, "#e9e1cf", 1);
   for (const [x, y] of [[90, 42], [92, 39], [94, 37]]) P.set(H(x), V(y) + (tuskUp ? -1 : 0), root);
   // roots through the back, swaying (secondary motion); droop when dazed or collapsing
-  const droop = pose === "daze" || col > 0 ? 3 : 0;
+  const droop = pose === "daze" || pose === "winded" || col > 0 ? 3 : 0;
   for (let i = 0; i < 16; i++) {
     const x = 18 + i * 3.6 + r() * 2 + ox, y = 22 + Math.abs(i - 8) * 0.6 + b + dy, h = 5 + r() * 9 - droop;
     const ex = x + (r() - 0.5) * 6 + sway * (1 + (i % 3)) - droop;
@@ -376,6 +386,34 @@ export function nanhRe(p: NanhPose = {}): Px {
     P.set(ex, y - h - 1, tip);
   }
   for (let k2 = 0; k2 < 6; k2++) { const sx = 26 + k2 * 8 + ox; P.line(sx, 30 + b + dy, sx + 6, 36 + b + dy, shade(root, 1.4)); }
+  return P.outline();
+}
+
+/**
+ * Arena landmark (cloud playtest): a lightning-split tree whose exposed roots spread across the clearing,
+ * the same living roots as Nanh Rễ's back, with a faint Mạch-green glow in the split.
+ */
+export function splitTree(): Px {
+  const P = new Px(150, 300), r = rng(77), T = 116; // trunks run up into the canopy; T shifts the base down
+  const bark = "#33261d", hi = "#4e3a2b", dark = "#140f0c", root = "#2c2420", tip = "#7fa65a", glow = "#9cc76a";
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  for (let y = 0; y < 156 + T; y++) {
+    const t = Math.max(0, (y - T) / 156); // straight trunks above, splitting apart toward the base
+    const l0 = lerp(10, 50, t), l1 = lerp(36, 73, t), r0 = lerp(112, 77, t), r1 = lerp(140, 100, t);
+    P.rect(l0, y, l1 - l0, 1, bark); P.rect(r0, y, r1 - r0, 1, bark);
+    P.rect(l1 - 2, y, 2, 1, hi); P.rect(r0, y, 2, 1, hi); // lit inner edges of the split
+    if (y > 104 + T) P.rect(l1, y, Math.max(0, r0 - l1), 1, dark); // the hollow at the base
+    if (r() < 0.22) P.set(lerp(l0, l1, r()), y, dark);
+    if (r() < 0.22) P.set(lerp(r0, r1, r()), y, dark);
+  }
+  for (let i = 0; i < 14; i++) P.set(lerp(70, 80, r()), 118 + T + r() * 36, r() < 0.5 ? glow : tip);
+  // exposed roots arching over the ground
+  for (let i = 0; i < 11; i++) {
+    const sx = 52 + i * 4.6, ex = sx + (i - 5) * 13 + (r() - 0.5) * 8, my = 166 + T + r() * 6;
+    P.line(sx, 152 + T, (sx + ex) / 2, my - 6, root, i % 3 === 0 ? 3 : 2);
+    P.line((sx + ex) / 2, my - 6, ex, 182 + T, root, 2);
+    if (i % 2) P.set(ex, 181 + T, tip);
+  }
   return P.outline();
 }
 
@@ -618,6 +656,9 @@ export function registerTextures(scene: Phaser.Scene): void {
   add("nanh_rear1", nanhRe({ pose: "rear", bob: 1, sway: 2 }));
   add("nanh_slam", nanhRe({ pose: "slam", sway: -2 }));
   add("nanh_toss", nanhRe({ pose: "toss", sway: 2 }));
+  add("nanh_skid", nanhRe({ pose: "skid", sway: 4 }));
+  for (let i = 0; i < 2; i++) add(`nanh_wind${i}`, nanhRe({ pose: "winded", bob: i, sway: i ? -1 : 0 }));
+  add("split_tree", splitTree());
   for (let i = 0; i < 2; i++) add(`nanh_daze${i}`, nanhRe({ pose: "daze", bob: i, sway: i ? -1 : 1 }));
   add("nanh_flinch", nanhRe({ pose: "flinch", sway: -2 }));
   for (let i = 1; i <= 3; i++) add(`nanh_fall${i}`, nanhRe({ collapse: i }));

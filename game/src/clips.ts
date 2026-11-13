@@ -69,6 +69,9 @@ export const NC = {
   rear: clip("rear", [{ key: "nanh_rear0", ms: 180 }, { key: "nanh_rear1", ms: 99999 }], PRI.ACTION),
   slam: clip("slam", [{ key: "nanh_slam", ms: 160, event: "stomp" }, { key: "nanh_idle0", ms: 200 }], PRI.ACTION),
   toss: clip("toss", [{ key: "nanh_toss", ms: 120 }, { key: "nanh_idle0", ms: 150 }], PRI.ACTION),
+  /** End of a charge: braced skid (the dodge moment is over) → winded (the counter window). Cloud playtest. */
+  skid: clip("skid", [{ key: "nanh_skid", ms: 240, event: "skid" }], PRI.ACTION),
+  winded: loop("winded", ["nanh_wind0", "nanh_wind1"], 170, PRI.LOCO), // LOCO: idle replaces it the moment recovery ends
   daze: loop("daze", ["nanh_daze0", "nanh_daze1"], 180, PRI.ACTION),
   flinch: clip("flinch", [{ key: "nanh_flinch", ms: 90 }], PRI.SETTLE),
   collapse: clip("collapse", [{ key: "nanh_fall1", ms: 170 }, { key: "nanh_fall2", ms: 170 }, { key: "nanh_fall3", ms: 99999, event: "thud" }], PRI.DEAD),

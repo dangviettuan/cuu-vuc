@@ -85,7 +85,16 @@ export class Boar extends Enemy {
   private readonly hitList: EnemyHit[];
   onDeath: (x: number) => void = () => {};
 
-  constructor(scene: Phaser.Scene, x: number, private minX: number, private maxX: number) {
+  /**
+   * Leash (cloud playtest: two boars chased the player into the boss arena). A boar only notices a player near
+   * its territory, a charge ends a little past it, and a boar outside its range walks home, ignoring the player.
+   */
+  private static readonly LEASH = 50;
+  private static readonly NOTICE_RANGE = 120;
+  private static readonly CHARGE_LIMIT = 140;
+
+  /** `tellMs`: the notice windup. The first (teaching) boar uses a longer one, so its one lesson is easy to read. */
+  constructor(scene: Phaser.Scene, x: number, private minX: number, private maxX: number, private tellMs = 600) {
     super(scene, x, WORLD.groundY, "boar_walk0", 60); // 60 HP: a riposte (40) no longer one-shots it (playtest I-04)
     this.b.setSize(26, 13).setOffset(5, 9);
     this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: 15, knockback: 0, parryable: true, onParried: () => this.parried() };
@@ -101,12 +110,16 @@ export class Boar extends Enemy {
     const t = now - this.stateAt, dx = playerX - this.x;
     let vx = 0;
     switch (this.state) {
-      case "wander":
+      case "wander": {
+        const home = this.x < this.minX - Boar.LEASH ? 1 : this.x > this.maxX + Boar.LEASH ? -1 : 0;
+        if (home) { this.facing = home; vx = home * 60; this.show(BC.walk); this.anim.timeScale = 1; break; }
         // Too close to charge: back off first, so every charge starts from a readable distance
         // (fix-pass finding: after a riposte it recovered beside the player and charged point-blank, unavoidable).
         if (Math.abs(dx) < 80) {
-          this.facing = dx > 0 ? -1 : 1; vx = this.facing * 80;
-          this.show(BC.walk); this.anim.timeScale = 1.1;
+          const away = dx > 0 ? -1 : 1, nx = this.x + away * 24;
+          if (nx > this.minX - Boar.LEASH && nx < this.maxX + Boar.LEASH) {
+            this.facing = away; vx = away * 80; this.show(BC.walk); this.anim.timeScale = 1.1;
+          } else { this.facing = dx > 0 ? 1 : -1; this.show(BC.idle); } // cornered at the leash: stand and face
           break;
         }
         if (this.x < this.minX) this.facing = 1;
@@ -114,18 +127,21 @@ export class Boar extends Enemy {
         vx = this.facing * 30;
         this.show(BC.walk);
         this.anim.timeScale = 0.8;
-        if (Math.abs(dx) < 170) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(BC.paw, true); this.onFx("tellBoar", this.x, this.y); }
+        const inRange = playerX > this.minX - Boar.NOTICE_RANGE && playerX < this.maxX + Boar.NOTICE_RANGE;
+        if (inRange && Math.abs(dx) < 170) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(BC.paw, true); this.onFx("tellBoar", this.x, this.y); }
         break;
+      }
       case "notice": // anticipation: head down, pawing the ground
-        this.telegraph(t / 600);
-        if (t > 600) { flash(this, false); this.swing = nextId("boar"); this.near = false; this.enter("charge"); this.show(BC.gallop, true); }
+        this.telegraph(t / this.tellMs);
+        if (t > this.tellMs) { flash(this, false); this.swing = nextId("boar"); this.near = false; this.enter("charge"); this.show(BC.gallop, true); }
         break;
       case "charge":
         vx = this.facing * 210;
         // Dodged through: it skids to a stop just past the player, leaving a short punish window (playtest I-04).
         if (Math.abs(dx) < 26) this.near = true;
         if (this.near && dx * this.facing < -18) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 40; this.onFx("skid", this.x, this.y); break; }
-        if (t > 1100 || this.b.blocked.left || this.b.blocked.right) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 60; }
+        const runaway = this.x > this.maxX + Boar.CHARGE_LIMIT || this.x < this.minX - Boar.CHARGE_LIMIT;
+        if (t > 1100 || runaway || this.b.blocked.left || this.b.blocked.right) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 60; }
         break;
       case "stun":
         this.show(BC.stun);
@@ -165,33 +181,45 @@ export class Boar extends Enemy {
 export class RootSpike {
   sprite: Phaser.GameObjects.Image;
   marker: Phaser.GameObjects.Rectangle;
+  /** Dark crack under the marker: together they read as "the ground here is about to break". */
+  private crack: Phaser.GameObjects.Rectangle;
   done = false;
   private readonly hit: EnemyHit;
   private stage = -1;
   constructor(scene: Phaser.Scene, public x: number, private bornAt: number, private warn: number, private active = 380) {
-    this.marker = scene.add.rectangle(x, WORLD.groundY - 1, 14, 3, 0x7fa65a, 0.9).setDepth(6);
+    // Cloud playtest: the green marker vanished against the grass. A warm amber line flat on the ground now grows and
+    // brightens over the warning, then flickers just before the eruption: it marks exactly where *not* to stand.
+    this.crack = scene.add.rectangle(x, WORLD.groundY + 1, 12, 3, 0x140f0c, 0.95).setDepth(6);
+    this.marker = scene.add.rectangle(x, WORLD.groundY - 1, 12, 3, 0xffc24d, 0.7).setDepth(6);
     this.sprite = scene.add.image(x, WORLD.groundY, ROOT[0]).setOrigin(0.5, 1).setDepth(7).setVisible(false);
     this.hit = { id: nextId("root"), rect: new Phaser.Geom.Rectangle(x - 4, WORLD.groundY - 30, 8, 30), damage: 14, knockback: 0, parryable: false };
   }
   /** Returns true on the frame the spike erupts (for dust/shake). */
   tick(now: number): boolean {
     const t = now - this.bornAt;
-    if (t < this.warn) { this.marker.setAlpha(Math.floor(t / 80) % 2 ? 0.35 : 0.95).setSize(14 + (t / this.warn) * 6, 3); return false; }
+    if (t < this.warn) {
+      const u = t / this.warn, w = Math.round(12 + u * 12);
+      this.marker.setSize(w, u > 0.6 ? 4 : 3).setAlpha(u > 0.75 && Math.floor(t / 60) % 2 ? 0.6 : 0.7 + 0.3 * u);
+      this.crack.setSize(w + 4, 3);
+      return false;
+    }
     const u = t - this.warn;
     const stage = u < 60 ? 0 : u < this.active ? 1 : u < this.active + 160 ? 2 : 3;
     if (stage === this.stage) return false;
     const first = this.stage < 0;
     this.stage = stage;
-    this.marker.setVisible(false);
+    this.marker.setVisible(false); this.crack.setVisible(false);
     if (stage === 3) { this.destroy(); return false; }
     this.sprite.setVisible(true).setTexture(ROOT[stage]);
     return first;
   }
+  /** True while the ground is still only warning (the scene kicks up low dirt specks from it). */
+  warning(now: number): boolean { return !this.done && now - this.bornAt < this.warn; }
   hitbox(now: number): EnemyHit | null {
     const u = now - this.bornAt - this.warn;
     return u >= 40 && u <= this.active ? this.hit : null;
   }
-  destroy(): void { this.done = true; this.sprite.destroy(); this.marker.destroy(); }
+  destroy(): void { this.done = true; this.sprite.destroy(); this.marker.destroy(); this.crack.destroy(); }
 }
 
 /* ---------------- Nanh Rễ (Prologue boss, scale M) ---------------- */
@@ -232,7 +260,8 @@ export class NanhRe extends Enemy {
   /** The player died: stop attacking the body and stand still until the respawn resets the fight. */
   stand(): void { if (this.isAlive() && this.state !== "leave") { this.enter("dormant"); this.show(NC.idle, true); } }
 
-  wake(): void { if (this.state === "dormant") this.enter("idle"); }
+  /** Opening beat: she wakes and holds for a moment before the first attack, so the fight starts clean. */
+  wake(): void { if (this.state === "dormant") { this.enter("idle"); this.stateAt += 700; } }
   reset(x: number): void {
     this.hp = this.maxHp; this.poise = 0; this.lastPhase = 1; this.kb = 0; this.stomped = false; this.setPosition(x, WORLD.groundY);
     this.b.enable = true; this.setAlpha(1); this.enter("dormant"); flash(this, false); this.show(NC.idle, true);
@@ -272,7 +301,7 @@ export class NanhRe extends Enemy {
           if (this.chargesLeft > 0) { this.chargesLeft--; this.facing = dx > 0 ? 1 : -1; this.enter("tCharge"); this.stateAt -= 300; }
           // Phase 2+: sometimes whips round into a quick tusk sweep, so "dodge the charge, then combo" is no longer free.
           else if (this.phase >= 2 && Math.random() < 0.45) { this.facing = dx > 0 ? 1 : -1; this.enter("tSwipe"); this.stateAt -= Math.max(0, 450 * k - 300); }
-          else { this.enter("recover"); this.show(NC.idle, true); }
+          else { this.enter("recover"); this.show(NC.skid, true); } // braced skid, then winded: the counter window
         }
         break;
       }
@@ -298,12 +327,13 @@ export class NanhRe extends Enemy {
         if (this.stomped && t > 600 * k + 160) { this.stomped = false; this.enter("recover"); }
         break;
       case "recover":
-        if (this.anim.finished || this.anim.name === "idle") this.show(NC.idle);
+        if (this.anim.name === "skid" && this.anim.finished) this.show(NC.winded);
+        else if (this.anim.name !== "winded" && (this.anim.finished || this.anim.name === "idle")) this.show(NC.idle);
         if (t > [0, 600, 450, 320][this.phase]) this.enter("idle"); // was 750/750/450: punish windows shortened (playtest I-01); tuned for a Prologue boss
         break;
       case "stagger":
         this.show(NC.daze);
-        if (t > 1100) { this.poise = 0; this.enter("idle"); }
+        if (t > 1100) { this.poise = 0; this.enter("idle"); this.show(NC.idle, true); } // the daze loop would otherwise outlast the stagger
         break;
       case "down": break;
       case "leave":
