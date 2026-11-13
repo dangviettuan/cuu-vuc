@@ -1,7 +1,7 @@
 {
  "accel": {
   "framesToFirstMotion": 2,
-  "msToFullSpeed": 66,
+  "msToFullSpeed": 67,
   "msToStop": 50,
   "animsDuringRun": [
    "idle",
@@ -12,11 +12,11 @@
   "runTimeScaleNote": "timeScale read separately"
  },
  "runCycle": {
-  "pxPerCycle": 54.4,
-  "msPerCycle": 567,
+  "pxPerCycle": 46.4,
+  "msPerCycle": 486,
   "speed": 96,
   "plantedFootSweepPx": 12,
-  "expectedGroundTravelPerHalfCycle": 27.2
+  "expectedGroundTravelPerHalfCycle": 23.2
  },
  "turn": {
   "anims": [
@@ -41,7 +41,7 @@
  },
  "jumpHold": {
   "heightPx": 45.6,
-  "airMs": 450,
+  "airMs": 449,
   "anims": [
    "idle",
    "takeoff",
@@ -54,12 +54,12 @@
   ]
  },
  "airControl": {
-  "dxWhileJumpingRight": 82.8
+  "dxWhileJumpingRight": 83.1
  },
  "ledgeLand": {
   "onLedge": true,
   "y": 274,
-  "x": 399.2
+  "x": 400.8
  },
  "coyote": {
   "leftEdgeDetected": true,
@@ -72,30 +72,30 @@
   "buffered": true
  },
  "latencyMs": {
-  "jump": 7.7,
-  "light": 13.6,
-  "dodge": 13.2,
-  "parry": 13.5
+  "jump": 26,
+  "light": 10.8,
+  "dodge": 3.4,
+  "parry": 12.7
  },
  "idle": {
   "distinctFrames": [
    "p_idle4",
    "p_idle5",
    "p_idle0",
+   "p_blink",
    "p_idle1",
    "p_idle2",
-   "p_idle3",
-   "p_blink"
+   "p_idle3"
   ],
   "blinked": true
  },
  "frameTimes": {
-  "n": 1559,
-  "avg": 16.71,
+  "n": 1562,
+  "avg": 16.68,
   "p50": 16.7,
-  "p95": 16.7,
+  "p95": 16.8,
   "p99": 16.8,
-  "max": 33.4
+  "max": 33.3
  },
  "console": {
   "errors": [],

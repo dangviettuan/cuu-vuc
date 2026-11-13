@@ -30,7 +30,7 @@ const { launch, filmstrip, stats, save } = require("./harness.cjs");
   const cycMs = cycleStarts.length >= 2 ? cycleStarts[1].t - cycleStarts[0].t : null;
   R.runCycle = { pxPerCycle: cyc && +cyc.toFixed(1), msPerCycle: cycMs && +cycMs.toFixed(0), speed: runFrames.length ? runFrames[runFrames.length - 1].p.vx : 0,
     // generated legs swing ±6 px about the hip → a planted foot can sweep at most 12 px per half-cycle
-    plantedFootSweepPx: 12, expectedGroundTravelPerHalfCycle: cyc && +(cyc / 2).toFixed(1) };
+    plantedFootSweepPx: 18 /* derived from the art rig stride (2 × fdx = 2 × 9 px in art.ts), not measured from pixels */, expectedGroundTravelPerHalfCycle: cyc && +(cyc / 2).toFixed(1) };
 
   // Filmstrip of the run cycle (clipped around the player, one shot per ~70 ms frame)
   const rf = [];

@@ -62,6 +62,8 @@ const { makeBot } = require("./bot.cjs");
     await h.tap("1", 60); await h.wait(3600);
     R.shots.push(await h.shot("f07-ending-spare"));
     s = await bot.snap(); step("ending choice 1 (spare) recorded", s.finished, {});
+    await h.tap("r", 50); await h.wait(1500);
+    s = await bot.snap(); step("R restarts from the beginning", s.p.x < 100 && !s.finished && !s.shrineLit, { x: s.p.x });
   } else step("reached ending choice", false, { bossHp: s.boss.hp });
 
   R.minutes = +((Date.now() - t0) / 60000).toFixed(1);

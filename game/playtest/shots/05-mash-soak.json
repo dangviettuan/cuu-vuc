@@ -3,10 +3,10 @@
   {
    "intervalMs": 80,
    "presses": 12,
-   "swingsStarted": 2,
-   "sequence": "L2L3",
-   "pressesLandingInL3": 5,
-   "minStamina": 80
+   "swingsStarted": 3,
+   "sequence": "L2L3L1",
+   "pressesLandingInL3": 4,
+   "minStamina": 74
   },
   {
    "intervalMs": 120,
@@ -42,90 +42,90 @@
   }
  ],
  "soak": {
-  "fights": 4,
+  "fights": 1,
   "frameTimes": {
-   "n": 6648,
-   "avg": 18.06,
+   "n": 7195,
+   "avg": 16.68,
    "p50": 16.7,
-   "p95": 33.2,
-   "p99": 50,
-   "max": 750
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 50
   },
   "samples": [
    {
-    "s": 71,
-    "heapMB": 32.5,
-    "objects": 348,
-    "updateMs": 0.109
+    "s": 39,
+    "heapMB": 30.2,
+    "objects": 351,
+    "updateMs": 0.041
    },
    {
-    "s": 81,
-    "heapMB": 31.1,
-    "objects": 348,
-    "updateMs": 0.149
+    "s": 49,
+    "heapMB": 32,
+    "objects": 351,
+    "updateMs": 0.063
    },
    {
-    "s": 91,
-    "heapMB": 33.5,
-    "objects": 350,
-    "updateMs": 0.054
+    "s": 59,
+    "heapMB": 29.8,
+    "objects": 351,
+    "updateMs": 0.065
    },
    {
-    "s": 101,
-    "heapMB": 34.7,
-    "objects": 350,
-    "updateMs": 0.108
+    "s": 69,
+    "heapMB": 31.2,
+    "objects": 351,
+    "updateMs": 0.048
    },
    {
-    "s": 111,
+    "s": 79,
+    "heapMB": 32,
+    "objects": 351,
+    "updateMs": 0.041
+   },
+   {
+    "s": 89,
+    "heapMB": 33.7,
+    "objects": 351,
+    "updateMs": 0.057
+   },
+   {
+    "s": 99,
+    "heapMB": 32.9,
+    "objects": 351,
+    "updateMs": 0.07
+   },
+   {
+    "s": 109,
     "heapMB": 33.2,
-    "objects": 348,
-    "updateMs": 0.091
+    "objects": 351,
+    "updateMs": 0.049
    },
    {
-    "s": 121,
-    "heapMB": 37.4,
-    "objects": 350,
-    "updateMs": 0.132
-   },
-   {
-    "s": 131,
-    "heapMB": 38,
-    "objects": 350,
-    "updateMs": 0.134
-   },
-   {
-    "s": 141,
+    "s": 119,
     "heapMB": 35.3,
-    "objects": 350,
-    "updateMs": 0.158
+    "objects": 351,
+    "updateMs": 0.06
    },
    {
-    "s": 152,
-    "heapMB": 36,
-    "objects": 348,
-    "updateMs": 0.386
+    "s": 129,
+    "heapMB": 34.7,
+    "objects": 351,
+    "updateMs": 0.038
    },
    {
-    "s": 161,
-    "heapMB": 37.6,
-    "objects": 350,
-    "updateMs": 0.159
+    "s": 139,
+    "heapMB": 35.6,
+    "objects": 351,
+    "updateMs": 0.025
    },
    {
-    "s": 171,
-    "heapMB": 35.1,
-    "objects": 350,
-    "updateMs": 0.136
-   },
-   {
-    "s": 181,
-    "heapMB": 36.6,
-    "objects": 350,
-    "updateMs": 0.152
+    "s": 149,
+    "heapMB": 37.2,
+    "objects": 351,
+    "updateMs": 0.035
    }
   ],
-  "deaths": 1,
+  "deaths": 0,
   "errors": [],
   "warnings": []
  }

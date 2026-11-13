@@ -1,0 +1,82 @@
+[
+ {
+  "phase": 1,
+  "plannedOffsetMs": -180,
+  "pressMinusSwipeStartMs": -212,
+  "parried": false,
+  "hit": true,
+  "gapAtSwipe": 19
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": -120,
+  "pressMinusSwipeStartMs": 96,
+  "parried": false,
+  "hit": true,
+  "gapAtSwipe": 26
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": -60,
+  "pressMinusSwipeStartMs": null,
+  "parried": true,
+  "hit": false,
+  "gapAtSwipe": null
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": 0,
+  "pressMinusSwipeStartMs": null,
+  "parried": true,
+  "hit": false,
+  "gapAtSwipe": null
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": 60,
+  "pressMinusSwipeStartMs": 49,
+  "parried": false,
+  "hit": true,
+  "gapAtSwipe": 16
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": -180,
+  "pressMinusSwipeStartMs": 38,
+  "parried": false,
+  "hit": true,
+  "gapAtSwipe": 23
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": -120,
+  "pressMinusSwipeStartMs": 523,
+  "parried": false,
+  "hit": false,
+  "gapAtSwipe": 33
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": -60,
+  "pressMinusSwipeStartMs": null,
+  "parried": true,
+  "hit": false,
+  "gapAtSwipe": null
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": 0,
+  "pressMinusSwipeStartMs": null,
+  "parried": true,
+  "hit": false,
+  "gapAtSwipe": null
+ },
+ {
+  "phase": 1,
+  "plannedOffsetMs": 60,
+  "pressMinusSwipeStartMs": 33,
+  "parried": false,
+  "hit": true,
+  "gapAtSwipe": 22
+ }
+]

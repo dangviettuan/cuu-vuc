@@ -11,35 +11,25 @@
   },
   {
    "name": "rematch with jump-over tactic",
-   "ok": true,
-   "result": "won",
-   "bossHp": 0,
-   "playerHp": 84,
-   "herbs": 1
-  },
-  {
-   "name": "ending choice 2 (finish her) recorded",
-   "ok": true
-  },
-  {
-   "name": "R restarts the slice",
    "ok": false,
-   "x": 1440
+   "result": "died",
+   "bossHp": 24,
+   "playerHp": 0,
+   "herbs": 1
   }
  ],
  "shots": [
   "shots/d01-death.png",
   "shots/d02-death-pose.png",
   "shots/d03-respawn.png",
-  "shots/d04-telegraph-tCharge.png",
-  "shots/d04-telegraph-charge.png",
   "shots/d04-telegraph-tStomp.png",
   "shots/d04-telegraph-tSwipe.png",
-  "shots/d04-telegraph-stagger.png",
-  "shots/d05-ending-finish.png"
+  "shots/d04-telegraph-tCharge.png",
+  "shots/d04-telegraph-charge.png",
+  "shots/d04-telegraph-stagger.png"
  ],
  "idleDeath": {
-  "secondsToDie": 16.3,
+  "secondsToDie": 19.3,
   "timeline": [
    [
     0,
@@ -47,46 +37,36 @@
     "dormant"
    ],
    [
-    2.4,
-    86,
-    "recover"
-   ],
-   [
-    5.2,
-    64,
+    3.1,
+    78,
     "charge"
    ],
    [
-    7.4,
-    48,
+    7.2,
+    56,
     "swipe"
    ],
    [
-    10.4,
+    13.3,
     34,
-    "recover"
-   ],
-   [
-    11.8,
-    18,
     "swipe"
    ],
    [
-    14.8,
-    4,
-    "recover"
+    15.3,
+    12,
+    "swipe"
    ],
    [
-    16.3,
+    19.3,
     0,
-    "swipe"
+    "dormant"
    ]
   ]
  },
  "rematch": {
-  "result": "won",
-  "bossHp": 0,
-  "playerHp": 84,
+  "result": "died",
+  "bossHp": 24,
+  "playerHp": 0,
   "herbs": 1
  },
  "botLog": {
@@ -94,101 +74,48 @@
    {
     "mode": "dodge",
     "hitDuringDodge": false,
-    "punishDealt": 0
+    "punishDealt": 36
    },
    {
     "mode": "dodge",
     "hitDuringDodge": false,
-    "punishDealt": 0
+    "punishDealt": 24
    },
    {
     "mode": "dodge",
     "hitDuringDodge": false,
-    "punishDealt": 0
+    "punishDealt": 36
    },
    {
     "mode": "dodge",
     "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "dodge",
-    "hitDuringDodge": false,
-    "punishDealt": 0
-   },
-   {
-    "mode": "parry",
-    "parried": true,
-    "riposte": true,
-    "hit": false,
-    "boarHpAfter": 0
+    "punishDealt": 24
    }
   ],
   "boss": [
    {
-    "t": 2.4,
+    "t": 1.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 1.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 6,
     "phase": 1,
     "kind": "charge",
     "tactic": "jump",
     "avoided": true
    },
    {
-    "t": 3.6,
+    "t": 6.9,
     "phase": 1,
     "kind": "punish",
     "window": "recover",
@@ -196,50 +123,36 @@
     "gotHit": false
    },
    {
-    "t": 4.9,
+    "t": 8.2,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
     "n": 3
    },
    {
-    "t": 5.3,
+    "t": 8.7,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
     "n": 3
-   },
-   {
-    "t": 7.1,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 7.5,
-    "phase": 1,
-    "kind": "roots",
-    "avoided": true,
-    "n": 3
-   },
-   {
-    "t": 10.3,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "jump",
-    "avoided": true
    },
    {
     "t": 11.2,
     "phase": 1,
+    "kind": "charge",
+    "tactic": "jump",
+    "avoided": true
+   },
+   {
+    "t": 12.1,
+    "phase": 1,
     "kind": "punish",
     "window": "recover",
     "dealt": 36,
     "gotHit": false
    },
    {
-    "t": 13.5,
+    "t": 14.3,
     "phase": 1,
     "kind": "swipe",
     "parried": true,
@@ -247,7 +160,7 @@
     "dealt": 60
    },
    {
-    "t": 14.2,
+    "t": 14.9,
     "phase": 1,
     "kind": "punish",
     "window": "stagger",
@@ -255,28 +168,15 @@
     "gotHit": false
    },
    {
-    "t": 15.1,
+    "t": 15.8,
     "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
    },
    {
-    "t": 15.5,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 17.9,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "jump",
-    "avoided": true
-   },
-   {
-    "t": 18.8,
+    "t": 16.5,
     "phase": 2,
     "kind": "punish",
     "window": "recover",
@@ -284,56 +184,57 @@
     "gotHit": false
    },
    {
-    "t": 20.1,
+    "t": 17.6,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 20.5,
+    "t": 18,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 22,
+    "t": 19.2,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 22.4,
+    "t": 19.7,
     "phase": 2,
     "kind": "roots",
     "avoided": true,
     "n": 5
    },
    {
-    "t": 24,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 24.4,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 26.8,
+    "t": 21.9,
     "phase": 2,
     "kind": "charge",
     "tactic": "jump",
     "avoided": true
    },
    {
-    "t": 27.7,
+    "t": 23.3,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 25.9,
+    "phase": 2,
+    "kind": "charge",
+    "tactic": "jump",
+    "avoided": false
+   },
+   {
+    "t": 26.7,
     "phase": 2,
     "kind": "punish",
     "window": "recover",
@@ -341,7 +242,7 @@
     "gotHit": false
    },
    {
-    "t": 29.8,
+    "t": 28.6,
     "phase": 2,
     "kind": "swipe",
     "parried": true,
@@ -349,7 +250,7 @@
     "dealt": 60
    },
    {
-    "t": 30.5,
+    "t": 29.3,
     "phase": 3,
     "kind": "punish",
     "window": "stagger",
@@ -357,65 +258,88 @@
     "gotHit": false
    },
    {
-    "t": 31,
+    "t": 30.1,
     "phase": 3,
-    "kind": "swipe-late-dodge",
-    "hit": false
+    "kind": "roots",
+    "avoided": false,
+    "n": 7
    },
    {
-    "t": 31.7,
+    "t": 32.2,
     "phase": 3,
-    "kind": "punish",
-    "window": "recover",
-    "dealt": 0,
-    "gotHit": false
+    "kind": "charge",
+    "tactic": "jump",
+    "avoided": false
    },
    {
-    "t": 33.6,
+    "t": 33,
     "phase": 3,
-    "kind": "swipe",
-    "parried": true,
-    "hit": false,
-    "dealt": 24
+    "kind": "charge",
+    "tactic": "jump",
+    "avoided": false
+   },
+   {
+    "t": 33,
+    "phase": 3,
+    "kind": "death"
    }
   ],
   "damage": [
    {
-    "amount": 15,
-    "ctx": "move",
-    "pState": "hurt",
-    "boss": "dormant",
-    "boars": [
-     "charge",
-     "wander"
-    ],
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
+    "boars": [],
     "roots": 0
    },
    {
-    "amount": 16,
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 14,
     "ctx": "boss",
     "pState": "hurt",
-    "boss": "swipe",
-    "boars": [
-     "wander"
-    ],
+    "boss": "recover",
+    "boars": [],
+    "roots": 7
+   },
+   {
+    "amount": 22,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "tCharge",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 20,
+    "ctx": "boss",
+    "pState": "dead",
+    "boss": "dormant",
+    "boars": [],
     "roots": 0
    }
   ],
-  "deaths": 0,
+  "deaths": 1,
   "heals": 0,
   "phaseTimes": {
-   "2": 14,
-   "3": 30
+   "2": 15,
+   "3": 29
   }
  },
  "frameTimes": {
-  "n": 7364,
-  "avg": 16.76,
+  "n": 5317,
+  "avg": 16.73,
   "p50": 16.7,
   "p95": 16.8,
   "p99": 16.8,
-  "max": 83.4
+  "max": 66.6
  },
  "console": {
   "errors": [],

@@ -1,0 +1,558 @@
+{
+ "steps": [
+  {
+   "name": "brush blocks",
+   "ok": true,
+   "x": 457
+  },
+  {
+   "name": "brush cleared by combo",
+   "ok": true
+  },
+  {
+   "name": "both herbs collected (one on the ledge)",
+   "ok": true,
+   "herbs": 2
+  },
+  {
+   "name": "boar 1 defeated (parry → riposte)",
+   "ok": true,
+   "hp": 100,
+   "herbs": 4
+  },
+  {
+   "name": "boar 2 defeated (dodge-through → combo)",
+   "ok": true,
+   "hp": 100,
+   "herbs": 4
+  },
+  {
+   "name": "shrine lit",
+   "ok": true,
+   "hp": 100
+  },
+  {
+   "name": "ending choice 1 (spare) recorded",
+   "ok": true
+  }
+ ],
+ "attempts": [
+  {
+   "attempt": 1,
+   "result": "won",
+   "seconds": 61,
+   "bossHpLeft": 0,
+   "bossPhase": 3,
+   "startHp": 100,
+   "herbsLeft": 4
+  }
+ ],
+ "shots": [
+  "shots/f01-after-boar1.png",
+  "shots/f02-shrine.png",
+  "shots/f03-boss-intro-a1.png",
+  "shots/f04-phase2-a1.png",
+  "shots/f04-phase3-a1.png",
+  "shots/f06-choice.png",
+  "shots/f07-ending-spare.png"
+ ],
+ "minutes": 1.5,
+ "botLog": {
+  "boar": [
+   {
+    "mode": "parry",
+    "parried": true,
+    "riposte": true,
+    "hit": false,
+    "boarHpAfter": 0
+   },
+   {
+    "mode": "parry",
+    "parried": true,
+    "riposte": true,
+    "hit": false,
+    "boarHpAfter": 0
+   }
+  ],
+  "boss": [
+   {
+    "t": 2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 4.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 5.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 5.8,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 6.7,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 7.4,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 10,
+    "gotHit": false
+   },
+   {
+    "t": 9.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 9.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 12,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 14.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 15,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 16.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 17.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 18.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 19.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 21.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 21.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 22.2,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 23.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 26.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 27.3,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 28.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 29.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 31.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 34.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 34.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 35.4,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 36.3,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 36.8,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 38.3,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 38.7,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 39.4,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 10,
+    "gotHit": false
+   },
+   {
+    "t": 40.2,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 40.9,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 42.4,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 42.8,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 44.3,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 44.7,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 45.4,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 10,
+    "gotHit": false
+   },
+   {
+    "t": 46.3,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 47,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 48.4,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 48.8,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 50.3,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 50.8,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 51.4,
+    "phase": 2,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 10,
+    "gotHit": false
+   },
+   {
+    "t": 52,
+    "phase": 3,
+    "kind": "swipe-late-dodge",
+    "hit": false
+   },
+   {
+    "t": 52.7,
+    "phase": 3,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 0,
+    "gotHit": false
+   },
+   {
+    "t": 53.5,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 54.8,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 57,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 57.9,
+    "phase": 3,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 58.7,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 59.4,
+    "phase": 3,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 20,
+    "gotHit": false
+   },
+   {
+    "t": 61.4,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": true,
+    "hit": false,
+    "dealt": 8
+   }
+  ],
+  "damage": [
+   {
+    "amount": 14,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "recover",
+    "boars": [],
+    "roots": 3
+   },
+   {
+    "amount": 16,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 16,
+    "ctx": "boss",
+    "pState": "move",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 16,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "swipe",
+    "boars": [],
+    "roots": 0
+   },
+   {
+    "amount": 16,
+    "ctx": "boss",
+    "pState": "hurt",
+    "boss": "recover",
+    "boars": [],
+    "roots": 0
+   }
+  ],
+  "deaths": 0,
+  "heals": 0,
+  "phaseTimes": {
+   "2": 36,
+   "3": 52
+  }
+ },
+ "frameTimes": {
+  "n": 5345,
+  "avg": 16.78,
+  "p50": 16.7,
+  "p95": 16.7,
+  "p99": 16.8,
+  "max": 200
+ },
+ "memory": {
+  "start": {
+   "used": 26673363,
+   "total": 32143995
+  },
+  "end": {
+   "used": 31880698,
+   "total": 40795290
+  }
+ },
+ "objects": {
+  "start": 348,
+  "end": 344
+ },
+ "console": {
+  "errors": [],
+  "warnings": []
+ }
+}

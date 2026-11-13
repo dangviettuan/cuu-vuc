@@ -1,0 +1,132 @@
+{
+ "mash": [
+  {
+   "intervalMs": 80,
+   "presses": 12,
+   "swingsStarted": 3,
+   "sequence": "L2L3L1",
+   "pressesLandingInL3": 4,
+   "minStamina": 74
+  },
+  {
+   "intervalMs": 120,
+   "presses": 12,
+   "swingsStarted": 5,
+   "sequence": "L2L3L1L2L3",
+   "pressesLandingInL3": 3,
+   "minStamina": 62
+  },
+  {
+   "intervalMs": 160,
+   "presses": 12,
+   "swingsStarted": 5,
+   "sequence": "L2L3L1L2L3",
+   "pressesLandingInL3": 4,
+   "minStamina": 62
+  },
+  {
+   "intervalMs": 220,
+   "presses": 12,
+   "swingsStarted": 7,
+   "sequence": "L2L3L1L2L3L1L2",
+   "pressesLandingInL3": 4,
+   "minStamina": 59
+  },
+  {
+   "intervalMs": 300,
+   "presses": 12,
+   "swingsStarted": 8,
+   "sequence": "L2L3L1L2L3L1L2L3",
+   "pressesLandingInL3": 3,
+   "minStamina": 47
+  }
+ ],
+ "soak": {
+  "fights": 1,
+  "frameTimes": {
+   "n": 7195,
+   "avg": 16.68,
+   "p50": 16.7,
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 50
+  },
+  "samples": [
+   {
+    "s": 39,
+    "heapMB": 30.2,
+    "objects": 351,
+    "updateMs": 0.041
+   },
+   {
+    "s": 49,
+    "heapMB": 32,
+    "objects": 351,
+    "updateMs": 0.063
+   },
+   {
+    "s": 59,
+    "heapMB": 29.8,
+    "objects": 351,
+    "updateMs": 0.065
+   },
+   {
+    "s": 69,
+    "heapMB": 31.2,
+    "objects": 351,
+    "updateMs": 0.048
+   },
+   {
+    "s": 79,
+    "heapMB": 32,
+    "objects": 351,
+    "updateMs": 0.041
+   },
+   {
+    "s": 89,
+    "heapMB": 33.7,
+    "objects": 351,
+    "updateMs": 0.057
+   },
+   {
+    "s": 99,
+    "heapMB": 32.9,
+    "objects": 351,
+    "updateMs": 0.07
+   },
+   {
+    "s": 109,
+    "heapMB": 33.2,
+    "objects": 351,
+    "updateMs": 0.049
+   },
+   {
+    "s": 119,
+    "heapMB": 35.3,
+    "objects": 351,
+    "updateMs": 0.06
+   },
+   {
+    "s": 129,
+    "heapMB": 34.7,
+    "objects": 351,
+    "updateMs": 0.038
+   },
+   {
+    "s": 139,
+    "heapMB": 35.6,
+    "objects": 351,
+    "updateMs": 0.025
+   },
+   {
+    "s": 149,
+    "heapMB": 37.2,
+    "objects": 351,
+    "updateMs": 0.035
+   }
+  ],
+  "deaths": 0,
+  "errors": [],
+  "warnings": []
+ }
+}
