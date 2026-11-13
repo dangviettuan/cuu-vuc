@@ -72,7 +72,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     const body = this.body as Phaser.Physics.Arcade.Body;
-    body.setSize(10, 44).setOffset(19, 10);
+    body.setSize(10, 44).setOffset(31, 28); // 72×76 frame: body centred at x=36, feet at y=72
     body.setMaxVelocityY(600);
     this.setOrigin(0.5, 1).setDepth(10);
     this.anim = new Animator(this, (e) => this.onEvent(e as PlayerEvent));

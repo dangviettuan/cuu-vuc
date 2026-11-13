@@ -96,6 +96,7 @@ Clip timings, tags and events are already in place, so authored frames can repla
 ## Known greybox simplifications
 
 - **The class kit is merged into the Prologue.** In the final game the Prologue has no class (PB L9); Riposte is here only to test the Kiếm Khách loop.
+- **Weapon:** the greybox uses the Kiếm Khách **straight sword**: a 24 px blade, drawn at the same length in every pose, with a crossguard and a hip scabbard. Reach past the body edge is 36 px (light 1–2), 40 px (light 3) and 44 px (heavy, riposte). In the final game the Prologue uses the brush-knife (PB L2); the class weapon comes in Chapter I.
 - No audio, no gamepad, and no save system beyond the one flag.
 - Arcade physics. Final collision feel will be decided after playtesting (ADR-0008).
 - Tuning values are the Bible's starting targets. Expect to change them after the first playtest.

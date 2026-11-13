@@ -282,7 +282,7 @@ export class PrologueScene extends Phaser.Scene {
       case "land": this.fx.dust(p.x, p.y, 4, 0, 1); break;
       case "dodge": this.fx.dust(p.x, p.y, 3, -f, 1); break;
       case "ghost": this.fx.afterimage(p.texture.key, p.x, p.y, p.flipX); break;
-      case "swing": this.fx.slash(p.x + f * 4, p.y - 26 + (p.slashLevel > 0 ? 2 : 0), p.slashLevel, f, p.rising); break;
+      case "swing": this.fx.slash(p.x + f * 4, p.y - 32 + (p.slashLevel > 0 ? 2 : 0), p.slashLevel, f, p.rising); break;
       case "slam": this.fx.dust(p.x + f * 18, p.y, 3, f, 0.8); break;
       case "thud": this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
       case "parry":

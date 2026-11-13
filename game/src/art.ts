@@ -173,11 +173,14 @@ const PRO = {
   skin: "#d9a27c", boot: "#3a2a20", belt: "#4a3424",
   shirt: "#8a6a45", sleeve: "#4b5f45", pants: "#3f3a33", wrap: "#a99a78",
   coat: "#4b5f45", hair: "#1f1a19", strap: "#5e3f27", bag: "#7a5534",
-  blade: "#b4bec2", bladeHi: "#e3eaec", grip: "#5a3b25",
+  blade: "#b4bec2", bladeHi: "#e3eaec", grip: "#5a3b25", guard: "#8a7b5a", sheath: "#4a3424",
 };
+/** Kiếm Khách straight sword: ~24 px blade (Art Bible: one-hand sword ≈ 22 px; +guard). */
+const BLADE = 24;
 
 export function protagonist(p: Pose): Px {
-  const P = new Px(48, 56), base = 54, top = base - 47, cx = 24;
+  // 72×76 frame so a full sword fits in every pose (windup behind, overhead above, thrust ahead)
+  const P = new Px(72, 76), base = 72, top = base - 47, cx = 36;
   const b = p.bob ?? 0, ln = p.lean ?? 0, hairK = p.hair ?? 0;
   const Y = (v: number) => top + v;
   const X = (v: number) => cx + v;
@@ -197,11 +200,15 @@ export function protagonist(p: Pose): Px {
     P.line(sx, sy, ex, ey, col, 2);
     P.line(ex, ey, hx2, hy, col, 2);
     if (a.blade) {
-      const bx = sx + a.blade[0], by = sy + a.blade[1];
-      const dx = bx - hx2, dy = by - hy, L = Math.hypot(dx, dy) || 1;
-      P.line(hx2 - (dx / L) * 2, hy - (dy / L) * 2, hx2, hy, PRO.grip, 1);
-      P.line(hx2, hy, bx, by, PRO.blade, 1);
-      P.set(hx2 + dx * 0.6, hy + dy * 0.6, PRO.bladeHi);
+      // ARMS give the blade *direction*; length is fixed so the sword reads the same in every pose
+      const dx0 = a.blade[0] - a.h[0], dy0 = a.blade[1] - a.h[1], L = Math.hypot(dx0, dy0) || 1;
+      const ux = dx0 / L, uy = dy0 / L, bx = hx2 + ux * BLADE, by = hy + uy * BLADE;
+      P.line(hx2 - ux * 3, hy - uy * 3, hx2, hy, PRO.grip, 1); // grip + pommel
+      P.line(hx2 + ux - uy * 2, hy + uy + ux * 2, hx2 + ux + uy * 2, hy + uy - ux * 2, PRO.guard, 1); // crossguard
+      P.line(hx2 + ux * 2, hy + uy * 2, bx, by, PRO.blade, 1);
+      P.line(hx2 + ux * 3 - uy, hy + uy * 3 + ux, hx2 + ux * (BLADE - 4) - uy, hy + uy * (BLADE - 4) + ux, shade(PRO.blade, 0.8), 1); // blade width
+      P.set(hx2 + ux * BLADE * 0.65, hy + uy * BLADE * 0.65, PRO.bladeHi);
+      P.set(bx, by, PRO.bladeHi);
     }
     if (isFront) {
       const fx = a.h[0] - a.e[0], fy = a.h[1] - a.e[1], L = Math.hypot(fx, fy) || 1;
@@ -250,14 +257,19 @@ export function protagonist(p: Pose): Px {
   else P.set(X(2) + hx0, Y(5) + b, "#1b1714");
 
   const arm = ARMS[p.arm ?? "rest"] as ArmPose;
-  if (!arm.blade) { P.rect(X(4) + ln, Y(21) + b, 1, 3, PRO.grip); P.rect(X(4) + ln, Y(24) + b, 2, 6, PRO.blade); }
+  if (!arm.blade) { // sheathed sword at the hip: grip forward-up, scabbard trailing back-down
+    P.line(X(4) + ln, Y(19) + b, X(2) + ln, Y(22) + b, PRO.grip, 1);
+    P.line(X(1) + ln, Y(21) + b, X(4) + ln, Y(23) + b, PRO.guard, 1);
+    P.line(X(2) + ln, Y(23) + b, X(-9) + ln, Y(37) + b, PRO.sheath, 2);
+    P.set(X(-9) + ln, Y(37) + b, PRO.guard);
+  }
   drawArm(arm, PRO.sleeve, PRO.skin, true);
   P.outline();
 
   // smear: a 2-tone arc along the blade path, drawn after the outline so it reads as motion, not form
   if (p.smear) {
-    const [a0, a1, r] = p.smear === "down" ? [-1.15, 0.95, 15] : p.smear === "up" ? [0.9, -1.25, 15] : [-2.0, 0.45, 17];
-    const steps = 18;
+    const [a0, a1, r] = p.smear === "down" ? [-1.15, 0.95, 30] : p.smear === "up" ? [0.9, -1.25, 30] : [-2.0, 0.45, 33];
+    const steps = 30;
     for (let i = 0; i <= steps; i++) {
       const a = a0 + ((a1 - a0) * i) / steps, fade = i / steps;
       const px = sx + 2 + Math.cos(a) * r, py = sy + Math.sin(a) * r;
@@ -271,12 +283,12 @@ export function protagonist(p: Pose): Px {
 
 /** Lying on the ground (death, last frame). Drawn separately because it is not a standing pose. */
 export function protagonistLying(): Px {
-  const P = new Px(48, 56), g = 54;
-  P.rect(6, g - 4, 12, 3, PRO.pants); P.rect(4, g - 4, 3, 3, PRO.boot); P.rect(9, g - 2, 2, 1, PRO.wrap);
-  P.rect(16, g - 6, 16, 5, PRO.coat); P.rect(18, g - 6, 12, 2, PRO.shirt); P.line(18, g - 6, 29, g - 2, PRO.strap);
-  P.rect(31, g - 7, 7, 6, PRO.skin); P.rect(31, g - 8, 7, 3, PRO.hair); P.rect(38, g - 8, 3, 2, PRO.hair);
-  P.rect(24, g - 2, 8, 2, PRO.sleeve); P.set(32, g - 2, RED); P.rect(33, g - 2, 2, 2, PRO.skin);
-  P.line(36, g - 1, 43, g - 1, PRO.blade);
+  const P = new Px(72, 76), g = 72, o = 12;
+  P.rect(6 + o, g - 4, 12, 3, PRO.pants); P.rect(4 + o, g - 4, 3, 3, PRO.boot); P.rect(9 + o, g - 2, 2, 1, PRO.wrap);
+  P.rect(16 + o, g - 6, 16, 5, PRO.coat); P.rect(18 + o, g - 6, 12, 2, PRO.shirt); P.line(18 + o, g - 6, 29 + o, g - 2, PRO.strap);
+  P.rect(31 + o, g - 7, 7, 6, PRO.skin); P.rect(31 + o, g - 8, 7, 3, PRO.hair); P.rect(38 + o, g - 8, 3, 2, PRO.hair);
+  P.rect(24 + o, g - 2, 8, 2, PRO.sleeve); P.set(32 + o, g - 2, RED); P.rect(33 + o, g - 2, 2, 2, PRO.skin);
+  P.line(36 + o, g - 1, 38 + o, g - 1, PRO.grip); P.line(39 + o, g - 1, 39 + o + BLADE, g - 1, PRO.blade);
   return P.outline();
 }
 
@@ -445,7 +457,7 @@ export function dirtTile(): Px {
 /* ---------------- FX sprites ---------------- */
 /** Slash arc, 3 frames: leading edge (0), full arc (1), thinning tail (2). */
 export function slash(level: number, frame: number): Px {
-  const w = 34 + level * 6, h = 30 + level * 6, P = new Px(w, h);
+  const w = 54 + level * 8, h = 50 + level * 8, P = new Px(w, h);
   const c = level >= 2 ? "#f6eccc" : "#e3eaec";
   const from = frame === 2 ? 12 : 0, to = frame === 0 ? 14 : 24;
   for (let t = from; t <= to; t++) {

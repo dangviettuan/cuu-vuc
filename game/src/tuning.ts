@@ -49,9 +49,9 @@ export interface AttackDef {
 }
 
 export const LIGHT: AttackDef[] = [
-  { name: "light1", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 20, height: 16, guardBreak: false, lunge: 30 },
-  { name: "light2", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 20, height: 16, guardBreak: false, lunge: 30 },
-  { name: "light3", startup: f(7), active: f(5), recovery: f(16), damage: 16, stamina: 8, reach: 24, height: 18, guardBreak: false, lunge: 60 },
+  { name: "light1", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 36, height: 20, guardBreak: false, lunge: 30 },
+  { name: "light2", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 36, height: 20, guardBreak: false, lunge: 30 },
+  { name: "light3", startup: f(7), active: f(5), recovery: f(16), damage: 16, stamina: 8, reach: 40, height: 24, guardBreak: false, lunge: 60 },
 ];
 
 /** Heavy attack: chargeable, 2 levels (Bible §2). */
@@ -59,12 +59,12 @@ export const HEAVY = {
   levelTimes: [0, 400, 900], // hold time to reach level 0/1/2
   damage: [22, 32, 44],
   stamina: [18, 24, 30],
-  def: { name: "heavy", startup: f(10), active: f(5), recovery: f(18), damage: 0, stamina: 0, reach: 26, height: 22, guardBreak: true, lunge: 80 } as AttackDef,
+  def: { name: "heavy", startup: f(10), active: f(5), recovery: f(18), damage: 0, stamina: 0, reach: 44, height: 28, guardBreak: true, lunge: 80 } as AttackDef,
   chargeMoveFactor: 0.25,
 } as const;
 
 /** Riposte: Kiếm Khách signature (parry → heavy counter). */
-export const RIPOSTE: AttackDef = { name: "riposte", startup: f(4), active: f(5), recovery: f(14), damage: 40, stamina: 0, reach: 26, height: 22, guardBreak: true, lunge: 120 };
+export const RIPOSTE: AttackDef = { name: "riposte", startup: f(4), active: f(5), recovery: f(14), damage: 40, stamina: 0, reach: 44, height: 28, guardBreak: true, lunge: 120 };
 export const RIPOSTE_WINDOW = 650;
 
 export const DODGE = {
