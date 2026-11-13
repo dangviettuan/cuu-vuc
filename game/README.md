@@ -6,6 +6,8 @@ The first playable slice, built to the scope of the Combat & Class Bible §11:
 
 Engine: **Phaser 4.2.1 + TypeScript + Vite** ([ADR-0008](../docs/decisions/ADR-0008-engine-phaser.md)).
 
+**Play online:** https://dangviettuan.github.io/cuu-vuc/ (deployed by `.github/workflows/deploy-pages.yml` on every push to `main` that touches `game/`).
+
 ## Run
 
 ```bash
