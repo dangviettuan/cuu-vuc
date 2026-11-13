@@ -1,0 +1,13 @@
+{
+ "samples": 792,
+ "maxPx": 2139,
+ "worstRightMarginPx": 8,
+ "worstLeftMarginPx": 70,
+ "clippedFrames": 0,
+ "clippedExamples": [],
+ "shots": {
+  "wall": true,
+  "overlap": true
+ },
+ "errors": []
+}

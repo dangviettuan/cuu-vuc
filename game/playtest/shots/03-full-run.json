@@ -45,11 +45,11 @@
   {
    "attempt": 1,
    "result": "won",
-   "seconds": 146,
+   "seconds": 133,
    "bossHpLeft": 0,
    "bossPhase": 3,
    "startHp": 100,
-   "herbsLeft": 0
+   "herbsLeft": 2
   }
  ],
  "shots": [
@@ -61,7 +61,7 @@
   "shots/f06-choice.png",
   "shots/f07-ending-spare.png"
  ],
- "minutes": 3,
+ "minutes": 2.8,
  "botLog": {
   "boar": [
    {
@@ -102,44 +102,35 @@
     "avoided": true
    },
    {
-    "t": 6.9,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 9.8,
-    "phase": 1,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 12.4,
+    "t": 4.6,
     "phase": 1,
     "kind": "roots",
     "avoided": true,
     "n": 3
    },
    {
-    "t": 13.1,
+    "t": 5,
     "phase": 1,
-    "kind": "punish",
-    "window": "recover",
-    "dealt": 36,
-    "gotHit": false
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
    },
    {
-    "t": 15.3,
+    "t": 6.6,
     "phase": 1,
-    "kind": "swipe",
-    "parried": true,
-    "hit": false,
-    "dealt": 0
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
    },
    {
-    "t": 16.4,
+    "t": 7.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 8.3,
     "phase": 1,
     "kind": "swipe",
     "parried": false,
@@ -147,7 +138,7 @@
     "dealt": 0
    },
    {
-    "t": 17.5,
+    "t": 9.4,
     "phase": 1,
     "kind": "punish",
     "window": "recover",
@@ -155,7 +146,268 @@
     "gotHit": false
    },
    {
-    "t": 19.6,
+    "t": 10.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 11.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 13.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 16.3,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 19.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 24,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 26.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 26.8,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 28.4,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 28.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 31.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 35.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 35.9,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 38,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 40.9,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 43.3,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 43.7,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 45.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 48.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 51.6,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 56.4,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 59.3,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 62.2,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 65.1,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 68,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 70.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 73.8,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 76.2,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 76.6,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 78.9,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 83.7,
+    "phase": 1,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 86.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 86.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 88.1,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 88.5,
+    "phase": 1,
+    "kind": "roots",
+    "avoided": true,
+    "n": 3
+   },
+   {
+    "t": 89.8,
+    "phase": 1,
+    "kind": "swipe",
+    "parried": false,
+    "hit": false,
+    "dealt": 0
+   },
+   {
+    "t": 90.9,
+    "phase": 1,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 36,
+    "gotHit": false
+   },
+   {
+    "t": 93,
     "phase": 1,
     "kind": "swipe",
     "parried": true,
@@ -163,7 +415,7 @@
     "dealt": 60
    },
    {
-    "t": 20.3,
+    "t": 93.7,
     "phase": 1,
     "kind": "punish",
     "window": "stagger",
@@ -171,113 +423,7 @@
     "gotHit": false
    },
    {
-    "t": 21.2,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 21.6,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 23.4,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 27.6,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 29.9,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 32.4,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 32.8,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 34.7,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 37.6,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 39.6,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 40,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 41.3,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 41.7,
-    "phase": 2,
-    "kind": "roots",
-    "avoided": true,
-    "n": 5
-   },
-   {
-    "t": 43.5,
-    "phase": 2,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 44.3,
-    "phase": 2,
-    "kind": "punish",
-    "window": "recover",
-    "dealt": 36,
-    "gotHit": false
-   },
-   {
-    "t": 45.1,
+    "t": 94.5,
     "phase": 2,
     "kind": "swipe",
     "parried": false,
@@ -285,31 +431,7 @@
     "dealt": 0
    },
    {
-    "t": 45.9,
-    "phase": 2,
-    "kind": "punish",
-    "window": "recover",
-    "dealt": 20,
-    "gotHit": false
-   },
-   {
-    "t": 47.9,
-    "phase": 2,
-    "kind": "swipe",
-    "parried": true,
-    "hit": false,
-    "dealt": 0
-   },
-   {
-    "t": 48.9,
-    "phase": 2,
-    "kind": "swipe",
-    "parried": false,
-    "hit": false,
-    "dealt": 0
-   },
-   {
-    "t": 50,
+    "t": 95.3,
     "phase": 2,
     "kind": "punish",
     "window": "recover",
@@ -317,533 +439,199 @@
     "gotHit": false
    },
    {
-    "t": 50.7,
-    "phase": 3,
+    "t": 96.1,
+    "phase": 2,
     "kind": "swipe",
     "parried": false,
     "hit": true,
     "dealt": 0
    },
    {
-    "t": 51.4,
-    "phase": 3,
-    "kind": "punish",
-    "window": "recover",
-    "dealt": 36,
-    "gotHit": false
-   },
-   {
-    "t": 52.4,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 52.8,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 53.8,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 54.2,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 55.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 56.9,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 60.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 61.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 63.9,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 64.3,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 65.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 66.9,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 69.5,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 70.4,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 72.6,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 73,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 74,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 74.4,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 76,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 76.5,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 77.7,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": false,
-    "n": 7
-   },
-   {
-    "t": 79.1,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 79.7,
-    "phase": 3,
-    "kind": "heal"
-   },
-   {
-    "t": 80.2,
-    "phase": 3,
-    "kind": "heal"
-   },
-   {
-    "t": 81.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 82.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 83.9,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 85.3,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 85.9,
-    "phase": 3,
-    "kind": "heal"
-   },
-   {
-    "t": 86.4,
-    "phase": 3,
-    "kind": "heal"
-   },
-   {
-    "t": 86.8,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 88.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 89.8,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 91.9,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 92.9,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 97.5,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 98.5,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 101.1,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 102.1,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 104.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 105.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 107.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 110,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 111,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 112.7,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 113.1,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 114.6,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 115.6,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 117.7,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 118.7,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 120.4,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 120.8,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 122.3,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 123.4,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 125.4,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 126.4,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 129,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 130,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 132.6,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 133.6,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 135.7,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 136.2,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 137.1,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 137.5,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 138.5,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 138.9,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 139.9,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 140.3,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 141.3,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 141.7,
-    "phase": 3,
-    "kind": "roots",
-    "avoided": true,
-    "n": 7
-   },
-   {
-    "t": 143.2,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": true
-   },
-   {
-    "t": 143.7,
-    "phase": 3,
-    "kind": "charge",
-    "tactic": "dodge",
-    "avoided": false
-   },
-   {
-    "t": 144,
-    "phase": 3,
+    "t": 96.4,
+    "phase": 2,
     "kind": "swipe-late-dodge",
     "hit": false
    },
    {
-    "t": 144.7,
-    "phase": 3,
+    "t": 97.1,
+    "phase": 2,
     "kind": "punish",
     "window": "recover",
-    "dealt": 20,
+    "dealt": 36,
     "gotHit": false
    },
    {
-    "t": 145.5,
+    "t": 98.1,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 98.6,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 100.4,
+    "phase": 2,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 105.5,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 105.9,
+    "phase": 2,
+    "kind": "roots",
+    "avoided": true,
+    "n": 5
+   },
+   {
+    "t": 108,
+    "phase": 2,
+    "kind": "swipe",
+    "parried": true,
+    "hit": false,
+    "dealt": 60
+   },
+   {
+    "t": 108.6,
+    "phase": 3,
+    "kind": "punish",
+    "window": "stagger",
+    "dealt": 16,
+    "gotHit": false
+   },
+   {
+    "t": 109.4,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 109.8,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 110.8,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 111.2,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 112.8,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 114,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 116.5,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 117.5,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 119.6,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 120.6,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 122.3,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 122.7,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 124.2,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 125,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 128.5,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 128.9,
+    "phase": 3,
+    "kind": "roots",
+    "avoided": true,
+    "n": 7
+   },
+   {
+    "t": 130.3,
+    "phase": 3,
+    "kind": "charge",
+    "tactic": "dodge",
+    "avoided": true
+   },
+   {
+    "t": 130.9,
     "phase": 3,
     "kind": "swipe",
     "parried": false,
@@ -851,7 +639,23 @@
     "dealt": 0
    },
    {
-    "t": 146.2,
+    "t": 131.6,
+    "phase": 3,
+    "kind": "punish",
+    "window": "recover",
+    "dealt": 0,
+    "gotHit": false
+   },
+   {
+    "t": 132.4,
+    "phase": 3,
+    "kind": "swipe",
+    "parried": false,
+    "hit": true,
+    "dealt": 0
+   },
+   {
+    "t": 133.1,
     "phase": 3,
     "kind": "punish",
     "window": "recover",
@@ -863,64 +667,24 @@
    {
     "amount": 22,
     "ctx": "boss",
-    "pState": "hurt",
-    "boss": "recover",
-    "boars": [],
-    "roots": 0
-   },
-   {
-    "amount": 22,
-    "ctx": "boss",
     "pState": "move",
     "boss": "recover",
     "boars": [],
     "roots": 0
    },
    {
-    "amount": 14,
+    "amount": 22,
     "ctx": "boss",
     "pState": "hurt",
-    "boss": "recover",
+    "boss": "swipe",
     "boars": [],
-    "roots": 7
-   },
-   {
-    "amount": 14,
-    "ctx": "boss",
-    "pState": "hurt",
-    "boss": "recover",
-    "boars": [],
-    "roots": 7
-   },
-   {
-    "amount": 14,
-    "ctx": "boss",
-    "pState": "hurt",
-    "boss": "recover",
-    "boars": [],
-    "roots": 7
-   },
-   {
-    "amount": 14,
-    "ctx": "boss",
-    "pState": "hurt",
-    "boss": "recover",
-    "boars": [],
-    "roots": 7
-   },
-   {
-    "amount": 14,
-    "ctx": "boss",
-    "pState": "hurt",
-    "boss": "recover",
-    "boars": [],
-    "roots": 7
+    "roots": 0
    },
    {
     "amount": 22,
     "ctx": "boss",
     "pState": "hurt",
-    "boss": "swipe",
+    "boss": "recover",
     "boars": [],
     "roots": 0
    },
@@ -934,36 +698,98 @@
    }
   ],
   "deaths": 0,
-  "heals": 4,
+  "heals": 0,
   "phaseTimes": {
-   "2": 21,
-   "3": 50
+   "2": 94,
+   "3": 108
   }
  },
  "frameTimes": {
-  "n": 10858,
-  "avg": 16.73,
+  "n": 10102,
+  "avg": 16.69,
   "p50": 16.7,
   "p95": 16.8,
   "p99": 16.8,
-  "max": 116.7
+  "max": 83.3
  },
  "memory": {
   "start": {
-   "used": 26688302,
-   "total": 32437898
+   "used": 31389860,
+   "total": 36456740
   },
   "end": {
-   "used": 28788753,
-   "total": 50663081
+   "used": 28889679,
+   "total": 50176579
   }
  },
  "objects": {
-  "start": 352,
-  "end": 352
+  "start": 354,
+  "end": 354
  },
  "console": {
   "errors": [],
-  "warnings": []
+  "warnings": [
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently",
+   "Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently"
+  ]
  }
 }

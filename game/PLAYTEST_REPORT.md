@@ -386,6 +386,17 @@ After the report, I was asked to make the first five fixes from §F plus the qui
 5. **The latency sample for jump was 26 ms in this run** (7.7 ms before). It's a single sample of 1–2 frames and nothing in the jump code changed, so I count it as noise.
 6. **The soak's frame times look better** (the 750 ms spike didn't recur), but this soak ran only one fight instead of four, so I-17 stays *not confirmed*.
 
+### Follow-up: cloud-browser playtest feedback
+The cloud-browser playtest had no WebGL, so the game now falls back to Canvas (`Phaser.AUTO`). It raised three more issues, all now fixed:
+
+| Feedback | Cause | Fix | Verified |
+|---|---|---|---|
+| **P1:** the hero is sometimes cut off at the arena's right edge | **Wall position:** the walls stood *outside* the camera bounds, so a 10 px body against the wall left the drawn hero (about 24 px) partly off-screen. **Push-out:** it could shove the player through the wall entirely, past Arcade's 4 px overlap margin. | **Walls:** now 16 px *inside* the camera bounds. **Push-out:** clamped to the arena; whatever the wall absorbs pushes the enemy away instead. | `probe-arena-edge.cjs` (DEBUG-ASSISTED setup, real input). **Before:** the player reached x=2195 (wall at 2160); 496/731 frames clipped, worst 48 px. **After:** max x=2139; **0/792 frames clipped**; closest margin 8 px. Shots `e01`, `e02`. |
+| **P1:** the hero is hard to read when overlapping Nanh Rễ | The dark-green hero merges into her body. | **1 px dark outline** around every hero frame, generated at boot (`src/outline.ts`). It is drawn above enemies and below the hero, and works on both renderers. | `e02-overlap.png` |
+| **P2:** the bottom controls strip is hard to read | 8 px grey text with no backing. | **Text:** 9 px, near-white. **Backing:** its own dark band under the boss bar. | `e01`, `e02` |
+
+**Regression check:** full playthroughs on WebGL and on Canvas both pass every step. Frame time p95 is 16.8 / 16.7 ms, with no errors and no object growth.
+
 ### Still open
 - **I-08:** the hero is still small.
 - **I-13:** the swipe-parry window is narrow at human reaction speed.

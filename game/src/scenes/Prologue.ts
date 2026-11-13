@@ -6,10 +6,13 @@ import { EnemyHit, Hittable, PlayerHit, overlaps } from "../combat";
 import { Animator } from "../anim";
 import { HERB_GLINT, SHRINE_LIT } from "../clips";
 import { Fx } from "../fx";
+import { buildOutlines } from "../outline";
 import { sfx, unlockAudio } from "../sfx";
 import { PLAYER, VIEW, WORLD } from "../tuning";
 
 const ARENA = { min: 1520, max: 2160 };
+/** Arena walls sit *inside* the camera bounds so the hero's drawn sprite (wider than its 10 px body) is never cut off at the edge. */
+const ARENA_WALL = 16;
 const FLAG_KEY = "cuu-vuc-flags";
 
 interface Herb { img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; }
@@ -24,6 +27,8 @@ interface Drift { img: Phaser.GameObjects.Image; x: number; y: number; vx: numbe
  */
 export class PrologueScene extends Phaser.Scene {
   private player!: Player;
+  /** Dark 1 px outline drawn just under the hero, above enemies (outline.ts). */
+  private playerOutline!: Phaser.GameObjects.Image;
   private keys!: Record<string, Phaser.Input.Keyboard.Key>;
   private bg!: Phaser.GameObjects.TileSprite;
   private solids!: Phaser.Physics.Arcade.StaticGroup;
@@ -73,6 +78,7 @@ export class PrologueScene extends Phaser.Scene {
 
   create(): void {
     registerTextures(this);
+    buildOutlines(this, "p_");
     this.sim = 0; this.hitstopLeft = 0; this.engaged = false; this.finished = false; this.choosing = false;
     this.checkpoint = { x: 60, y: WORLD.groundY }; // R must restart from the beginning, not the last shrine (playtest I-06)
     this.boars = []; this.roots = []; this.herbs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
@@ -102,6 +108,7 @@ export class PrologueScene extends Phaser.Scene {
 
     // Player.
     this.player = new Player(this, this.checkpoint.x, this.checkpoint.y);
+    this.playerOutline = this.add.image(0, 0, "p_idle0_ol").setOrigin(0.5, 1).setDepth(9.5);
     this.player.body2.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.solids);
     this.player.onEvent = (k) => this.onPlayerEvent(k);
@@ -165,7 +172,9 @@ export class PrologueScene extends Phaser.Scene {
     this.toastText = txt(VIEW.width / 2, 50, "", 11, "#f6e7a0", { backgroundColor: "#0b0d11cc", padding: { x: 6, y: 3 } }).setOrigin(0.5, 0);
     this.bossName = txt(VIEW.width / 2, VIEW.height - 40, "NANH RỄ", 10, "#ebe6dc").setOrigin(0.5, 0).setVisible(false);
     this.prompt = txt(VIEW.width / 2, 110, "", 12, "#ebe6dc", { align: "center", backgroundColor: "#0b0d11dd", padding: { x: 10, y: 8 } }).setOrigin(0.5, 0).setVisible(false);
-    txt(VIEW.width / 2, VIEW.height - 15, "A/D chạy · Space nhảy · J chém · K giữ: chém mạnh · Shift né · I đỡ · Q thảo dược · E tương tác · F1 hitbox", 8, "#9aa1ad").setOrigin(0.5, 0);
+    // Controls strip: its own dark band and near-white text (cloud playtest: the old 8 px grey line was the hardest text to read).
+    this.add.rectangle(0, VIEW.height - 15, VIEW.width, 15, 0x0b0d11, 0.86).setOrigin(0).setScrollFactor(0).setDepth(100);
+    txt(VIEW.width / 2, VIEW.height - 13, "A/D chạy · Space nhảy · J chém · K giữ: chém mạnh · Shift né · I đỡ · Q thảo dược · E tương tác · F1 hitbox", 9, "#e4e7ec").setOrigin(0.5, 0);
     this.keyHint = this.label(0, 0, "E", 9, "#0b0d11", { backgroundColor: "#f6e7a0", padding: { x: 3, y: 1 } }).setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.floatText = this.label(0, 0, "", 9, "#f6e7a0").setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.toast("Việc sáng: phát quang lối mòn cho trưởng làng.");
@@ -335,7 +344,7 @@ export class PrologueScene extends Phaser.Scene {
 
   private engage(): void {
     this.engaged = true;
-    for (const x of [ARENA.min - 8, ARENA.max + 8]) this.walls.add(this.add.rectangle(x, WORLD.groundY / 2, 16, WORLD.groundY + 200).setVisible(false));
+    for (const x of [ARENA.min + ARENA_WALL / 2, ARENA.max - ARENA_WALL / 2]) this.walls.add(this.add.rectangle(x, WORLD.groundY / 2, 16, WORLD.groundY + 200).setVisible(false));
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.boss, this.walls);
     this.cameras.main.setBounds(ARENA.min, 0, ARENA.max - ARENA.min, WORLD.height);
@@ -475,9 +484,16 @@ export class PrologueScene extends Phaser.Scene {
     for (const h of inc) if (overlaps(h.rect, hb)) this.player.receive(h);
 
     this.pressed.clear();
+    this.syncOutline();
     this.drawHud(time, delta);
     this.drawDebug(ph?.rect ?? null, inc);
     this.frameMs = this.frameMs * 0.95 + (performance.now() - t0) * 0.05;
+  }
+
+  private syncOutline(): void {
+    const p = this.player, o = this.playerOutline, key = p.texture.key + "_ol";
+    if (o.texture.key !== key && this.textures.exists(key)) o.setTexture(key);
+    o.setPosition(p.x, p.y).setFlipX(p.flipX).setVisible(p.visible).setAlpha(p.alpha);
   }
 
   /**
@@ -495,7 +511,16 @@ export class PrologueScene extends Phaser.Scene {
       const overlap = Math.min(pb.right, eb.right) - Math.max(pb.x, eb.x);
       if (overlap <= 0) continue;
       const side = p.x !== e.x ? Math.sign(p.x - e.x) : -e.facing;
-      const push = side * Math.min(overlap, Math.max(2, overlap * 0.5));
+      let push = side * Math.min(overlap, Math.max(2, overlap * 0.5));
+      if (this.engaged) {
+        // Never push the player into an arena wall (a large push could tunnel past Arcade's 4 px overlap bias and
+        // leave the hero half off-screen). Whatever the wall absorbs moves the enemy away instead.
+        const half = pb.width / 2;
+        const target = Phaser.Math.Clamp(p.x + push, ARENA.min + ARENA_WALL + half, ARENA.max - ARENA_WALL - half);
+        const rest = p.x + push - target;
+        if (rest !== 0) { e.x -= rest; eb.x -= rest; }
+        push = target - p.x;
+      }
       p.x += push; pb.x += push;
     }
   }
