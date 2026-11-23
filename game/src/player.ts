@@ -36,6 +36,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   stamina: number = PLAYER.maxStamina;
   the = 0; // Thế: Kiếm Khách stance charge
   herbs = 0;
+  /**
+   * Herbs found so far. Respawning and resting at a shrine refill `herbs` to this (review 2026-11-23, B2: spent herbs
+   * never came back, so a struggling player faced every later boss attempt with none). Interim until the healing
+   * model (flask vs consumable) is decided.
+   */
+  herbMax = 0;
   facing: 1 | -1 = 1;
   state: State = "move";
   readonly anim: Animator;
@@ -99,7 +105,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   respawn(x: number, y: number): void {
-    this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0;
+    this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0; this.herbs = this.herbMax;
     this.setPosition(x, y); this.body2.setVelocity(0, 0);
     this.setAlpha(1); flash(this, false);
     this.attack = null;

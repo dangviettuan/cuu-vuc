@@ -156,6 +156,10 @@ export class PrologueScene extends Phaser.Scene {
     this.boss = new NanhRe(this, 1960, ARENA.min, ARENA.max);
     this.boss.facing = -1;
     this.physics.add.collider(this.boss, this.solids);
+    // Registered once: the walls group is filled on engage and emptied on reset. Adding these in engage() leaked two
+    // colliders per boss attempt (review 2026-11-23, B1).
+    this.physics.add.collider(this.player, this.walls);
+    this.physics.add.collider(this.boss, this.walls);
     this.boss.onRoots = (xs, warn) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, this.sim, warn + i * 40)));
     this.boss.onDown = () => this.bossDown();
     this.boss.onPhase = (p) => { sfx.roar(); this.toast(p === 2 ? "Nanh Rễ gào lên. Rễ mọc dày hơn." : "Nanh Rễ liều mạng!"); this.cameras.main.shake(220, 0.006); };
@@ -363,8 +367,6 @@ export class PrologueScene extends Phaser.Scene {
   private engage(): void {
     this.engaged = true;
     for (const x of [ARENA.min + ARENA_WALL / 2, ARENA.max - ARENA_WALL / 2]) this.walls.add(this.add.rectangle(x, WORLD.groundY / 2, 16, WORLD.groundY + 200).setVisible(false));
-    this.physics.add.collider(this.player, this.walls);
-    this.physics.add.collider(this.boss, this.walls);
     this.cameras.main.setBounds(ARENA.min, 0, ARENA.max - ARENA.min, WORLD.height);
     this.bossName.setVisible(true);
     this.toast("Nanh Rễ: rễ cây mọc xuyên qua da thịt nó.", 2000);
@@ -457,7 +459,7 @@ export class PrologueScene extends Phaser.Scene {
     // Pickups and interactions (with feedback).
     for (const h of this.herbs) {
       if (!h.taken && Math.abs(h.img.x - this.player.x) < 12 && Math.abs(h.img.y - this.player.y) < 30) {
-        h.taken = true; h.img.destroy(); this.player.herbs++; sfx.pickup();
+        h.taken = true; h.img.destroy(); this.player.herbs++; this.player.herbMax++; sfx.pickup();
         this.fx.sparkle(h.img.x, h.baseY - 6, 8); this.float(h.img.x, h.baseY - 14, "+1 thảo dược");
       }
     }
@@ -466,8 +468,9 @@ export class PrologueScene extends Phaser.Scene {
     if (tap("KeyE") && nearShrine) {
       this.checkpoint = { x: this.shrine.x + 20, y: WORLD.groundY };
       this.player.hp = PLAYER.maxHp;
+      this.player.herbs = this.player.herbMax; // resting refills the herbs found so far (review B2)
       if (!this.shrineLit) { sfx.shrine(); this.shrineLit = true; this.shrineAnim.play(SHRINE_LIT); this.fx.ring(this.shrine.x, this.shrine.y - 20); this.fx.motes(this.shrine.x, this.shrine.y - 30, 8); }
-      this.toast("Miếu Mạch đã thắp. Máu hồi đầy.");
+      this.toast("Miếu Mạch đã thắp. Máu và thảo dược hồi đầy.");
     }
     if (!this.engaged && !this.finished && this.boss.isAlive() && this.player.x > ARENA.min + 30) this.engage();
 
