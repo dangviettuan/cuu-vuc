@@ -17,7 +17,7 @@ The Art README's items that must be locked before large-scale asset production *
 
 | Item | Decision |
 |---|---|
-| **Reference resolution** | **640 × 360** (16:9), integer-scaled: ×3 for 1920×1080 and ×6 for 4K. Ultrawide shows extra side view, never a stretch. |
+| **Reference resolution** | ~~640 × 360~~ → **480 × 270** (16:9) *(amended 2026-11-25, [ADR-0009](../decisions/ADR-0009-logical-resolution-480x270.md))*, integer-scaled: ×4 for 1920×1080 and ×8 for 4K. Sprite and tile sizes are unchanged; the camera shows less world, so the 48 px hero reads larger. Ultrawide shows extra side view, never a stretch. |
 | **Tile size** | **16 × 16 px** |
 | **Base character height** | **Protagonist: 48 px** (3 tiles), standing, including the hair tail. Diệp is 51 px (slightly taller, DB N7). The Father is 46 px (stooped, FB F6). Thủ Mạch Nhân is 72 px (very tall, TB T6). |
 | **Camera** | A side view with gentle look-ahead in the direction of movement. Vertical framing opens up in Vân Hải and Thiên Khuyết. **Boss arenas lock the camera** unless the boss is larger than the screen. |
@@ -27,7 +27,7 @@ The Art README's items that must be locked before large-scale asset production *
 | **Outline rules** | **Characters and enemies:** a 1 px **coloured** outline (a darkened local hue, never pure black). **Backgrounds:** no outlines. **Interactables:** a 1 px light rim on approach. |
 | **Lighting rules** | Each scene has **one key light plus at most two accents.** **Mạch light is always an accent** (§4). Characters get a simple rim light from the key light. There is no dynamic lighting on sprites in v0.1. |
 | **Palette policy** | **Per-realm master palette of 32 colours** (§5) plus **a shared character palette of 24**. **Reserved red** (§3) is never used in environments. |
-| **Weapon scale** | One-hand sword ≈ 22 px; twin blades ≈ 12 px each; staff ≈ 40 px; crossbow ≈ 20 px. Diệp's spear ≈ 56 px, longer than she is tall. **[DB N6]** |
+| **Weapon scale** | Brush-knife (Prologue) ≈ 15 px *(amended, ADR-0010)*; one-hand sword ≈ 22 px; twin blades ≈ 12 px each; staff ≈ 40 px; crossbow ≈ 20 px. Diệp's spear ≈ 56 px, longer than she is tall. **[DB N6]** |
 | **VFX scale** | Hit sparks ≤ 16 px. Mạch Ấn effects ≤ 2 tiles from the player, except bursts (frost burst, wave), which are ≤ 6 tiles. **VFX must never hide an enemy's tell.** |
 | **Hitbox consistency** | Hurtbox = body silhouette inset by 2 px. Attack hitboxes must match the drawn weapon arc on its **active frames**. Telegraph frames are drawn and timed **before** the hitbox becomes active. |
 

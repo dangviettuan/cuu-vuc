@@ -1,6 +1,12 @@
 # Combat & Class Bible v0.1
 
-Status: **v0.1 locked.** All numbers are **starting targets for the greybox prototype**, not final tuning.
+Status: **v0.1 locked**, with the **2026-11-25 amendments** marked *(amended)*. All numbers are **starting targets for the greybox prototype**, not final tuning.
+
+> **Amendments 2026-11-25** (from `game/REVIEW-2026-11-23.md`, decisions D2 and D4–D6):
+> - **Block** is added (§2).
+> - **Healing** uses a herb pouch refilled at checkpoints (§2).
+> - **Thế** comes from parries only. The Riposte is free after a parry, and **Phá Thế** spends 2 Thế (§3).
+> - **The Prologue kit** is defined in [ADR-0010](../decisions/ADR-0010-prologue-kit-and-class-kits.md).
 
 > Source tags: **[GB]** Gameplay README, **[WB]** World Bible, **[PB]** Protagonist Bible, **[CH*]** chapter specs, **[ADR-0006/0007]**, **[new]** a new invention.
 
@@ -21,11 +27,13 @@ Status: **v0.1 locked.** All numbers are **starting targets for the greybox prot
 | **Heavy attack** | Chargeable (2 levels). Breaks guards. Costs stamina. |
 | **Dodge** | A short dash with **10 i-frames** (at 60 FPS). Costs stamina. A **perfect dodge** (enemy hit lands within the first 4 frames) triggers the perfect-defence state for classes that use dodge (§3). |
 | **Parry** | **Every class can parry** (window of 8 frames). A successful parry staggers lighter enemies. **Kiếm Khách** has a wider window and gains counters (§3). |
+| **Block** *(amended)* | **Keep holding the parry button** after the parry window to guard. So pressing always opens a parry window first, and holding turns it into a block. A blocked hit deals **25% chip damage** and drains **1.6 stamina per point of damage**. If the drain would empty stamina, **the guard breaks** and the rest of the hit lands. Only **parryable** attacks can be blocked, and only from the front: unparryable attacks (charges, eruptions) must be dodged. Stamina does not regenerate while guarding. Releasing costs a short recovery (120 ms). |
 | **Interact / Use item** | Healing herbs (CH-P), antidotes (CH-I), water skins (CH-III) and so on. Use animations are short and can be punished. |
+| **Healing** *(amended)* | **The herb pouch.** Each field herb found adds a pouch slot, up to a cap (2 in the Prologue, raised later by upgrades). **Resting at a checkpoint and respawning refill the pouch.** Healing is therefore a per-attempt budget, so a struggling player never faces a boss with fewer heals than last time. Herbs found beyond the cap are crafting and upgrade material. |
 | **Traversal (gear)** | **Móc Câu** (grapple, CH-I/II) and **Áo Gió** (Air Dash, CH-VIII). **Never gated by optional Mạch Ấn.** **[GB]** |
 
 **Resources:**
-- **Health:** restored by consumables and checkpoints.
+- **Health:** restored by the herb pouch and checkpoints.
 - **Stamina:** regenerates when not spending; drained by dodge, heavy attacks and blocking. Heat (CH-III) and cold (CH-VI) slow its regeneration.
 - **No mana bar.** Class abilities run on **cooldowns** plus a per-class **charge resource** (§3).
 
@@ -39,8 +47,8 @@ Classes are chosen in early Ch. I from four mentors. The class is **the path he 
 | **Fantasy** | Stand your ground and turn the blow. | Never be there. Punish the miss. | Borrow the world's spirits, and pay them back. | Decide the fight before it starts. |
 | **Weapon** | Straight sword (one-hand) + off-hand guard | Twin short blades | Staff + spirit focus | Crossbow + toolkit (traps, devices) |
 | **Perfect defence** | **Perfect parry** (wider window: 12 frames) | **Perfect dodge** (window: 6 frames) | **Ward timing**: a spirit ward raised just before impact | **Trap trigger**: an enemy entering a primed trap |
-| **Charge resource** | **Thế** (stance): built by blocks and parries, spent on counters | **Ảnh** (shadow): built by perfect dodges and combos, spent on blink strikes | **Linh** (spirit debt): abilities *borrow* Linh; the debt repays over time, and **if over-borrowed, healing is reduced until it is repaid** | **Linh kiện** (parts): crafted at checkpoints and from drops; traps consume them |
-| **Signature abilities (v0.1)** | Riposte (parry → heavy counter); Đứng Chắn (a stance that absorbs a hit for an ally or object, used in escort and boss beats); Phá Thế (guard break) | Blink Strike (dash through and behind); Ảnh Phân (afterimage feint); Cửu Liên (9-hit finisher spending Ảnh) | Mộc Linh (a root spirit that binds); Phong Linh (a gust that knocks back); Trả Nợ (repays debt for a burst of power) | Bẫy Kẹp (clamp trap); Nỏ Ba (triple bolt); Ròng Rọc (pulls an enemy or object); Chốt (a turret device) |
+| **Charge resource** | **Thế** (stance): **built by parries** (max 3) and spent on **Phá Thế**. *(Amended: blocks don't build it, so guarding stays a cost, not a farm, and the Riposte no longer spends it.)* | **Ảnh** (shadow): built by perfect dodges and combos, spent on blink strikes | **Linh** (spirit debt): abilities *borrow* Linh; the debt repays over time, and **if over-borrowed, healing is reduced until it is repaid** | **Linh kiện** (parts): crafted at checkpoints and from drops; traps consume them |
+| **Signature abilities (v0.1)** | Riposte (parry → heavy counter, **free** within 650 ms of a parry); Đứng Chắn (a stance that absorbs a hit for an ally or object, used in escort and boss beats); **Phá Thế** (guard break: **hold guard + heavy, 2 Thế**; heavy poise damage that staggers a boss even mid-windup, but not mid-charge) | Blink Strike (dash through and behind); Ảnh Phân (afterimage feint); Cửu Liên (9-hit finisher spending Ảnh) | Mộc Linh (a root spirit that binds); Phong Linh (a gust that knocks back); Trả Nợ (repays debt for a burst of power) | Bẫy Kẹp (clamp trap); Nỏ Ba (triple bolt); Ròng Rọc (pulls an enemy or object); Chốt (a turret device) |
 | **Primary attributes** | STR, VIT | DEX | SPI, WIL | DEX, WIL |
 | **Thủ Mạch Nhân counter (CH-V)** | Never attacks into a parry; he waits. | Area attacks with no dodge window. | Summons and spells are sealed as they are cast. | Traps and devices are deactivated as they are placed. |
 | **Prose reference class** | ✔ (Chương 4 onward) | | | |
@@ -152,3 +160,5 @@ This maps the Gameplay README's prototype target **[GB]** to actual content:
 | One enemy | **A startled boar** (thú hoảng) |
 | One boss pattern | **Nanh Rễ**: charge, root-burst, desperate phase |
 | **Stretch goal** | Rễ Giữ (the first Mạch Ấn) + Độc Đằng (poison) as a second slice |
+
+**Greybox kits** *(amended, [ADR-0010](../decisions/ADR-0010-prologue-kit-and-class-kits.md))*: the greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class ability. `?kit=kiem` loads the Kiếm Khách kit (12-frame parry, Thế, Riposte and Phá Thế) for testing.

@@ -42,6 +42,10 @@
 - Concept direction v0.1 picks: protagonist long coat; Diệp short-haired warden; the Father in a scholar's robe; Thủ Mạch Nhân bare-headed with white hair; Nanh Rễ with living roots; realm moods (A: Thanh Mộc, Xích Sa, U Minh, Thiên Khuyết; B: Trung Vực, Lôi Trạch, Hàn Sơn, Huyền Hải, Vân Hải)
 - ADR-0008: Phaser 4.2.1 + TypeScript + Vite; 640×360, pixel art, Arcade physics for the greybox
 - Greybox v0.1: Prologue S1 tutorial, two startled boars, shrine checkpoint, Nanh Rễ with 3 phases (charge, parryable swipe, root-burst), Kiếm Khách parry and Riposte, choice C2 → PRO_SOW_SPARED
+- ADR-0009: logical resolution **480×270** (amends the Art Bible's 640×360); sprite and tile sizes are unchanged
+- ADR-0010: **the classless Prologue kit** (brush-knife, 8-frame parry, block, herb pouch; no Thế or Riposte). Class kits are added in Ch. I; Nanh Rễ's HP is 260
+- ADR-0011: authored art pipeline (Aseprite → Hash JSON atlases in `game/public/art/`, frame names = clip keys, replacing generated frames one at a time)
+- Combat Bible amendments (2026-11-25): **block** (hold parry; chip 25%, stamina 1.6 per damage, guard break); a **herb pouch** refilled at checkpoints; **Thế** from parries only, a free Riposte, and **Phá Thế** (guard + heavy, 2 Thế, boss stagger)
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
 - Prose Chương 4 "Bốn con đường" drafted (Ch. I stages I-2 and I-3 plus Làng Khê; reference class Kiếm Khách)
@@ -59,7 +63,14 @@
 
 ## Next design task
 
-**Greybox playtest and tuning** — next. **Greybox prototype v0.1 is playable** in `game/` (Phaser 4 + TypeScript + Vite, ADR-0008): Prologue S1 → shrine → Nanh Rễ → choice C2.
+**Foundations for the vertical slice**, then **a human playtest**. The greybox (Prologue S1 → shrine → Nanh Rễ → choice C2) has been bot-playtested and tuned (`game/PLAYTEST_REPORT.md`), and reviewed (`game/REVIEW-2026-11-23.md`). Decisions D1–D6 from the review are locked (ADR-0009 to 0011 and the Combat Bible amendments) and implemented in the greybox.
+
+Next, before any new content (review §10, Phase 1):
+- an input service with gamepad and rebinding; title, pause and options;
+- a versioned save and flags service following the flags registry; name entry (ADR-0004);
+- a data-driven stage loader; a dialogue and choice runner with string tables; a pixel font with Vietnamese glyphs;
+- enemy tuning tables with Story / Standard / Hard modes; a seeded RNG for AI;
+- **a 3–5 person human playtest** (review §8).
 
 Roadmap:
 
@@ -68,7 +79,8 @@ Roadmap:
 3. ~~Combat & Class Bible~~ (v0.1: `docs/05-gameplay/combat-class-bible-v0.1.md`)
 4. ~~Art Bible~~ (v0.1: `docs/06-art/art-bible-v0.1.md`)
 5. ~~Concept direction~~ (v0.1: generated pixel concepts chosen; `docs/06-art/concept-v0.1/picks.md`). Painted or hand-pixelled key art can come later and must keep the chosen silhouettes and palettes.
-6. ~~Greybox combat prototype~~ (v0.1 playable: `game/`; next, playtest and tune)
+6. ~~Greybox combat prototype~~ (playable in `game/`; bot playtest, tuning and review done; review decisions D1–D6 locked)
+6b. Vertical-slice foundations (review §10 Phase 1) and a human playtest
 7. Vertical slice (Prologue + Ch. I)
 
 ## Open questions deliberately not locked yet

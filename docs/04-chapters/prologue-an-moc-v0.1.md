@@ -9,6 +9,7 @@ Prose coverage (ADR-0005): prose **Chương 1 — Cái giếng cạn** covers st
 - The protagonist begins in ordinary village life. Tutorial mechanics are embedded in routine activities: movement, interaction, basic combat, family and local NPC relationships. The Father leaves to investigate a Linh Mạch station and does not return. That night the forest changes: animals flee, the ecosystem turns violent, and the journey begins. **[NB Prologue]**
 - **Arc state:** Certainty. Entering: comfortable, restless, mildly irritated by the Father's secrecy. Leaving: afraid, holding a secret that "knows who he is". **[PB L10]**
 - **Tutorial weapon:** the brush-knife only, with no class. The class is chosen in early Ch. I at Mộc Thành. **[PB L9]**
+- **The Prologue kit** *(2026-11-25, [ADR-0010](../decisions/ADR-0010-prologue-kit-and-class-kits.md))*: the universal verbs only. That means the light string, the heavy attack, the dodge, the 8-frame parry (a parry staggers, then "strike now") and the block (hold parry). Healing is the herb pouch: each herb found in S1 adds a slot (2 in the Prologue), and resting at the miếu Mạch refills it. There is no Thế, Riposte or other class ability; Nanh Rễ is tuned for this kit.
 - **The burned half Mạch Ấn** is found in the Father's room. It is a resonator, never absorbed, and it lets him pass the regrowing roots. **[FB F3]**
 - **The Father** confirms the cut at the station and leaves with Quy Nguyên. He did not cut it himself; Cương ordered it. **[FB F4, FF K2]**
 - **Diệp** is away at Mộc Thành with the Hộ Lâm. **[DB]**
