@@ -3,8 +3,8 @@ import { ENEMY_FLASH, WORLD } from "./tuning";
 import { EnemyHit, Hittable, PlayerHit, flash } from "./combat";
 import { canTint } from "./render";
 import { Animator, Clip } from "./anim";
-import { BC, NC, ROOT } from "./clips";
-import { BOAR, NANH_RE } from "./data/enemies";
+import { BC, BoarClips, NC, RBC, ROOT } from "./clips";
+import { BOAR, NANH_RE, ROOTED_BOAR, STAMPEDE } from "./data/enemies";
 import { DIFFICULTY, DifficultyDef } from "./data/difficulty";
 import { Rng } from "./core/rng";
 import { settings } from "./core/settings";
@@ -92,7 +92,9 @@ abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
 }
 
 /* ---------------- startled boar (thú hoảng) ---------------- */
-type BoarState = "wander" | "notice" | "charge" | "stun" | "dead";
+type BoarState = "wander" | "notice" | "charge" | "stun" | "dead" | "flee";
+/** Stage options for a boar: the rooted one (S6) is tougher and runs off when beaten, as in the prose (Ch. 2). */
+export interface BoarOpts { tellMs?: number; rooted?: boolean }
 export class Boar extends Enemy {
   state: BoarState = "wander";
   private swing = nextId("boar");
@@ -107,16 +109,24 @@ export class Boar extends Enemy {
    * its territory, a charge ends a little past it, and a boar outside its range walks home, ignoring the player.
    * `tellMs`: the notice windup. The first (teaching) boar uses a longer one, so its one lesson is easy to read.
    */
-  constructor(scene: Phaser.Scene, x: number, private minX: number, private maxX: number, private tellMs: number = BOAR.tellMs) {
-    super(scene, x, WORLD.groundY, "boar_walk0", Math.round(BOAR.hp * ctx.diff.enemyHp));
+  private readonly C: BoarClips;
+  private readonly tellMs: number;
+  readonly rooted: boolean;
+
+  constructor(scene: Phaser.Scene, x: number, private minX: number, private maxX: number, opts: BoarOpts = {}) {
+    const rooted = !!opts.rooted;
+    super(scene, x, WORLD.groundY, rooted ? "rboar_walk0" : "boar_walk0", Math.round((rooted ? ROOTED_BOAR.hp : BOAR.hp) * ctx.diff.enemyHp));
+    this.rooted = rooted;
+    this.C = rooted ? RBC : BC;
+    this.tellMs = opts.tellMs ?? (rooted ? ROOTED_BOAR.tellMs : BOAR.tellMs);
     this.b.setSize(26, 13).setOffset(5, 9);
-    this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: BOAR.damage, knockback: 0, parryable: true, onParried: () => this.parried() };
+    this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: rooted ? ROOTED_BOAR.damage : BOAR.damage, knockback: 0, parryable: true, onParried: () => this.parried() };
     this.hitList = [this.hit];
-    this.show(BC.walk);
+    this.show(this.C.walk);
   }
 
   private enter(s: BoarState, stunMs: number = BOAR.stunMs): void { this.state = s; this.enterAt(); this.stunMs = stunMs; }
-  private parried(): void { this.enter("stun", BOAR.parriedStunMs); this.kb = -this.facing * 160; this.show(BC.stun); }
+  private parried(): void { this.enter("stun", BOAR.parriedStunMs); this.kb = -this.facing * 160; this.show(this.C.stun); }
 
   tick(now: number, dt: number, playerX: number): void {
     this.now = now;
@@ -126,47 +136,52 @@ export class Boar extends Enemy {
     switch (this.state) {
       case "wander": {
         const home = this.x < lo ? 1 : this.x > hi ? -1 : 0;
-        if (home) { this.facing = home; vx = home * BOAR.homeSpeed; this.show(BC.walk); this.anim.timeScale = 1; break; }
+        if (home) { this.facing = home; vx = home * BOAR.homeSpeed; this.show(this.C.walk); this.anim.timeScale = 1; break; }
         // Too close to charge: back off first, so every charge starts from a readable distance
         // (fix-pass finding: after a riposte it recovered beside the player and charged point-blank, unavoidable).
         if (Math.abs(dx) < BOAR.backOff) {
           const away = dx > 0 ? -1 : 1, nx = this.x + away * 24;
           if (nx > lo && nx < hi) {
-            this.facing = away; vx = away * BOAR.backOffSpeed; this.show(BC.walk); this.anim.timeScale = 1.1;
-          } else { this.facing = dx > 0 ? 1 : -1; this.show(BC.idle); } // cornered at the leash: stand and face
+            this.facing = away; vx = away * BOAR.backOffSpeed; this.show(this.C.walk); this.anim.timeScale = 1.1;
+          } else { this.facing = dx > 0 ? 1 : -1; this.show(this.C.idle); } // cornered at the leash: stand and face
           break;
         }
         if (this.x < this.minX) this.facing = 1;
         if (this.x > this.maxX) this.facing = -1;
         vx = this.facing * BOAR.walkSpeed;
-        this.show(BC.walk);
+        this.show(this.C.walk);
         this.anim.timeScale = 0.8;
         const inRange = playerX > this.minX - BOAR.noticeRange && playerX < this.maxX + BOAR.noticeRange;
-        if (inRange && Math.abs(dx) < BOAR.sight) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(BC.paw, true); this.onFx("tellBoar", this.x, this.y); }
+        if (inRange && Math.abs(dx) < BOAR.sight) { this.facing = dx > 0 ? 1 : -1; this.enter("notice"); this.show(this.C.paw, true); this.onFx("tellBoar", this.x, this.y); }
         break;
       }
       case "notice": { // anticipation: head down, pawing the ground
         const len = tell(this.tellMs);
         this.telegraph(t / len);
-        if (t > len) { flash(this, false); this.swing = nextId("boar"); this.near = false; this.enter("charge"); this.show(BC.gallop, true); }
+        if (t > len) { flash(this, false); this.swing = nextId("boar"); this.near = false; this.enter("charge"); this.show(this.C.gallop, true); }
         break;
       }
       case "charge":
         vx = this.facing * BOAR.chargeSpeed;
         // Dodged through: it skids to a stop just past the player, leaving a short punish window (playtest I-04).
         if (Math.abs(dx) < BOAR.skidNear) this.near = true;
-        if (this.near && dx * this.facing < -BOAR.skidPast) { this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 40; this.onFx("skid", this.x, this.y); break; }
+        if (this.near && dx * this.facing < -BOAR.skidPast) { this.enter("stun"); this.show(this.C.stun, true); this.kb = this.facing * 40; this.onFx("skid", this.x, this.y); break; }
         if (t > BOAR.chargeMaxMs || this.x > this.maxX + BOAR.chargeLimit || this.x < this.minX - BOAR.chargeLimit || this.b.blocked.left || this.b.blocked.right) {
-          this.enter("stun"); this.show(BC.stun, true); this.kb = this.facing * 60;
+          this.enter("stun"); this.show(this.C.stun, true); this.kb = this.facing * 60;
         }
         break;
       case "stun":
-        this.show(BC.stun);
-        if (t > this.stunMs) { this.enter("wander"); this.show(BC.walk); }
+        this.show(this.C.stun);
+        if (t > this.stunMs) { this.enter("wander"); this.show(this.C.walk); }
         break;
       case "dead":
         if (t > 700) this.setAlpha(Math.max(0, 1 - (t - 700) / 500));
         if (t > 1200) { this.destroy(); return; }
+        break;
+      case "flee": // beaten, it bolts away from the hero into the dark (it does not die: Ch. 2)
+        vx = this.facing * ROOTED_BOAR.fleeSpeed;
+        if (t > ROOTED_BOAR.fleeMs - 400) this.setAlpha(Math.max(0, (ROOTED_BOAR.fleeMs - t) / 400));
+        if (t > ROOTED_BOAR.fleeMs) { this.destroy(); return; }
         break;
     }
     if (this.state !== "wander") this.anim.timeScale = 1;
@@ -181,16 +196,54 @@ export class Boar extends Enemy {
   }
 
   protected onDamaged(hit: PlayerHit): void {
+    if (this.hp <= 0 && this.rooted) {
+      this.facing = hit.direction > 0 ? 1 : -1; this.enter("flee"); this.show(this.C.gallop, true); this.onDeath(this.x);
+      this.b.checkCollision.left = this.b.checkCollision.right = false;
+      return;
+    }
     if (this.hp <= 0) {
-      this.enter("dead"); this.show(BC.death, true); this.onDeath(this.x); this.onFx("dead", this.x, this.y);
+      this.enter("dead"); this.show(this.C.death, true); this.onDeath(this.x); this.onFx("dead", this.x, this.y);
       this.kb = hit.direction * 120; this.b.checkCollision.left = this.b.checkCollision.right = false;
       return;
     }
     if (this.state !== "charge" || hit.poise >= 40) { // a poise strike (Phá Thế) stops even a charge
       this.facing = hit.direction > 0 ? -1 : 1;
       this.enter("stun", BOAR.hurtStunMs);
-      this.show(BC.hurt, true); // HURT outranks the stun loop, so stun resumes only once the flinch has played
+      this.show(this.C.hurt, true); // HURT outranks the stun loop, so stun resumes only once the flinch has played
     }
+  }
+}
+
+/* ---------------- the stampede (Prologue S6) ---------------- */
+
+/**
+ * A panicked animal running straight through the village (prose Ch. 2: "Không con nào dừng lại để cắn ai. Chúng chỉ
+ * chạy. Và những thứ đang chạy thì không nhìn đường."). It does not target the hero and cannot be fought: jump over it
+ * or dodge through. Its hit is not parryable (there is no one to parry), but a block holds.
+ */
+export class Runner extends Phaser.GameObjects.Sprite {
+  private readonly anim: Animator;
+  private readonly hit: EnemyHit;
+  private readonly hitList: EnemyHit[];
+  private readonly rect = new Phaser.Geom.Rectangle();
+  done = false;
+  constructor(scene: Phaser.Scene, x: number, readonly dir: 1 | -1) {
+    super(scene, x, WORLD.groundY, "boar_gal0");
+    scene.add.existing(this);
+    this.setOrigin(0.5, 1).setDepth(8).setFlipX(dir < 0);
+    this.anim = new Animator(this);
+    this.anim.play(BC.gallop, true);
+    this.hit = { id: nextId("run"), rect: this.rect, damage: STAMPEDE.damage, knockback: dir * STAMPEDE.knockback, parryable: false };
+    this.hitList = [this.hit];
+  }
+  tick(dt: number, viewL: number, viewR: number): void {
+    this.x += this.dir * STAMPEDE.speed * dt / 1000;
+    this.anim.update(dt);
+    if ((this.dir < 0 && this.x < viewL - 60) || (this.dir > 0 && this.x > viewR + 60)) { this.done = true; this.destroy(); }
+  }
+  hits(): EnemyHit[] {
+    this.rect.setTo(this.x - 13, this.y - 13, 26, 13);
+    return this.hitList;
   }
 }
 

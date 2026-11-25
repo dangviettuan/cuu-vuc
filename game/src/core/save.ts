@@ -26,6 +26,8 @@ export interface SaveData {
   flags: Partial<Record<FlagName, FlagValue>>;
   /** Stages finished (their boss beaten and choice made). */
   done: string[];
+  /** Key items (Prologue: the half Mạch Ấn, S5). */
+  items: string[];
 }
 
 /** Quick mode (playtest tools) keeps its throwaway save apart from the player's. */
@@ -37,7 +39,7 @@ let current: SaveData | null = null;
 
 export function newSave(name: string, stage: string): SaveData {
   const now = Date.now();
-  current = { v: 1, name: cleanName(name), createdAt: now, updatedAt: now, stage, checkpoint: null, herbCap: 0, taken: [], flags: {}, done: [] };
+  current = { v: 1, name: cleanName(name), createdAt: now, updatedAt: now, stage, checkpoint: null, herbCap: 0, taken: [], flags: {}, done: [], items: [] };
   write();
   return current;
 }
@@ -54,7 +56,7 @@ export function loadSave(): SaveData | null {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const s = JSON.parse(raw) as SaveData;
-      if (s && s.v === 1 && typeof s.name === "string") { current = { ...s, taken: s.taken ?? [], done: s.done ?? [], flags: s.flags ?? {} }; return current; }
+      if (s && s.v === 1 && typeof s.name === "string") { current = { ...s, taken: s.taken ?? [], done: s.done ?? [], flags: s.flags ?? {}, items: s.items ?? [] }; return current; }
     }
   } catch { /* corrupt or unavailable: treated as no save */ }
   current = null;
@@ -91,6 +93,12 @@ export function saveAtCheckpoint(stage: string, checkpoint: string, herbCap: num
 export function enterStage(stage: string, herbCap: number, taken: Iterable<string>): void {
   if (!current) return;
   current.stage = stage; current.checkpoint = null; current.herbCap = herbCap; current.taken = [...new Set(taken)];
+  write();
+}
+
+export function addItem(id: string): void {
+  if (!current) return;
+  if (!current.items.includes(id)) current.items.push(id);
   write();
 }
 

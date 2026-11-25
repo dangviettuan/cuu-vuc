@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Player, Controls, PlayerEvent } from "../player";
-import { Boar, Bush, EnemyEvent, NanhRe, RootSpike, configureEnemies, setEnemyDifficulty } from "../enemies";
+import { Boar, Bush, EnemyEvent, NanhRe, RootSpike, Runner, configureEnemies, setEnemyDifficulty } from "../enemies";
 import { EnemyHit, Hittable, PlayerHit, overlaps } from "../combat";
 import { Animator } from "../anim";
 import { HERB_GLINT, SHRINE_LIT } from "../clips";
@@ -12,12 +12,13 @@ import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
 import { Rng, runSeed } from "../core/rng";
 import { onSettings, settings } from "../core/settings";
-import { enterStage, markDone, save, saveAtCheckpoint } from "../core/save";
+import { addItem, enterStage, getFlag, markDone, save, saveAtCheckpoint } from "../core/save";
 import { DIFFICULTY } from "../data/difficulty";
 import { FIRST_STAGE, STAGES } from "../data/stages";
-import type { StageDef } from "../data/stage";
+import type { StageDef, When } from "../data/stage";
+import { STAMPEDE } from "../data/enemies";
 import { SCRIPTS } from "../data/dialogue";
-import { CUTSCENES, Step } from "../data/cutscenes";
+import { CUTSCENES, CutSfx, Step } from "../data/cutscenes";
 import { Npc } from "../npc";
 import { text } from "../ui/text";
 import type { UIScene } from "./UI";
@@ -35,11 +36,16 @@ interface Herb { id: string; img: Phaser.GameObjects.Image; anim: Animator; base
 interface Drift { img: Phaser.GameObjects.Image; x: number; y: number; vx: number; vy: number; phase: number; }
 interface Sign { x: number; key: StringKey; label: Phaser.GameObjects.Text; }
 /** Something the interact key does when the hero stands near it: rest at a shrine, look at a thing, talk to someone. */
-interface Interactable { x: number; range: number; y: number; act: () => void; when?: () => boolean; quiet?: () => boolean; priority?: number; }
+interface Interactable { x: number; range: number; y: number; act: () => void; when?: () => boolean; quiet?: () => boolean; priority?: number; at?: () => number; }
+/** A prop that cycles frames (a barking dog, a bird beating its wings), with an optional sound on its second frame. */
+interface PropAnim { img: Phaser.GameObjects.Image; frames: string[]; ms: number; t: number; i: number; sound?: CutSfx; heardAt: number; }
+interface Block { x: number; prop?: string; until?: string; wall: Phaser.GameObjects.Rectangle | null; }
+interface Bird { img: Phaser.GameObjects.Image; vx: number; vy: number; phase: number; }
 
 /**
- * A playable stage, built from data (src/data/stages). The Prologue greybox runs S1 (morning chores) → S3 (lunch, a
- * cutscene) → S7 (Nanh Rễ at night, then C2); exits carry the hero on, with narration cards for the stages between.
+ * A playable stage, built from data (src/data/stages). The Prologue greybox runs S1 (morning chores) → S3 (lunch) →
+ * S4 (the afternoon, C1) → S5 (the Father's room) → S6 (the village at night) → S7 (Nanh Rễ, C2); exits and cutscenes
+ * carry the hero on, with narration cards between. The story layer (marks, triggers, flag conditions) is `updateStory`.
  * Sources: docs/04-chapters/prologue-an-moc-v0.1.md, docs/05-gameplay/combat-class-bible-v0.1.md.
  *
  * - **Time model:** `sim` is gameplay time. Hit-stop freezes `sim` (and physics, and character animation) while FX,
@@ -72,6 +78,17 @@ export class StageScene extends Phaser.Scene {
   npcs = new Map<string, Npc>();
   private props = new Map<string, Phaser.GameObjects.Image>();
   private interactables: Interactable[] = [];
+  /** Story marks set in this visit to the stage (cutscenes, things used): they open `after` gates in the stage data. */
+  marks = new Set<string>();
+  /** Cutscenes already played in this visit (triggers and one-time talks run once). */
+  private played = new Set<string>();
+  private propAnims: PropAnim[] = [];
+  private blocks: Block[] = [];
+  private runners: Runner[] = [];
+  private stampedeAt = 0;
+  private stampedeCue = 0;
+  private birds: Bird[] = [];
+  private stageRng = new Rng(1);
   /** The cutscene playing, if any (gameplay input is locked; the pause menu can skip it). */
   cutscene: string | null = null;
   private skipping = false;
@@ -124,11 +141,13 @@ export class StageScene extends Phaser.Scene {
     this.boars = []; this.bushes = []; this.roots = []; this.herbs = []; this.signs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     this.gone = false;
     this.npcs = new Map(); this.props = new Map(); this.interactables = []; this.cutscene = null; this.skipping = false; this.heroWalk = null; this.leaving = false; this.boss = null;
+    this.marks = new Set(); this.played = new Set(); this.propAnims = []; this.blocks = []; this.runners = []; this.birds = []; this.stampedeAt = 0; this.stampedeCue = 0; this.inChoice = false;
     // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
     this.taken = new Set(sv?.taken ?? []);
     this.checkpoint = { x: def.start.x, y: def.groundY };
     this.seed = runSeed();
     configureEnemies(new Rng(this.seed), DIFFICULTY[settings().difficulty]);
+    this.stageRng = new Rng(this.seed + 7);
 
     const camY = def.height - VIEW.height; // ADR-0009: the view is shorter than the world; the camera keeps to the ground lane
     this.physics.world.setBounds(EDGE, -200, def.width - EDGE * 2, def.height + 200);
@@ -138,8 +157,9 @@ export class StageScene extends Phaser.Scene {
     this.bg = this.add.tileSprite(0, 0, VIEW.width, VIEW.height, "bg_thanhmoc").setOrigin(0).setScrollFactor(0).setTileScale(4, 4).setDepth(-10);
     this.bg.tilePositionY = Math.round(camY / 4); // keep the backdrop aligned with the world as it was at 640×360
     const mid = this.add.graphics().setScrollFactor(0.5).setDepth(-5);
-    const night = def.time === "night";
-    for (let i = 0; i < 18; i++) {
+    const night = def.time === "night", indoor = def.time === "indoor";
+    if (indoor) { this.bg.setVisible(false); this.cameras.main.setBackgroundColor("#120d09"); }
+    for (let i = 0; i < (indoor ? 0 : 18); i++) {
       const x = i * 90 + (i % 3) * 23, w = 18 + (i % 4) * 6;
       mid.fillStyle(night ? 0x141a1c : 0x2c3a26, 1).fillRect(x, 0, w, def.groundY);
       mid.fillStyle(night ? 0x1c2426 : 0x354630, 1).fillRect(x + 3, 0, 2, def.groundY);
@@ -152,15 +172,24 @@ export class StageScene extends Phaser.Scene {
       this.cameras.main.setBackgroundColor("#0a0e14");
     } else if (def.time === "noon") {
       this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0xfff2c8, 0.08).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+    } else if (def.time === "afternoon") {
+      // S4: a low sun, the light going amber over the backdrop (the lane keeps its colours)
+      this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0xff9a40, 0.16).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+      this.add.circle(VIEW.width * 0.86, 70, 16, 0xffd08a, 0.55).setScrollFactor(0).setDepth(-4.4);
     }
     for (const pr of def.props ?? []) {
-      const img = this.add.image(pr.x, pr.y ?? def.groundY, pr.key).setOrigin(pr.left ? 0 : 0.5, 1).setDepth(pr.depth ?? -3);
+      if (!this.ok(pr.when)) continue;
+      const img = this.add.image(pr.x, pr.y ?? def.groundY, pr.key).setOrigin(pr.left ? 0 : 0.5, 1).setDepth(pr.depth ?? -3).setVisible(!pr.hidden);
       if (pr.id) this.props.set(pr.id, img);
+      if (pr.frames) this.propAnims.push({ img, frames: pr.frames, ms: pr.ms ?? 300, t: Math.random() * 300, i: 0, sound: pr.id === "dog" ? "bark" : undefined, heardAt: 0 });
+    }
+    if (indoor) { // the lamp's warmth in the middle of the house, the corners dark
+      for (let i = 0; i < 7; i++) this.add.circle(110, def.groundY - 40, 36 + i * 18, 0xffb060, 0.03).setDepth(-2.5);
     }
 
     // Ground and ledges.
     this.solids = this.physics.add.staticGroup();
-    this.platform(0, def.groundY, def.width, def.height - def.groundY);
+    this.platform(0, def.groundY, def.width, def.height - def.groundY, false, def.floor === "wood");
     for (const l of def.ledges) this.platform(l.x, l.y, l.w, 10, true);
 
     this.fx = new Fx(this, 180);
@@ -204,14 +233,26 @@ export class StageScene extends Phaser.Scene {
     this.player.herbCap = sv?.herbCap ?? 0;
     this.player.refillHerbs();
 
-    // People and things to look at (S3).
-    for (const n of def.npcs ?? []) this.npcs.set(n.id, new Npc(this, n.x, def.groundY, n.id, n.clip, n.facing ?? 1));
+    // People, and things to look at or use.
+    for (const n of def.npcs ?? []) if (this.ok(n.when)) this.npcs.set(n.id, new Npc(this, n.x, def.groundY, n.id, n.clip, n.facing ?? 1, n.kind === "villager" ? n.look : undefined, n.rest));
     for (const ex of def.examine ?? []) {
-      this.interactables.push({ x: ex.x, range: 16, y: def.groundY - 50, act: () => this.ui.line(null, ex.text), when: () => !ex.while || !!this.props.get(ex.while)?.visible });
+      if (!this.ok(ex.when)) continue;
+      const use = () => { this.marks.add(ex.id); if (ex.cutscene) void this.runCutscene(ex.cutscene); else if (ex.text) this.ui.line(null, ex.text); };
+      this.interactables.push({ x: ex.x, range: ex.range ?? 16, y: def.groundY - 50, act: use,
+        when: () => (!ex.while || !!this.props.get(ex.while)?.visible) && this.has(ex.after) && !(ex.once && this.marks.has(ex.id)) && !this.cutscene });
     }
     for (const tk of def.talk ?? []) {
       const npc = this.npcs.get(tk.npc);
-      if (npc) this.interactables.push({ x: npc.x, range: 30, y: def.groundY - 56, priority: 1, act: () => void this.runCutscene(tk.cutscene), when: () => !this.cutscene && !this.leaving && npc.clip === "sit" });
+      if (!npc || !this.ok(tk.when)) continue;
+      this.interactables.push({ x: npc.x, range: 30, y: def.groundY - 56, priority: 1, act: () => void this.runCutscene(tk.cutscene),
+        when: () => !this.cutscene && !this.leaving && this.has(tk.after) && !(tk.once && this.played.has(tk.cutscene)), at: () => npc.x });
+    }
+    // Ways shut until something happens.
+    for (const bl of def.blocks ?? []) {
+      const wall = this.add.rectangle(bl.x, def.groundY / 2, 8, def.groundY + 200).setVisible(false);
+      this.physics.add.existing(wall, true);
+      this.physics.add.collider(this.player, wall);
+      this.blocks.push({ x: bl.x, prop: bl.until ? undefined : bl.id, until: bl.until, wall });
     }
 
     // Arena + boss.
@@ -279,18 +320,29 @@ export class StageScene extends Phaser.Scene {
     setEnemyDifficulty(d);
   }
 
-  private spawnBoars(): void {
-    for (const b of this.def.boars) {
-      const boar = new Boar(this, b.x, b.min, b.max, b.tellMs);
+  /** Boars that belong in the stage right now: their flag condition holds, their `after` mark is set, not yet beaten. */
+  private boarDue(b: StageDef["boars"][number]): boolean {
+    return this.ok(b.when) && (!b.after || this.marks.has(b.after)) && !(b.id && this.marks.has(`${b.id}.down`));
+  }
+
+  private spawnBoars(only?: StageDef["boars"][number]): void {
+    for (const b of only ? [only] : this.def.boars) {
+      if (!this.boarDue(b) || (!only && b.after)) continue; // `after` boars arrive when their mark is set (update)
+      const boar = new Boar(this, b.x, b.min, b.max, { tellMs: b.tellMs, rooted: b.rooted });
       this.physics.add.collider(boar, this.solids);
       boar.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, boar.facing, 1);
+      if (b.id) boar.onDeath = () => { this.marks.add(`${b.id}.down`); };
       this.boars.push(boar);
     }
   }
 
-  private platform(x: number, y: number, w: number, h: number, oneWay = false): void {
-    this.add.tileSprite(x, y, w, Math.min(h, 16), "ground").setOrigin(0).setDepth(2);
-    if (h > 16) this.add.tileSprite(x, y + 16, w, h - 16, "dirt").setOrigin(0).setDepth(2);
+  /** A flag condition from the stage data (C1 shapes S6). An unset flag counts as false: the prose branch. */
+  ok(w?: When): boolean { return !w || (getFlag(w.flag) ?? false) === w.is; }
+  private has(marks?: string[]): boolean { return !marks || marks.every((m) => this.marks.has(m)); }
+
+  private platform(x: number, y: number, w: number, h: number, oneWay = false, wood = false): void {
+    this.add.tileSprite(x, y, w, Math.min(h, 16), wood ? "floor_wood" : "ground").setOrigin(0).setDepth(2);
+    if (h > 16) this.add.tileSprite(x, y + 16, w, h - 16, wood ? "floor_under" : "dirt").setOrigin(0).setDepth(2);
     const r = this.add.rectangle(x + w / 2, y + h / 2, w, h).setVisible(false);
     this.solids.add(r);
     if (oneWay) {
@@ -302,7 +354,7 @@ export class StageScene extends Phaser.Scene {
   /** Living-world details: swaying grass tufts, drifting light motes, falling Linh Suy leaves. */
   private ambience(): void {
     const def = this.def;
-    for (let x = 8; x < def.width; x += 17 + ((x * 7) % 13)) {
+    for (let x = 8; def.time !== "indoor" && x < def.width; x += 17 + ((x * 7) % 13)) {
       const tf = this.add.image(x, def.groundY + 1, "tuft1").setOrigin(0.5, 1).setDepth(3);
       tf.setData("p", (x * 0.013) % (Math.PI * 2));
       this.tufts.push(tf);
@@ -313,9 +365,11 @@ export class StageScene extends Phaser.Scene {
     }
     const leafKind = def.leaves ?? "yellow";
     this.leafKey = leafKind === "green" ? "leafg" : "leaf";
-    for (let i = 0; i < (leafKind === "none" ? 0 : 5); i++) {
-      const img = this.add.image(0, 0, this.leafKey + "0").setDepth(4);
-      this.leaves.push({ img, x: Math.random() * VIEW.width, y: -Math.random() * 300, vx: 8, vy: 22 + Math.random() * 14, phase: Math.random() * 6 });
+    // "storm" (S4): many leaves falling straight down, no wind ("Lá rơi không có gió", Ch1)
+    const storm = leafKind === "storm", n = leafKind === "none" ? 0 : storm ? def.leafCount ?? 26 : 5;
+    for (let i = 0; i < n; i++) {
+      const img = this.add.image(0, 0, this.leafKey + "0").setDepth(i % 3 ? 4 : -2);
+      this.leaves.push({ img, x: Math.random() * VIEW.width, y: -Math.random() * 300, vx: storm ? 0 : 8, vy: storm ? 12 + Math.random() * 10 : 22 + Math.random() * 14, phase: Math.random() * 6 });
     }
   }
 
@@ -341,7 +395,7 @@ export class StageScene extends Phaser.Scene {
       m.img.setPosition(m.x, m.y).setAlpha(0.35 + 0.35 * Math.sin(now / 500 + m.phase));
     }
     for (const l of this.leaves) {
-      l.x += (l.vx + Math.sin(now / 400 + l.phase) * 18) * sec; l.y += l.vy * sec;
+      l.x += (l.vx + Math.sin(now / 400 + l.phase) * (l.vx ? 18 : 6)) * sec; l.y += l.vy * sec;
       if (l.y > this.def.groundY - 2 || l.x > cam.scrollX + VIEW.width + 20) { l.y = cam.scrollY - 10 - Math.random() * 120; l.x = cam.scrollX + Math.random() * VIEW.width; }
       l.img.setPosition(l.x, l.y);
       const key = this.leafKey + (Math.floor(now / 160 + l.phase) % 2 ? "0" : "1");
@@ -403,7 +457,7 @@ export class StageScene extends Phaser.Scene {
     this.player.hp = PLAYER.maxHp;
     this.player.refillHerbs();
     if (!this.shrineLit) this.lightShrine(true);
-    const missing = this.def.boars.length - this.boars.filter((b) => b.active && b.isAlive()).length;
+    const missing = this.def.boars.filter((b) => this.boarDue(b) && !b.after).length - this.boars.filter((b) => b.active && b.isAlive()).length;
     if (missing > 0) { this.boars.forEach((b) => b.destroy()); this.boars = []; this.spawnBoars(); }
     saveAtCheckpoint(this.def.id, sh.id, this.player.herbCap, this.taken);
     this.ui.toast(t("toast.shrine"));
@@ -440,16 +494,36 @@ export class StageScene extends Phaser.Scene {
     const steps = CUTSCENES[id];
     if (!steps || this.cutscene) return;
     this.cutscene = id; this.skipping = false;
-    for (const st of steps) {
-      if (this.gone) return; // the stage was left (title, restart) mid-scene
-      await this.step(st);
-    }
+    this.played.add(id);
+    const ok = await this.runSteps(steps);
+    if (!ok) return;
     this.cutscene = null; this.skipping = false;
   }
 
+  /** Steps in order; false if the stage went away mid-scene. A choice step plays its chosen branch inline. */
+  private async runSteps(steps: Step[]): Promise<boolean> {
+    for (const st of steps) {
+      if (this.gone) return false; // the stage was left (title, restart) mid-scene
+      if ("choose" in st) {
+        // A choice is never skipped: skipping stops here, and the branch after it plays normally.
+        this.skipping = false; this.inChoice = true;
+        const outcome = await new Promise<string>((res) => this.ui.runScript(SCRIPTS[st.choose], res));
+        this.inChoice = false;
+        const branch = CUTSCENES[st.then[outcome]];
+        if (branch && !(await this.runSteps(branch))) return false;
+        continue;
+      }
+      await this.step(st);
+    }
+    return true;
+  }
+
+  /** True while a cutscene's choice is on screen (the pause menu can't skip past it). */
+  inChoice = false;
+
   /** Skip (pause menu): every pending wait, walk and line completes at once; the remaining steps run instantly. */
   skipCutscene(): void {
-    if (!this.cutscene) return;
+    if (!this.cutscene || this.inChoice) return;
     this.skipping = true;
     this.ui.closeLine();
     for (const n of this.npcs.values()) n.finishWalk();
@@ -511,7 +585,62 @@ export class StageScene extends Phaser.Scene {
     }
     if ("toast" in st) { if (!fast) this.ui.toast(t(st.toast), 3200); return done; }
     if ("goto" in st) { this.leave(st.goto, st.card); return done; }
+    if ("mark" in st) { this.marks.add(st.mark); return done; }
+    if ("sfx" in st) { if (!fast) sfx[st.sfx](); return done; }
+    if ("shake" in st) { if (!fast) this.shake(st.shake); return done; }
+    if ("pulse" in st) return fast ? done : this.pulse(st.pulse);
+    if ("tween" in st) {
+      const tw = st.tween, o = this.props.get(tw.id) ?? this.npcs.get(tw.id);
+      if (!o) return done;
+      const end = () => { if (tw.hide) o.setVisible(false); };
+      if (fast) { o.x += tw.dx ?? 0; o.y += tw.dy ?? 0; end(); return done; }
+      return new Promise((res) => this.tweens.add({ targets: o, x: o.x + (tw.dx ?? 0), y: o.y + (tw.dy ?? 0), duration: tw.ms, ease: "Sine.easeInOut", onComplete: () => { end(); res(); } }));
+    }
+    if ("setProp" in st) {
+      const img = this.props.get(st.setProp.id);
+      if (img) { img.setTexture(st.setProp.key); const a = this.propAnims.find((p) => p.img === img); if (a) a.frames = [st.setProp.key]; }
+      return done;
+    }
+    if ("showProp" in st) { this.props.get(st.showProp)?.setVisible(true); return done; }
+    if ("place" in st) {
+      const pl = st.place, x = pl.at === "player" ? this.player.x + this.player.facing * 8 : pl.at;
+      const y = pl.at === "player" ? this.player.y + (pl.dy ?? -30) : this.def.groundY + (pl.dy ?? 0);
+      this.props.get(pl.id)?.destroy();
+      this.props.set(pl.id, this.add.image(x, y, pl.key).setDepth(11));
+      return done;
+    }
+    if ("flock" in st) { if (!fast) this.flock(st.flock); return done; }
+    if ("item" in st) { addItem(st.item); if (!fast) this.ui.toast(t("toast.item", { item: t(`item.${st.item}` as StringKey) }), 2400); return done; }
+    if ("music" in st) { music.play(st.music); return done; }
     return done;
+  }
+
+  /** The scar flares with the Mạch Ấn (S5): `n` beats, a warm ring at his chest and his heartbeat. */
+  private pulse(n: number): Promise<void> {
+    return new Promise((res) => {
+      let k = 0;
+      const beat = () => {
+        if (this.gone) { res(); return; }
+        const p = this.player, x = p.x + p.facing * 1, y = p.y - 30;
+        sfx.heartbeat();
+        const ring = this.add.circle(x, y, 3, settings().reduceFlashes ? 0x8a3a20 : 0xff6a3a, 0.8).setDepth(12);
+        this.tweens.add({ targets: ring, scale: 5, alpha: 0, duration: 600, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+        const m = this.props.get("machAn"); if (m) { m.setTexture("mach_an1"); this.time.delayedCall(260, () => m.active && m.setTexture("mach_an0")); }
+        if (++k === n) { if (n > 1) this.shake(8); this.time.delayedCall(700, res); }
+        else this.time.delayedCall(k === n - 1 ? 560 : 700, beat); // the last beat comes on his own heart
+      };
+      beat();
+    });
+  }
+
+  /** A flock of panicked birds across the sky, right to left ("chim bay ra khỏi rừng", Ch1). */
+  private flock(n: number): void {
+    const cam = this.cameras.main;
+    for (let i = 0; i < n; i++) {
+      const img = this.add.image(cam.scrollX + VIEW.width + 20 + i * (18 + Math.random() * 26), cam.scrollY + 26 + Math.random() * 90, "bird0").setDepth(-2);
+      this.birds.push({ img, vx: -(150 + Math.random() * 90), vy: (Math.random() - 0.5) * 20, phase: Math.random() * 6 });
+    }
+    sfx.tellBoar();
   }
 
   /* ------------------------------------------------------------ events */
@@ -582,7 +711,7 @@ export class StageScene extends Phaser.Scene {
         music.play(this.def.music ?? "forest");
       }
       this.cameras.main.fadeIn(300);
-      this.ui.toast(t(this.shrineLit ? "toast.wakeShrine" : "toast.wakeStart"));
+      this.ui.toast(t(this.shrineLit ? "toast.wakeShrine" : this.def.wake ?? "toast.wakeStart"));
     });
   }
 
@@ -677,6 +806,7 @@ export class StageScene extends Phaser.Scene {
     for (const n of this.npcs.values()) n.tick(dt);
     const exit = this.def.exit;
     if (exit && !this.leaving && !locked && this.player.x > exit.x) this.leave(exit.to, exit.card);
+    this.updateStory(time, delta, locked);
     this.bg.tilePositionX = this.cameras.main.scrollX * 0.15 / 4;
 
     // Camera look-ahead: lean ~32 px toward the facing direction, eased.
@@ -692,12 +822,14 @@ export class StageScene extends Phaser.Scene {
     }
     // The interact key acts on the nearest thing in reach: rest at a shrine, look at something, talk to someone.
     let near: Interactable | null = null;
+    let nearD = 0;
     for (const it of this.interactables) {
+      if (it.at) it.x = it.at();
       const d = Math.abs(it.x - this.player.x);
       if (d >= it.range || (it.when && !it.when())) continue;
       // talking to someone beats looking at a thing beside them; otherwise the nearest wins
-      const better = !near || (it.priority ?? 0) > (near.priority ?? 0) || ((it.priority ?? 0) === (near.priority ?? 0) && d < Math.abs(near.x - this.player.x));
-      if (better) near = it;
+      const better = !near || (it.priority ?? 0) > (near.priority ?? 0) || ((it.priority ?? 0) === (near.priority ?? 0) && d < nearD);
+      if (better) { near = it; nearD = d; }
     }
     this.keyHint.setVisible(!!near && !locked && !near.quiet?.());
     if (near) this.keyHint.setText(input.label("interact")).setPosition(near.x, near.y - Math.round(Math.sin(time / 250)));
@@ -737,6 +869,7 @@ export class StageScene extends Phaser.Scene {
     // Enemies → player.
     const inc = this.incoming; inc.length = 0;
     for (const b of this.boars) for (const h of b.hits()) inc.push(h);
+    if (!this.cutscene) for (const r of this.runners) for (const h of r.hits()) inc.push(h);
     if (this.boss?.active) for (const h of this.boss.hits()) inc.push(h);
     for (const r of this.roots) { const h = r.hitbox(now); if (h) inc.push(h); }
     const hb = this.player.hurtbox();
@@ -748,6 +881,59 @@ export class StageScene extends Phaser.Scene {
     if (rip) this.jHint.setText(input.label("light")).setPosition(this.player.x, this.player.y - 56 - (Math.floor(time / 120) % 2));
     this.drawDebug(ph?.rect ?? null, inc);
     this.frameMs = this.frameMs * 0.95 + (performance.now() - t0) * 0.05;
+  }
+
+  /**
+   * The story layer, per frame: animated props, the flock, triggers, ways that open, boars that arrive on a mark, and
+   * the stampede (S6). Runs on real time except the stampede, which follows the hero's position and gameplay time.
+   */
+  private updateStory(time: number, delta: number, locked: boolean): void {
+    const cam = this.cameras.main, px = this.player.x;
+    for (const a of this.propAnims) {
+      if (a.frames.length < 2 || !a.img.visible) continue;
+      a.t += delta;
+      if (a.t < a.ms) continue;
+      a.t = 0; a.i = (a.i + 1) % a.frames.length; a.img.setTexture(a.frames[a.i]);
+      if (a.sound && a.i === 1 && time - a.heardAt > 900 && Math.abs(a.img.x - px) < 260 && Math.random() < 0.5) { a.heardAt = time; sfx[a.sound](); }
+    }
+    for (let i = this.birds.length - 1; i >= 0; i--) {
+      const b = this.birds[i];
+      b.img.x += b.vx * delta / 1000; b.img.y += (b.vy + Math.sin(time / 90 + b.phase) * 8) * delta / 1000;
+      b.img.setTexture(Math.floor(time / 90 + b.phase) % 2 ? "bird1" : "bird0").setFlipX(true);
+      if (b.img.x < cam.scrollX - 30) { b.img.destroy(); this.birds.splice(i, 1); }
+    }
+    for (const bl of this.blocks) {
+      if (!bl.wall) continue;
+      const open = bl.prop ? !this.props.get(bl.prop)?.visible : !!bl.until && this.marks.has(bl.until);
+      if (open) { bl.wall.destroy(); bl.wall = null; }
+    }
+    for (const b of this.def.boars) {
+      if (b.after && this.boarDue(b) && this.marks.has(b.after) && !this.marks.has(`spawned.${b.after}`)) { this.marks.add(`spawned.${b.after}`); this.spawnBoars(b); }
+    }
+    if (!this.cutscene && !this.leaving && !this.ui.busy) {
+      for (const tr of this.def.triggers ?? []) {
+        if (this.played.has(tr.cutscene) || !this.ok(tr.when) || !this.has(tr.after)) continue;
+        if (tr.x !== undefined && px < tr.x) continue;
+        void this.runCutscene(tr.cutscene);
+        break;
+      }
+    }
+    // The stampede: one panicked animal at a time from the right, its sound first (the cue is the tell).
+    const st = this.def.stampede, sec = this.sim;
+    if (st && !locked && !(st.until && this.marks.has(st.until)) && px > st.min && px < st.max) {
+      if (this.stampedeAt === 0) this.stampedeAt = sec + 900;
+      if (sec >= this.stampedeAt && !this.stampedeCue) {
+        this.stampedeCue = sec; sfx.tellBoar(); sfx.stomp();
+        this.fx.dust(cam.scrollX + VIEW.width - 6, this.def.groundY, 4, -1, 1.2);
+      }
+      if (this.stampedeCue && sec - this.stampedeCue >= STAMPEDE.leadMs) {
+        this.runners.push(new Runner(this, cam.scrollX + VIEW.width + 24, -1));
+        this.stampedeCue = 0;
+        this.stampedeAt = sec + STAMPEDE.every[0] + this.stageRng.next() * (STAMPEDE.every[1] - STAMPEDE.every[0]);
+      }
+    }
+    for (const r of this.runners) r.tick(delta, cam.scrollX, cam.scrollX + VIEW.width);
+    this.runners = this.runners.filter((r) => !r.done);
   }
 
   private updateFloat(dtMs: number): void {

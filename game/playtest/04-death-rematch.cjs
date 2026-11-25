@@ -1,5 +1,5 @@
 /**
- * Session 4 — real playthrough (no state writes), from the start of Prologue S7: the boar → shrine → boss. Deliberately die by standing still,
+ * Session 4 — real playthrough (no state writes), from the start of Prologue S7: shrine → boss. Deliberately die by standing still,
  * verify respawn, rematch using "jump over the charge", take ending 2 (finish her).
  * Also: telegraph screenshots with F1 hitboxes, and a clean performance window (no screenshots inside it).
  */
@@ -14,10 +14,7 @@ const { makeBot } = require("./bot.cjs");
   const R = { steps: [], shots: [] };
   const step = (name, ok, d = {}) => { R.steps.push({ name, ok, ...d }); console.log(ok ? "PASS" : "FAIL", name, JSON.stringify(d)); };
 
-  // Get to the shrine quickly but legitimately (same route as session 3).
-  // (S7) the panicked boar on the way in, then the shrine
-  for (let i = 0; i < 3; i++) { await h.tap("j", 40); await h.wait(220); }
-  await bot.moveTo(230); await bot.fightBoar(360, "dodge");
+  // (S7) walk to the shrine and rest (the village fight is S6 now)
   await bot.moveTo(540); await h.tap("e", 50); await h.wait(300);
 
   // Enter the arena and stand still: record how long an idle player survives and what kills them.

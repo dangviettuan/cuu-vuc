@@ -5,7 +5,8 @@
  *
  * The material is Vietnamese pentatonic (ngũ cung):
  * - **Bắc** (D E G A B), bright: the morning forest, home, the title.
- * - **Oán** (D F G A C), mournful: night, the fight with Nanh Rễ, the aftermath.
+ * - **Oán** (D F G A C), mournful: the afternoon that goes wrong (dusk), the night at home (indoor), the night village,
+ *   the fight with Nanh Rễ, the aftermath.
  * Plucked phrases imitate a đàn tranh, with an occasional bent note (nhấn); the fight adds a trống pulse and a mõ.
  *
  * Each track is a generator that schedules notes a little ahead of time (Web Audio's clock, not the game's, so
@@ -14,7 +15,7 @@
 import { audioContext, noiseBuffer, onAudioUnlock } from "./sfx";
 import { Rng } from "./core/rng";
 
-export type Track = "title" | "forest" | "home" | "night" | "boss" | "aftermath";
+export type Track = "title" | "forest" | "home" | "dusk" | "indoor" | "night" | "boss" | "aftermath";
 
 const D2 = 73.42;
 const semis = (n: number) => D2 * Math.pow(2, n / 12);
@@ -138,6 +139,8 @@ const TRACKS: Record<Track, { start: (r: Runner) => void; gen: Runner["gen"] }> 
   title: { start: (r) => { drone(r, D2, 0.05); wind(r, 0.02); }, gen: (r, t) => phrase(r, t, BAC, 10, 6, [3, 6], 0.13, [0.45, 0.8]) },
   forest: { start: (r) => { drone(r, D2, 0.04); wind(r, 0.025); }, gen: (r, t) => phrase(r, t, BAC, 10, 7, [2.5, 5.5], 0.12, [0.28, 0.55]) },
   home: { start: (r) => { drone(r, D2 * 2, 0.03); }, gen: (r, t) => phrase(r, t, BAC, 10, 5, [4, 8], 0.1, [0.4, 0.7]) },
+  dusk: { start: (r) => { drone(r, D2, 0.045); wind(r, 0.015); }, gen: (r, t) => phrase(r, t, OAN, 9, 5, [3.5, 7], 0.1, [0.7, 1.3]) },
+  indoor: { start: (r) => { drone(r, D2 * 2, 0.025); }, gen: (r, t) => { pluck(r, note(OAN, 8 + Math.floor(r.rng.next() * 5)), t, 0.07, 2.8); return t + 4 + r.rng.next() * 4; } },
   night: { start: (r) => { drone(r, D2, 0.06); wind(r, 0.04); }, gen: (r, t) => phrase(r, t, OAN, 7, 6, [4, 8], 0.11, [0.5, 0.9]) },
   aftermath: { start: (r) => { drone(r, D2, 0.05); }, gen: (r, t) => { pluck(r, note(OAN, 10 + Math.floor(r.rng.next() * 5)), t, 0.09, 2.6); return t + 3 + r.rng.next() * 3; } },
   /** 104 BPM, 16 sixteenth-note steps per bar. Intensity follows her phase: 1 pulse, 2 adds mõ and lead, 3 doubles. */

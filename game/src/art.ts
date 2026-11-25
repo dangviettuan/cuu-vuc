@@ -315,7 +315,9 @@ export function protagonistLying(): Px {
 }
 
 /* ---------------- startled boar (thú hoảng) ---------------- */
-export interface BoarPose { legs?: number; gallop?: boolean; headDy?: number; bodyDy?: number; side?: boolean; squint?: boolean; recoil?: number; }
+export interface BoarPose { legs?: number; gallop?: boolean; headDy?: number; bodyDy?: number; side?: boolean; squint?: boolean; recoil?: number;
+  /** Prologue S6: a boar with a clump of Linh Suy roots through its shoulder (black, wet, green-tipped; prose Ch. 2). */
+  roots?: boolean; }
 export function boar(p: BoarPose = {}): Px {
   const P = new Px(36, 24);
   const body = "#5a4a3c", belly = mix(body, "#c9a78a", 0.35), dark = shade(body, 0.78);
@@ -342,6 +344,13 @@ export function boar(p: BoarPose = {}): Px {
   P.line(32 + rx, 16 + bd + hd, 34 + rx, 13 + bd + hd, "#e9e1cf");
   P.tri(25 + rx, 8 + bd + hd, 27 + rx, 5 + bd + hd, 28 + rx, 9 + bd + hd, shade(body, 0.85));
   for (let i = 0; i < 6; i++) P.set(9 + i * 2 + rx, 6 + bd + (i % 2) - (p.gallop ? 1 : 0), dark);
+  if (p.roots) { // a clump of roots breaking out of the shoulder, still wet
+    for (const [x0, h, lean] of [[19, 6, -1], [21, 8, 0], [23, 5, 1], [20, 4, -2]] as const) {
+      P.line(x0 + rx, 7 + bd, x0 + lean + rx, 7 + bd - h, "#1a1512");
+      P.set(x0 + lean + rx, 6 + bd - h, "#7fa65a");
+    }
+    P.set(22 + rx, 8 + bd, "#2c2420");
+  }
   return P.outline();
 }
 
@@ -675,6 +684,15 @@ export function registerTextures(scene: Phaser.Scene): void {
   add("boar_hurt", boar({ recoil: 2, squint: true }));
   add("boar_dead0", boar({ headDy: 3, bodyDy: 2, squint: true }));
   add("boar_dead1", boar({ side: true }));
+  // the rooted boar (S6): same frames, roots through the shoulder
+  for (let i = 0; i < 2; i++) add(`rboar_idle${i}`, boar({ bodyDy: i, roots: true }));
+  for (let i = 0; i < 4; i++) add(`rboar_walk${i}`, boar({ legs: i, roots: true }));
+  for (let i = 0; i < 2; i++) add(`rboar_paw${i}`, boar({ headDy: 2, legs: i * 2, bodyDy: 1, roots: true }));
+  for (let i = 0; i < 2; i++) add(`rboar_gal${i}`, boar({ gallop: true, legs: i, roots: true }));
+  for (let i = 0; i < 2; i++) add(`rboar_stun${i}`, boar({ headDy: 3, squint: true, bodyDy: i, roots: true }));
+  add("rboar_hurt", boar({ recoil: 2, squint: true, roots: true }));
+  add("rboar_dead0", boar({ headDy: 3, bodyDy: 2, squint: true, roots: true }));
+  add("rboar_dead1", boar({ side: true }));
   // Nanh Rễ
   for (let i = 0; i < 4; i++) add(`nanh_idle${i}`, nanhRe({ bob: i === 1 || i === 2 ? 1 : 0, sway: [0, 1, 0, -1][i] }));
   for (let i = 0; i < 4; i++) add(`nanh_walk${i}`, nanhRe({ legs: i, bob: i % 2, sway: i % 2 ? -1 : 1 }));

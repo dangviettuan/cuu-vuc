@@ -27,7 +27,6 @@ const { makeBot } = require("./bot.cjs");
     const bot = makeBot(h);
     const samples = [];
     const t0 = Date.now();
-    await bot.moveTo(230); await bot.fightBoar(360, "dodge");
     await bot.moveTo(540); await h.tap("e", 50); await h.wait(300);
     await h.resetFrameTimes();
     const sampler = setInterval(async () => { try { const m = await h.memory(); const o = await h.objects(); const c = await h.page.evaluate(() => window.__cuuVuc.scene.getScene("Stage").updateCostMs); samples.push({ s: Math.round((Date.now() - t0) / 1000), heapMB: m && +(m.used / 1048576).toFixed(1), objects: o, updateMs: +c.toFixed(3) }); } catch {} }, 10000);

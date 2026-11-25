@@ -30,6 +30,26 @@ export const BOAR = {
   hurtStunMs: 400,
 } as const;
 
+/** Prologue S6: the boar with roots through its shoulder (prose Ch. 2). Tougher than the startled boars; it bolts when beaten. */
+export const ROOTED_BOAR = {
+  hp: 64, // about an S1 boar: the beat is the roots and the bolt, not a long fight (probe: 90 took nine parry cycles)
+  damage: 18,
+  tellMs: 600,
+  fleeSpeed: 240,
+  fleeMs: 1300,
+} as const;
+
+/** Prologue S6: the stampede through An Mộc. One animal at a time, announced by its sound before it is on screen. */
+export const STAMPEDE = {
+  speed: 235,
+  damage: 12,
+  knockback: 180,
+  /** Gap between runners, ms (randomised in this range). */
+  every: [2000, 3200],
+  /** The cue (hooves, a squeal) plays this long before the runner enters the view. */
+  leadMs: 650,
+} as const;
+
 export const NANH_RE = {
   hp: 260, // tuned for the classless Prologue kit (ADR-0010; was 320 with the Riposte)
   kbResist: 4,

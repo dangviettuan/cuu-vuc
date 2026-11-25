@@ -5,7 +5,10 @@
  * random boss moves or frame timing. Three parts, each started in quick mode at its stage:
  * - S1 (morning): movement, the brush chore, a herb, the shrine, the exit into the village.
  * - S3 (lunch): the opening lines, looking at a thing, talking to the Father, skipping the scene from the pause menu,
- *   the narration cards, arriving in S7.
+ *   the narration cards, arriving in S4.
+ * - S4 (afternoon): the opening, the four men's scene skipped up to C1 (a skip stops at a choice), C1 saved, on to S5.
+ * - S5 (the Father's room): his door shut until the bolt and the knife, the sound, the search, the half Mạch Ấn saved.
+ * - S6 (the village at night): the stampede, C1's two versions of bà Dần's house, the rooted boar bolting, the square.
  * - S7 (night): the shrine, the arena lock, a block, death and respawn, Nanh Rễ down, the C2 choice and its flag,
  *   and the end card.
  * Any console error fails it. The real-input playthrough (03-full-run.cjs) stays the tuning tool; this is the gate.
@@ -87,8 +90,92 @@ const { launch, withQuick } = require("./harness.cjs");
   while (!st.narr && Date.now() - tSkip < 4000) { await h.wait(100); st = await stageState(); }
   step("S3: skipping from the pause menu ends the scene in its cards", st.narr && !st.paused, st);
   for (let i = 0; i < 4; i++) { await h.tap("Enter", 60); await h.wait(600); }
+  st = await waitStage("prologue-s4");
+  step("S3 → S4: the card leads to the afternoon", st.id === "prologue-s4", st);
+
+  const skip = async () => { await h.tap("Escape", 60); await h.wait(200); await h.tap("ArrowDown", 50); await h.wait(150); await h.tap("Enter", 60); await h.wait(300); };
+  const skipAll = async (ms = 6000) => { const t = Date.now(); let x = await stageState(); while (x.cut && Date.now() - t < ms) { await skip(); x = await stageState(); } return x; };
+  const tp = (x) => scene((xx) => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.x = xx; p.body.reset(xx, p.y - p.body.height - 4); }, x);
+  const marks = () => scene(() => [...window.__cuuVuc.scene.getScene("Stage").marks]);
+  const use = async (x) => { await tp(x); await h.wait(200); await h.tap("e", 60); await h.wait(300); return skipAll(); };
+
+  /* ---------------- S4: the afternoon, C1 ---------------- */
+  await openAt("prologue-s4");
+  st = await stageState();
+  const tOpen4 = Date.now(); while (!st.dlg && Date.now() - tOpen4 < 3000) { await h.wait(100); st = await stageState(); }
+  step("S4: the opening plays", st.cut === "s4.open", st);
+  st = await skipAll();
+  const birdShown = await scene(() => window.__cuuVuc.scene.getScene("Stage").props.get("bird").visible);
+  step("S4: skipping the opening still drops the wounded bird in the yard", !st.cut && birdShown, { ...st, birdShown });
+  await tp(1130); await h.wait(200); await h.tap("e", 60); await h.wait(400);
+  st = await stageState();
+  step("S4: talking to the headman brings the four men back", st.cut === "s4.men", st);
+  await skip();
+  s = await until((x) => x.dlg, 3000);
+  // the question, then its options (confirm is ignored for the first 550 ms of each: J is also attack)
+  if (!s.menu) { await h.wait(650); await h.tap("Enter", 60); s = await until((x) => x.menu, 3000); }
+  step("S4: a skip stops at the choice (C1)", s.menu && s.cut === "s4.men", { cut: s.cut, menu: s.menu });
+  await h.tap("2", 60); await h.wait(400);
+  const c1 = await scene(() => window.__cuuVucSave().flags.PRO_VILLAGE_TOLD);
+  step("S4: choice 2 saves PRO_VILLAGE_TOLD = false", c1 === false, { c1 });
+  st = await skipAll();
+  for (let i = 0; i < 4; i++) { await h.tap("Enter", 60); await h.wait(600); }
+  st = await waitStage("prologue-s5");
+  step("S4 → S5: the cards lead home at night", st.id === "prologue-s5", st);
+
+  /* ---------------- S5: the Father's room ---------------- */
+  await openAt("prologue-s5");
+  await h.wait(700); st = await skipAll();
+  await tp(200); await h.down("d"); await h.wait(700); await h.up("d");
+  st = await stageState();
+  step("S5: the Father's room is shut at first", st.x < 228, st);
+  await use(30); await use(186);
+  await h.wait(600); st = await skipAll(); // the sound from the forest follows on its own
+  let mk = await marks();
+  step("S5: bolting the door and taking the knife bring the sound; the room opens", mk.includes("bolt") && mk.includes("knife") && mk.includes("room"), { marks: mk });
+  for (const x of [318, 420, 470, 420]) await use(x);
+  await tp(446); await h.wait(200); await h.tap("e", 60); await h.wait(300); await skip();
+  const tN5 = Date.now(); st = await stageState(); while (!st.narr && Date.now() - tN5 < 4000) { await h.wait(100); st = await stageState(); }
+  const items = await scene(() => window.__cuuVucSave().items);
+  step("S5: the search ends in the half Mạch Ấn, saved", st.narr && items.includes("halfMachAn"), { narr: st.narr, items });
+  for (let i = 0; i < 3; i++) { await h.tap("Enter", 60); await h.wait(600); }
+  st = await waitStage("prologue-s6");
+  step("S5 → S6: on into the village", st.id === "prologue-s6", st);
+
+  /* ---------------- S6: the night the forest changes ---------------- */
+  await openAt("prologue-s6");
+  await h.wait(700); st = await skipAll();
+  await tp(170); await h.wait(300); st = await skipAll(); // the stampede's first lines
+  await tp(400);
+  s = await until((x) => x.runners.length > 0, 5000);
+  step("S6: panicked animals run through the village", s.runners.length > 0, { runners: s.runners });
+  await tp(710); await h.wait(400); st = await stageState();
+  const kept = await scene(() => { const sc = window.__cuuVuc.scene.getScene("Stage"); return { ong: sc.npcs.get("ongDan").clip, frame: !!sc.props.get("frame") }; });
+  step("S6 (C1 kept): bà Dần's porch is down, ông Dần under the frame", st.cut === "s6.trapped" && kept.ong === "lie" && kept.frame, { ...st, ...kept });
+  await skipAll();
+  s = await until((x) => x.boars.length > 0, 2000);
+  const rooted = await scene(() => { const b = window.__cuuVuc.scene.getScene("Stage").boars[0]; return b ? b.rooted : null; });
+  step("S6: the rooted boar turns on him", rooted === true, { boars: s.boars });
+  await scene(() => { const b = window.__cuuVuc.scene.getScene("Stage").boars[0]; b.takeHit({ id: 99998, rect: null, damage: 999, guardBreak: false, poise: 0, direction: 1 }); });
+  await h.wait(300);
+  mk = await marks();
+  const fled = await scene(() => { const b = window.__cuuVuc.scene.getScene("Stage").boars[0]; return b ? b.state : "gone"; });
+  step("S6: beaten, it bolts (it does not die)", mk.includes("rb.down") && (fled === "flee" || fled === "gone"), { state: fled });
+  st = await skipAll();
+  await tp(1050); await h.wait(400); await skipAll();
+  const tN6 = Date.now(); st = await stageState(); while (!st.narr && Date.now() - tN6 < 4000) { await h.wait(100); st = await stageState(); }
+  step("S6: the square, then the cards", st.narr, st);
+  for (let i = 0; i < 3; i++) { await h.tap("Enter", 60); await h.wait(600); }
   st = await waitStage("prologue-s7");
-  step("S3 → S7: the cards lead to the night square", st.id === "prologue-s7", st);
+  step("S6 → S7: the gate breaks", st.id === "prologue-s7", st);
+
+  await openAt("prologue-s6");
+  await scene(() => { window.__cuuVucSave().flags.PRO_VILLAGE_TOLD = true; window.__cuuVuc.scene.getScene("Stage").scene.restart({ mode: "quick" }); });
+  await h.wait(1200); await skipAll();
+  await tp(170); await h.wait(300); await skipAll();
+  const told = await scene(() => { const sc = window.__cuuVuc.scene.getScene("Stage"); return { ong: sc.npcs.get("ongDan").clip, frame: !!sc.props.get("frame") }; });
+  await tp(710); await h.wait(400); st = await stageState();
+  step("S6 (C1 told): the house stands, ông Dần is on his feet", st.cut === "s6.ready" && told.ong === "idle" && !told.frame, { ...st, ...told });
 
   /* ---------------- S7: Nanh Rễ ---------------- */
   await openAt("prologue-s7");

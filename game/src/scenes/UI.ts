@@ -13,6 +13,8 @@ import { PALETTE, text } from "../ui/text";
 import type { StageScene } from "./Stage";
 
 /** Bottom controls strip: two lines of the 16 px pixel font. The boss bar and name sit just above it. */
+/** Input ignored on each line of a script that ends in a choice, and on its options, after they appear. */
+const CHOICE_GUARD_MS = 550;
 const STRIP_H = 34;
 
 /**
@@ -75,7 +77,7 @@ export class UIScene extends Phaser.Scene {
   /** Bottom space the strip takes right now (0 when hidden), so the boss bar sits just above whatever is there. */
   private get stripH(): number { return this.stripShown ? STRIP_H : 0; }
   /** The combat controls strip is noise in a quiet scene (S3): only stages with fighting show it. */
-  private get combatStage(): boolean { const d = this.stage?.def; return !!d && (d.boars.length > 0 || !!d.arena || d.brush.length > 0); }
+  private get combatStage(): boolean { const d = this.stage?.def; return !!d && (d.boars.length > 0 || !!d.arena || d.brush.length > 0 || !!d.stampede); }
   private get stripShown(): boolean { return this.hudOn && this.combatStage && settings().showControls && !this.dialogue && !this.card && !this.pause && !this.options; }
   private updateStrip(): void { const v = this.stripShown; this.strip.forEach((o) => (o as Phaser.GameObjects.Text).setVisible(v)); }
 
@@ -110,7 +112,7 @@ export class UIScene extends Phaser.Scene {
   closeLine(): void { this.dialogue?.finishNow(); }
 
   /**
-   * Full-screen narration cards between stages (S2, S4–S6 aren't built yet; the cards carry the story across).
+   * Full-screen narration cards between stages (they carry the story across time skips, and stand in for S2).
    * Confirm moves on; after the last card `done` runs.
    */
   narrate(keys: StringKey[], done: () => void): void {
@@ -143,7 +145,7 @@ export class UIScene extends Phaser.Scene {
     const title = text(this, VIEW.width / 2, 60, t("pause.title"), { size: 32, ox: 0.5, depth: 201, color: PALETTE.gold });
     const menu = new Menu(this, [
       { label: () => t("pause.resume"), onConfirm: () => this.closePause() },
-      { label: () => t("pause.skip"), disabled: () => !this.stage?.cutscene, onConfirm: () => { const st = this.stage; this.closePause(); st?.skipCutscene(); } },
+      { label: () => t("pause.skip"), disabled: () => !this.stage?.cutscene || this.stage.inChoice, onConfirm: () => { const st = this.stage; this.closePause(); st?.skipCutscene(); } },
       { label: () => t("pause.options"), onConfirm: () => { menu.setVisible(false); title.setVisible(false); this.options = new OptionsPanel(this, () => { this.options = null; menu.setVisible(true); title.setVisible(true); menu.refresh(); }, 300); } },
       { label: () => t("pause.title.menu"), onConfirm: () => this.toTitle() },
     ], { x: VIEW.width / 2, y: 110, align: "center", depth: 201, onCancel: () => this.closePause() });
@@ -248,17 +250,22 @@ class DialogueBox {
       this.more.setText("");
       const opts = this.script.options;
       const top = DLG_TOP;
+      // the options sit under the question, however many lines it wraps to
       this.menu = new Menu(this.scene, opts.map((o, k) => ({ label: () => `${k + 1}. ${t(o.text)}`, onConfirm: () => this.finish(o) })),
-        { x: 40, y: top + 44, step: 16, depth: 221 });
+        { x: 40, y: Math.max(top + 44, Math.ceil(this.body.y + this.body.height + 4)), step: 16, depth: 221 });
     } else this.more.setText(t("dlg.next"));
   }
 
   update(): void {
     // Number keys pick an option directly, from any line of a script that ends in a choice.
     const opts = this.script.options ?? [];
+    // A script that ends in a choice opens right after a fight (C2) or mid-scene: the attack key is also confirm, so a
+    // player still mashing it must not read past the question or pick an option unseen (bot full run, 2026-11-25).
+    // Number keys are a deliberate pick (nobody mashes them in a fight), so they are honoured at once.
     for (let k = 0; k < opts.length; k++) if (input.rawPresses.has(`Digit${k + 1}`) || input.rawPresses.has(`Numpad${k + 1}`)) { this.finish(opts[k]); return; }
+    const guard = opts.length ? CHOICE_GUARD_MS : 150;
+    if (this.scene.time.now - this.shownAt < guard) { input.consume("confirm"); return; }
     if (this.menu) { this.menu.update(); return; }
-    if (this.scene.time.now - this.shownAt < 150) return; // a held confirm must not skip a line
     if (input.consume("confirm")) {
       if (this.i < this.script.lines.length - 1) { this.i++; this.show(); }
       else this.finish(null);

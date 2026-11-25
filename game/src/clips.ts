@@ -57,15 +57,21 @@ export const PC = {
 /** Light string: 1 down-diagonal, 2 rising, 3 overhead slam. */
 export const lightClip = (combo: number): Clip => PC.light[Math.min(combo, 2)];
 
-export const BC = {
-  idle: loop("idle", ["boar_idle0", "boar_idle1"], 320),
-  walk: loop("walk", ["boar_walk0", "boar_walk1", "boar_walk2", "boar_walk3"], 110, PRI.LOCO, { 0: "step" }),
-  paw: loop("paw", ["boar_paw0", "boar_paw1"], 90, PRI.ACTION, { 1: "paw" }),
-  gallop: loop("gallop", ["boar_gal0", "boar_gal1"], 60, PRI.ACTION, { 0: "step" }),
-  stun: loop("stun", ["boar_stun0", "boar_stun1"], 200, PRI.ACTION),
-  hurt: clip("hurt", [{ key: "boar_hurt", ms: 130 }], PRI.HURT),
-  death: clip("death", [{ key: "boar_dead0", ms: 150 }, { key: "boar_dead1", ms: 99999, event: "thud" }], PRI.DEAD),
-};
+/** Boar clips by texture prefix: "boar" (the startled boars) or "rboar" (the rooted boar in S6). */
+function boarClips(k: string) {
+  return {
+    idle: loop("idle", [`${k}_idle0`, `${k}_idle1`], 320),
+    walk: loop("walk", [`${k}_walk0`, `${k}_walk1`, `${k}_walk2`, `${k}_walk3`], 110, PRI.LOCO, { 0: "step" }),
+    paw: loop("paw", [`${k}_paw0`, `${k}_paw1`], 90, PRI.ACTION, { 1: "paw" }),
+    gallop: loop("gallop", [`${k}_gal0`, `${k}_gal1`], 60, PRI.ACTION, { 0: "step" }),
+    stun: loop("stun", [`${k}_stun0`, `${k}_stun1`], 200, PRI.ACTION),
+    hurt: clip("hurt", [{ key: `${k}_hurt`, ms: 130 }], PRI.HURT),
+    death: clip("death", [{ key: `${k}_dead0`, ms: 150 }, { key: `${k}_dead1`, ms: 99999, event: "thud" }], PRI.DEAD),
+  };
+}
+export type BoarClips = ReturnType<typeof boarClips>;
+export const BC = boarClips("boar");
+export const RBC = boarClips("rboar");
 
 export const NC = {
   idle: loop("idle", ["nanh_idle0", "nanh_idle1", "nanh_idle2", "nanh_idle3"], 260),
@@ -97,6 +103,22 @@ export const FC = {
   drop: clip("drop", [{ key: "f_drop", ms: 99999 }]),
 };
 export type FatherClip = keyof typeof FC;
+
+/** A villager's clips (S4, S6), from the textures registered per look in src/artVillage.ts. */
+export function villagerClips(look: string) {
+  const k = `v_${look}_`;
+  return {
+    idle: loop("idle", [`${k}idle0`, `${k}idle1`], 480),
+    walk: loop("walk", [`${k}walk0`, `${k}walk1`, `${k}walk2`, `${k}walk3`], 140, PRI.LOCO, { 0: "step", 2: "step" }),
+    kneel: loop("kneel", [`${k}kneel0`, `${k}kneel1`], 260),
+    brow: clip("brow", [{ key: `${k}brow`, ms: 99999 }]),
+    torch: loop("torch", [`${k}torch0`, `${k}torch1`], 160),
+    lie: clip("lie", [{ key: `${k}lie`, ms: 99999 }]),
+  };
+}
+export type VillagerClip = keyof ReturnType<typeof villagerClips>;
+/** Any NPC pose a stage or cutscene can name. An NPC without that clip holds its idle. */
+export type NpcClip = FatherClip | VillagerClip;
 
 export const ROOT = ["root0", "root1", "root2"] as const;
 export const SHRINE_LIT = loop("lit", ["shrine_on0", "shrine_on1", "shrine_on2", "shrine_on1"], 110);

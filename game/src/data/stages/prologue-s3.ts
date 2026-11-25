@@ -36,6 +36,6 @@ export const PROLOGUE_S3 = {
     { id: "diep", x: 161, text: "s3.ex.diep" },
     { id: "bag", x: 188, text: "s3.ex.bag", while: "bag" },
   ],
-  talk: [{ npc: "father", cutscene: "s3.main", hint: "s3.hint" }],
+  talk: [{ npc: "father", cutscene: "s3.main", hint: "s3.hint", once: true }],
   opening: "s3.open",
 } satisfies StageDef;

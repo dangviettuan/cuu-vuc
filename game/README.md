@@ -68,8 +68,14 @@ URL options: `?quick=1` (straight into the stage with a throwaway save: used by 
 | **Cutscenes:** lines, walks, poses, the falling leaf, camera; skippable from the pause menu | `src/data/cutscenes.ts`, `runCutscene` in `Stage.ts` |
 | **Interaction:** the interact key acts on the nearest thing in reach (talking beats looking) | `Stage.ts` |
 | **The Father** (greybox frames from the concept pick: stoop, grey hair and beard, burn-white left hand, the bag with copper rods) and the house, yard and night-village props | `src/artVillage.ts`, `src/npc.ts` |
+| **Villagers** by look (bà Dần, ông Dần, the headman, the four men): idle, walk, kneel, a hand at the brow, a torch, lying pinned | `LOOKS` in `src/artVillage.ts`, `villagerClips` in `src/clips.ts` |
+| **Story gates in data:** marks set by things used and scenes played; `after` (needs these marks), `once`, `while` (a prop is still there); triggers by position or marks; walls that open with a prop or a mark | `src/data/stage.ts`, `updateStory` in `Stage.ts` |
+| **Flag conditions:** a prop, NPC, trigger or enemy can exist only for one C1 outcome (`when`); an unset flag counts as the prose branch | `When` in `src/data/stage.ts` |
+| **Choices inside cutscenes** (C1): a skip stops at the choice; its flags save at once; the chosen branch plays. Lines leading to a choice ignore confirm (J is also attack) for 550 ms; number keys always pick | `choose` step, `CHOICE_GUARD_MS` in `src/scenes/UI.ts` |
+| **S6 combat:** the stampede (panicked runners, jump or dodge; one at a time, sound first) and the rooted boar (roots through the shoulder; bolts when beaten) | `Runner`, `BoarOpts` in `src/enemies.ts`; `STAMPEDE`, `ROOTED_BOAR` in `src/data/enemies.ts` |
+| **Key items** in the save (the half Mạch Ấn) | `addItem` in `src/core/save.ts` |
 
-`?quick=1&stage=prologue-s3` (or `-s7`) starts a test run at that stage.
+`?quick=1&stage=prologue-s4` (or `-s3`, `-s5`, `-s6`, `-s7`) starts a test run at that stage. Starting at S6 without having made C1 plays the prose branch (kept the Father's word).
 
 ## Kits (ADR-0010)
 

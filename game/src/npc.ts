@@ -1,11 +1,12 @@
 import Phaser from "phaser";
-import { Animator } from "./anim";
-import { FC, FatherClip } from "./clips";
+import { Animator, Clip } from "./anim";
+import { FC, NpcClip, villagerClips } from "./clips";
+import type { LookId } from "./artVillage";
 
 /**
- * A non-combat character driven by cutscenes (Phase 2: the Father in Prologue S3). It walks to a point, holds a pose,
- * and carries the bag once he takes it (his idle and walk switch to the bag versions). No physics: it stands on the
- * stage's ground line.
+ * A non-combat character driven by cutscenes: the Father (S3) and the villagers (S4, S6). It walks to a point, holds a
+ * pose, and the Father carries the bag once he takes it (his idle and walk switch to the bag versions). No physics: it
+ * stands on the stage's ground line.
  */
 export class Npc extends Phaser.GameObjects.Sprite {
   readonly anim: Animator;
@@ -13,23 +14,30 @@ export class Npc extends Phaser.GameObjects.Sprite {
   bag = false;
   private target: number | null = null;
   private arrive: (() => void) | null = null;
-  private clipName: FatherClip = "idle";
-  /** An unhurried walk (he stoops, he is in his fifties) that still keeps a cutscene moving. */
+  private clipName: NpcClip = "idle";
+  private readonly clips: Partial<Record<NpcClip, Clip>>;
+  /** The pose it returns to after a walk: "idle", or "torch" for the headman at night. */
+  rest: NpcClip;
+  /** An unhurried walk (the Father stoops, he is in his fifties) that still keeps a cutscene moving. */
   static readonly SPEED = 62;
+  speed = Npc.SPEED;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, readonly id: string, clip: FatherClip, facing: 1 | -1 = 1) {
-    super(scene, x, y, "f_idle0");
+  constructor(scene: Phaser.Scene, x: number, y: number, readonly id: string, clip: NpcClip, facing: 1 | -1 = 1, readonly look?: LookId, rest?: NpcClip) {
+    super(scene, x, y, look ? `v_${look}_idle0` : "f_idle0");
     scene.add.existing(this);
     this.setOrigin(0.5, 1).setDepth(9);
     this.anim = new Animator(this);
+    this.clips = look ? villagerClips(look) : FC;
+    if (look) this.speed = 74;
+    this.rest = rest ?? "idle";
     this.facing = facing;
     this.pose(clip);
   }
 
-  /** Hold a clip (idle and walk follow whether he carries the bag). */
-  pose(c: FatherClip): void {
+  /** Hold a clip (the Father's idle and walk follow whether he carries the bag). */
+  pose(c: NpcClip): void {
     this.clipName = c;
-    const clip = c === "idle" && this.bag ? FC.bidle : c === "walk" && this.bag ? FC.bwalk : FC[c];
+    const clip = !this.look && c === "idle" && this.bag ? FC.bidle : !this.look && c === "walk" && this.bag ? FC.bwalk : this.clips[c] ?? this.clips.idle!;
     this.anim.play(clip, true, true);
   }
 
@@ -46,19 +54,19 @@ export class Npc extends Phaser.GameObjects.Sprite {
   /** Cutscene skipped: finish any walk at once. */
   finishWalk(): void {
     if (this.target === null) return;
-    this.x = this.target; this.target = null; this.pose("idle");
+    this.x = this.target; this.target = null; this.pose(this.rest);
     const f = this.arrive; this.arrive = null; f?.();
   }
 
   tick(dt: number): void {
     if (this.target !== null) {
-      const step = Npc.SPEED * dt / 1000, d = this.target - this.x;
-      if (Math.abs(d) <= step) { this.x = this.target; this.target = null; this.pose("idle"); const f = this.arrive; this.arrive = null; f?.(); }
+      const step = this.speed * dt / 1000, d = this.target - this.x;
+      if (Math.abs(d) <= step) { this.x = this.target; this.target = null; this.pose(this.rest); const f = this.arrive; this.arrive = null; f?.(); }
       else this.x += Math.sign(d) * step;
     }
     this.setFlipX(this.facing < 0);
     this.anim.update(dt);
   }
 
-  get clip(): FatherClip { return this.clipName; }
+  get clip(): NpcClip { return this.clipName; }
 }
