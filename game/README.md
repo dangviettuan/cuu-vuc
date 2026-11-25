@@ -57,7 +57,7 @@ npm run build      # type-check + production build into dist/
 
 URL options: `?quick=1` (straight into the stage with a throwaway save: used by the playtest tools), `?kit=kiem`, `?seed=N`, `?renderer=canvas|webgl`.
 
-## Phase 2 (branch `phase-2`)
+## Phase 2
 
 | Piece | Where |
 |---|---|

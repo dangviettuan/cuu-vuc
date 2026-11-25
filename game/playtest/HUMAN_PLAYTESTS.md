@@ -2,7 +2,12 @@
 
 The log of real people playing the greybox, collected with the playtest guide and form (a private claude.ai page shared by the project owner). Answers are copied in **without names**: each tester is T1, T2… in the order their answers arrived.
 
-**Build under test:** v0.5 (`1a39941`), live at https://dangviettuan.github.io/cuu-vuc/. It has the Prologue kit (brush-knife, 8-frame parry, block), Nanh Rễ at 260 HP and the Phase 1 shell (title, name entry, saves, options).
+**Builds under test** (live at https://dangviettuan.github.io/cuu-vuc/):
+- **v0.5** (`1a39941`), played by **T1**: the short slice (S1 forest edge → shrine → Nanh Rễ → C2) with the Prologue kit (brush-knife, 8-frame parry, block), Nanh Rễ at 260 HP, and the Phase 1 shell (title, name entry, saves, options).
+- **v0.6** (Phase 2, merged 2026-11-25), for **T2 onward**: the **whole Prologue, S1 → S8** (about 20–30 minutes, much of it story), placeholder music, and the reworked village art.
+  - Nanh Rễ's numbers are unchanged (260 HP). Two combat changes can still move her rating: the **air slash** (a downward chop after jumping her charge) and her **heal punish** (healing near her while she's idle draws an attack).
+  - Players now reach her after the S6 village fight, so they arrive warmed up.
+  - Answers from v0.6 are read separately from T1's for boss difficulty. "Minutes played" now means the whole Prologue.
 **Target** (REVIEW-2026-11-23 §1, PLAYTEST_REPORT I-01): a skilled first-time player dies **1–3 times** at Nanh Rễ. The boss should rate **about 3/5**, and no hit should feel unfair.
 
 ## What we are deciding

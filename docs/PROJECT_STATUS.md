@@ -73,7 +73,7 @@
 - data-driven stages (`game/src/data/stages/`); a dialogue and choice runner with a Vietnamese string table; the VT323 pixel font;
 - enemy tuning tables, Story / Standard / Hard, and a seeded RNG (`?seed=N`).
 
-**Phase 2 is in progress on the `phase-2` branch** (kept off `main` so the live build stays fixed while the playtest runs). Built so far:
+**Phase 2 is merged and live** (2026-11-25, v0.6; the playtest continues on it, see `game/playtest/HUMAN_PLAYTESTS.md`). Built:
 - the air slash and the boss's heal punish;
 - placeholder music in ngũ cung;
 - **the whole Prologue, S1 to S8, playable in story order** (greybox fidelity):
