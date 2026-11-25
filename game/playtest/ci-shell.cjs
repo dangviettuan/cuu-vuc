@@ -51,7 +51,7 @@ const { launch } = require("./harness.cjs");
   step("Esc pauses the stage", paused, {});
   // Options → difficulty → Story (cursor: Resume, Options, Title).
   await key("ArrowDown"); await key("Enter");
-  for (let i = 0; i < 3; i++) await key("ArrowDown"); // volume, shake, flashes → difficulty
+  for (let i = 0; i < 4; i++) await key("ArrowDown"); // sfx volume, music, shake, flashes → difficulty
   await key("ArrowLeft");
   let st = await page.evaluate(() => JSON.parse(localStorage.getItem("cuu-vuc-settings") || "{}"));
   const wb = await page.evaluate(() => window.__cuuVuc.scene.getScene("Stage").player.windowBonus);

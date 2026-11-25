@@ -14,6 +14,14 @@ const MASTER = 0.4;
 let volume = 0.8;
 export function setVolume(v: number): void { volume = Math.max(0, Math.min(1, v)); if (master) master.gain.value = MASTER * volume; }
 
+const unlockListeners: ((c: AudioContext) => void)[] = [];
+/** The shared AudioContext once a user gesture has created it (music uses it too), else null. */
+export function audioContext(): AudioContext | null { return ctx; }
+/** One second of white noise, shared by effects and the music's wind layer. */
+export function noiseBuffer(): AudioBuffer | null { return noiseBuf; }
+/** Called once, when the first user gesture creates the AudioContext (immediately if it already exists). */
+export function onAudioUnlock(fn: (c: AudioContext) => void): void { if (ctx) fn(ctx); else unlockListeners.push(fn); }
+
 export function unlockAudio(): void {
   if (ctx) { if (ctx.state === "suspended") void ctx.resume(); return; }
   try {
@@ -22,7 +30,8 @@ export function unlockAudio(): void {
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  } catch { ctx = null; }
+  } catch { ctx = null; return; }
+  for (const f of unlockListeners.splice(0)) f(ctx);
 }
 
 function env(g: GainNode, t: number, a: number, peak: number, dur: number): void {

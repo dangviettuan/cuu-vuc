@@ -3,6 +3,7 @@
  * `src/scenes/Stage.ts` builds any stage from a StageDef. Positions are world pixels; `y` defaults to the ground.
  */
 import type { StringKey } from "./strings.vi";
+import type { Track } from "../music";
 
 export interface StageDef {
   id: string;
@@ -10,6 +11,8 @@ export interface StageDef {
   height: number;
   groundY: number;
   start: { x: number };
+  /** Music while exploring (src/music.ts); an arena switches to its boss track. */
+  music?: Track;
   /** Toast shown when the stage starts fresh. */
   intro?: StringKey;
   /** One-way ledges: land from above, walk underneath, jump up through. Keep them ≤ 42 px above what they're reached from. */

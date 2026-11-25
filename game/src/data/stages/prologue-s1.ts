@@ -11,6 +11,7 @@ export const PROLOGUE_S1 = {
   height: 360,
   groundY: 304,
   start: { x: 60 },
+  music: "forest",
   intro: "s1.intro",
   ledges: [
     { x: 300, y: 270, w: 96 },

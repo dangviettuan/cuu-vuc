@@ -8,8 +8,10 @@ export type Difficulty = "story" | "standard" | "hard";
 
 export interface Settings {
   v: 1;
-  /** Master volume, 0–1. */
+  /** Sound-effect volume, 0–1. */
   volume: number;
+  /** Music volume, 0–1 (src/music.ts). */
+  music: number;
   /** Screen-shake strength, 0–1 (0 turns it off). */
   shake: number;
   /** Reduced flashes: hit flashes darken instead of flashing white, and the Canvas additive glow is skipped. */
@@ -24,7 +26,7 @@ export interface Settings {
 }
 
 const KEY = "cuu-vuc-settings";
-export const DEFAULT_SETTINGS: Settings = { v: 1, volume: 0.8, shake: 1, reduceFlashes: false, difficulty: "standard", pixelPerfect: true, showControls: true, bindings: {} };
+export const DEFAULT_SETTINGS: Settings = { v: 1, volume: 0.8, music: 0.6, shake: 1, reduceFlashes: false, difficulty: "standard", pixelPerfect: true, showControls: true, bindings: {} };
 
 type Listener = (s: Settings) => void;
 let current: Settings = load();

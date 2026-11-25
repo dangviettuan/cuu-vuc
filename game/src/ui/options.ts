@@ -31,6 +31,7 @@ export class OptionsPanel {
     const pct = (v: number) => `${Math.round(v * 100)}%`;
     this.menu = new Menu(this.scene, [
       { label: () => `${t("opt.volume")}: ◂ ${pct(s().volume)} ▸`, onChange: (d) => updateSettings({ volume: Math.round(Math.min(1, Math.max(0, s().volume + d * 0.1)) * 10) / 10 }) },
+      { label: () => `${t("opt.music")}: ◂ ${pct(s().music)} ▸`, onChange: (d) => updateSettings({ music: Math.round(Math.min(1, Math.max(0, s().music + d * 0.1)) * 10) / 10 }) },
       { label: () => `${t("opt.shake")}: ◂ ${pct(s().shake)} ▸`, onChange: (d) => updateSettings({ shake: SHAKES[(SHAKES.indexOf(s().shake) + d + SHAKES.length) % SHAKES.length] ?? 1 }) },
       { label: () => `${t("opt.flashes")}: ${onOff(s().reduceFlashes)}`, onChange: () => updateSettings({ reduceFlashes: !s().reduceFlashes }) },
       { label: () => `${t("opt.difficulty")}: ◂ ${t(`diff.${s().difficulty}` as StringKey)} ▸`, onChange: (d) => updateSettings({ difficulty: DIFFS[(DIFFS.indexOf(s().difficulty) + d + 3) % 3] }) },

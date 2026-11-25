@@ -6,6 +6,7 @@ import { Animator } from "../anim";
 import { HERB_GLINT, SHRINE_LIT } from "../clips";
 import { Fx } from "../fx";
 import { sfx } from "../sfx";
+import { music } from "../music";
 import { KIT, PLAYER, VIEW, WORLD } from "../tuning";
 import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
@@ -186,7 +187,7 @@ export class StageScene extends Phaser.Scene {
       this.physics.add.collider(boss, this.walls);
       boss.onRoots = (xs, warn, dmg) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, this.sim, warn + i * 40, dmg)));
       boss.onDown = () => this.bossDown();
-      boss.onPhase = (p) => { sfx.roar(); this.ui.toast(t(p === 2 ? "boss.nanhRe.p2" : "boss.nanhRe.p3")); this.cameras.main.shake(220, 0.006 * settings().shake); };
+      boss.onPhase = (p) => { sfx.roar(); music.setIntensity(p); this.ui.toast(t(p === 2 ? "boss.nanhRe.p2" : "boss.nanhRe.p3")); this.cameras.main.shake(220, 0.006 * settings().shake); };
       boss.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, boss.facing, 2.2);
       if (ar.litter) {
         this.add.image(ar.litter.bushX, def.groundY, "bush0").setOrigin(0.5, 1).setDepth(7);
@@ -212,6 +213,7 @@ export class StageScene extends Phaser.Scene {
     this.unsub.push(onSettings(() => { this.refreshLabels(); this.applyDifficulty(); }));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.unsub.forEach((u) => u()); this.unsub = []; });
 
+    music.play(def.music ?? "forest");
     // The UI scene runs for the whole session (launched in Boot); it draws the HUD for whichever stage is attached.
     this.scene.bringToTop("UI");
     this.ui.attach(this);
@@ -419,6 +421,7 @@ export class StageScene extends Phaser.Scene {
         this.boss.reset(ar.boss.x); this.boss.facing = -1;
         this.cameras.main.setBounds(0, this.def.height - VIEW.height, this.def.width, VIEW.height);
         this.ui.hideBoss();
+        music.play(this.def.music ?? "forest");
       }
       this.cameras.main.fadeIn(300);
       this.ui.toast(t(this.shrineLit ? "toast.wakeShrine" : "toast.wakeStart"));
@@ -431,6 +434,7 @@ export class StageScene extends Phaser.Scene {
     for (const x of [ar.min + ARENA_WALL / 2, ar.max - ARENA_WALL / 2]) this.walls.add(this.add.rectangle(x, this.def.groundY / 2, 16, this.def.groundY + 200).setVisible(false));
     this.cameras.main.setBounds(ar.min, this.def.height - VIEW.height, ar.max - ar.min, VIEW.height);
     this.ui.showBoss(t(ar.boss.name));
+    music.play("boss", 1);
     this.ui.toast(t(ar.boss.intro), 2000);
     this.time.delayedCall(900, () => { this.boss?.wake(); sfx.roar(); });
   }
@@ -439,6 +443,7 @@ export class StageScene extends Phaser.Scene {
     const ar = this.def.arena!, boss = this.boss!;
     this.choosing = true;
     this.shake(30); this.hitstop(160); sfx.bossDown();
+    music.play("aftermath");
     // frame the moment on her, not the arena edge (playtest I-14)
     const cam = this.cameras.main;
     cam.stopFollow();

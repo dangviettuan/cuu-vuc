@@ -6,6 +6,7 @@ import { StageScene } from "./scenes/Stage";
 import { UIScene } from "./scenes/UI";
 import { setWeapon } from "./art";
 import { setVolume, unlockAudio } from "./sfx";
+import { music, setMusicVolume } from "./music";
 import { input } from "./core/input";
 import { onSettings, settings } from "./core/settings";
 import { save } from "./core/save";
@@ -19,6 +20,7 @@ const forced = new URLSearchParams(location.search).get("renderer");
 setWeapon(KIT.weapon);
 input.setBindings(settings().bindings);
 setVolume(settings().volume);
+setMusicVolume(settings().music);
 
 const game = new Phaser.Game({
   type: forced === "canvas" ? Phaser.CANVAS : forced === "webgl" ? Phaser.WEBGL : Phaser.AUTO,
@@ -58,8 +60,9 @@ function applyScale(): void {
 }
 game.events.once(Phaser.Core.Events.READY, applyScale);
 window.addEventListener("resize", applyScale);
-onSettings((s) => { setVolume(s.volume); applyScale(); });
+onSettings((s) => { setVolume(s.volume); setMusicVolume(s.music); applyScale(); });
 
 // Exposed for automated smoke tests and console debugging.
 (window as unknown as { __cuuVuc: Phaser.Game }).__cuuVuc = game;
 (window as unknown as { __cuuVucSave: typeof save }).__cuuVucSave = save;
+(window as unknown as { __cuuVucMusic: typeof music }).__cuuVucMusic = music;

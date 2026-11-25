@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { KIT, PHA_THE_COST, PLAYER, VIEW } from "../tuning";
 import { input } from "../core/input";
+import { music } from "../music";
 import { t } from "../core/i18n";
 import { onSettings, settings } from "../core/settings";
 import { setFlag } from "../core/save";
@@ -106,6 +107,7 @@ export class UIScene extends Phaser.Scene {
 
   private toTitle(): void {
     this.closeAll();
+    music.duck(false);
     if (this.stage) { const st = this.stage; this.detach(); st.scene.stop(); }
     this.scene.run("Title");
     this.scene.bringToTop("UI");
@@ -114,6 +116,7 @@ export class UIScene extends Phaser.Scene {
   private openPause(): void {
     if (!this.stage) return;
     this.stage.scene.pause();
+    music.duck(true);
     const bg = this.add.rectangle(0, 0, VIEW.width, VIEW.height, PALETTE.panel, 0.7).setOrigin(0).setDepth(200);
     const title = text(this, VIEW.width / 2, 60, t("pause.title"), { size: 32, ox: 0.5, depth: 201, color: PALETTE.gold });
     const menu = new Menu(this, [
@@ -128,6 +131,7 @@ export class UIScene extends Phaser.Scene {
     if (!this.pause) return;
     this.pause.menu.destroy(); this.pause.bg.destroy(); this.pause.title.destroy(); this.pause = null;
     this.stage?.scene.resume();
+    music.duck(false);
     input.clearPresses(); // the key that closed the menu must not also swing the sword
   }
 
