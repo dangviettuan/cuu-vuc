@@ -83,6 +83,21 @@ export const NC = {
   collapse: clip("collapse", [{ key: "nanh_fall1", ms: 170 }, { key: "nanh_fall2", ms: 170 }, { key: "nanh_fall3", ms: 99999, event: "thud" }], PRI.DEAD),
 };
 
+/** The Father (Prologue S3). Mostly held poses: the scene is acted in stillness, as the prose writes it. */
+export const FC = {
+  idle: loop("idle", ["f_idle0", "f_idle1"], 420),
+  bidle: loop("bidle", ["f_bidle0", "f_bidle1"], 420),
+  sit: loop("sit", ["f_sit0", "f_sit1"], 600),
+  stand: clip("stand", [{ key: "f_stand", ms: 260 }, { key: "f_idle0", ms: 99999 }]),
+  walk: loop("walk", ["f_walk0", "f_walk1", "f_walk2", "f_walk3"], 150, PRI.LOCO, { 0: "step", 2: "step" }),
+  bwalk: loop("bwalk", ["f_bwalk0", "f_bwalk1", "f_bwalk2", "f_bwalk3"], 150, PRI.LOCO, { 0: "step", 2: "step" }),
+  crouch: clip("crouch", [{ key: "f_crouch", ms: 380 }, { key: "f_crouchLeaf", ms: 99999 }]),
+  hold: loop("hold", ["f_hold"], 99999),
+  offer: clip("offer", [{ key: "f_offer", ms: 99999 }]),
+  drop: clip("drop", [{ key: "f_drop", ms: 99999 }]),
+};
+export type FatherClip = keyof typeof FC;
+
 export const ROOT = ["root0", "root1", "root2"] as const;
 export const SHRINE_LIT = loop("lit", ["shrine_on0", "shrine_on1", "shrine_on2", "shrine_on1"], 110);
 export const HERB_GLINT = clip("glint", [{ key: "herb0", ms: 1400 }, { key: "herb1", ms: 90 }, { key: "herb2", ms: 90 }, { key: "herb0", ms: 600 }], 0, true);

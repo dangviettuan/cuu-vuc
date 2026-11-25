@@ -4,6 +4,7 @@ import { input } from "../core/input";
 import { t } from "../core/i18n";
 import { NAME_MAX, cleanName, newSave } from "../core/save";
 import { FONT, PALETTE, text } from "../ui/text";
+import { FIRST_STAGE } from "../data/stages";
 
 /**
  * Name entry (ADR-0004): the protagonist's name is typed by the player and stored in the save.
@@ -57,7 +58,7 @@ export class NameEntryScene extends Phaser.Scene {
   private submit(): void {
     const name = cleanName(this.field?.value ?? "");
     if (!name) { this.error.setText(t("name.empty")); return; }
-    newSave(name, "prologue-s1");
+    newSave(name, FIRST_STAGE);
     this.scene.start("Stage", { mode: "new" });
   }
 

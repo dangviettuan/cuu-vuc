@@ -34,9 +34,34 @@ const { makeBot } = require("./bot.cjs");
   s = await bot.snap(); step("shrine lit", s.shrineLit, { hp: s.p.hp });
   R.shots.push(await h.shot("f02-shrine"));
 
+  // Into the village: narration cards, then S3 (lunch) played line by line, then the cards into S7 (night).
+  const advance = async (until, ms = 90000) => {
+    const t1 = Date.now();
+    for (;;) { const x = await bot.snap(); if (until(x) || Date.now() - t1 > ms) return x; if (x.dlg || x.narr) await h.tap("Enter", 50); await h.wait(220); }
+  };
+  await h.down("d"); await h.wait(2200); await h.up("d");
+  s = await advance((x) => x.stage === "prologue-s3" && !x.narr && x.cut === "s3.open");
+  s = await advance((x) => !x.cut && !x.dlg);
+  step("S3: arrived home; the opening played", s.stage === "prologue-s3", { stage: s.stage });
+  await bot.moveTo(205, 6);
+  await h.tap("e", 50); await h.wait(400);
+  s = await bot.snap(); step("S3: talking to the Father starts the scene", s.cut === "s3.main", { cut: s.cut });
+  R.shots.push(await h.shot("s3-talk"));
+  s = await advance((x) => x.stage === "prologue-s7" && !x.narr);
+  step("S3 → S7: the scene played out to the night square", s.stage === "prologue-s7", { stage: s.stage });
+  R.shots.push(await h.shot("s7-start"));
+
+  // S7: the panicked boar (S6), then the shrine
+  await bot.moveTo(230);
+  const b3 = await bot.fightBoar(360, "parry");
+  s = await bot.snap(); step("S7: boar on the way in defeated", b3, { hp: s.p.hp, herbs: s.p.herbs });
+  await bot.moveTo(540);
+  await h.tap("e", 50); await h.wait(300);
+  s = await bot.snap(); step("S7: shrine rested", s.shrineLit, { hp: s.p.hp, herbs: s.p.herbs });
+
   // Boss, retry from the shrine after deaths (real respawn + walk back)
   for (let attempt = 1; attempt <= 5; attempt++) {
-    await bot.moveTo(1600, 8);
+    await bot.moveTo(700, 8);
     await h.wait(1000);
     R.shots.push(await h.shot(`f03-boss-intro-a${attempt}`));
     const startHp = (await bot.snap()).p.hp;
@@ -50,7 +75,7 @@ const { makeBot } = require("./bot.cjs");
       R.shots.push(await h.shot(`f05-death-a${attempt}`));
       await h.wait(2600); // death anim + fade + respawn
       s = await bot.snap();
-      step(`respawn at shrine after death #${attempt}`, Math.abs(s.p.x - 1440) < 30 && s.p.hp === 100 && !s.engaged, { x: s.p.x, hp: s.p.hp, bossHp: s.boss.hp, bossState: s.boss.state });
+      step(`respawn at shrine after death #${attempt}`, Math.abs(s.p.x - 560) < 30 && s.p.hp === 100 && !s.engaged, { x: s.p.x, hp: s.p.hp, bossHp: s.boss.hp, bossState: s.boss.state });
     }
     if (res === "timeout") break;
   }
@@ -62,8 +87,8 @@ const { makeBot } = require("./bot.cjs");
     await h.tap("1", 60); await h.wait(3600);
     R.shots.push(await h.shot("f07-ending-spare"));
     s = await bot.snap(); step("ending choice 1 (spare) recorded", s.finished, {});
-    await h.tap("r", 50); await h.wait(1500);
-    s = await bot.snap(); step("R restarts from the beginning", s.p.x < 100 && !s.finished && !s.shrineLit, { x: s.p.x });
+    const card = await h.page.evaluate(() => !!window.__cuuVuc.scene.getScene("UI").card);
+    step("the end card shows", card, {});
   } else step("reached ending choice", false, { bossHp: s.boss.hp });
 
   R.minutes = +((Date.now() - t0) / 60000).toFixed(1);

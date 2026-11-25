@@ -1,4 +1,6 @@
 /** Session 5 — (a) input mashing: which presses become swings; (b) 2-minute combat soak: perf + memory. Real input only. */
+// Starts at Prologue S7 (the night square), where the boss is, in quick mode.
+{ const u = new URL(process.env.GAME_URL || "http://localhost:5173/"); u.searchParams.set("stage", "prologue-s7"); process.env.GAME_URL = u.toString(); }
 const { launch, stats, save } = require("./harness.cjs");
 const { makeBot } = require("./bot.cjs");
 (async () => {
@@ -25,18 +27,17 @@ const { makeBot } = require("./bot.cjs");
     const bot = makeBot(h);
     const samples = [];
     const t0 = Date.now();
-    await bot.moveTo(520, 5, 8000); for (let i = 0; i < 3; i++) { await h.tap("j", 40); await h.wait(220); }
-    await bot.moveTo(780); await bot.fightBoar(930, "dodge"); await bot.moveTo(1120); await bot.fightBoar(1240, "parry");
-    await bot.moveTo(1420); await h.tap("e", 50); await h.wait(300);
+    await bot.moveTo(230); await bot.fightBoar(360, "dodge");
+    await bot.moveTo(540); await h.tap("e", 50); await h.wait(300);
     await h.resetFrameTimes();
     const sampler = setInterval(async () => { try { const m = await h.memory(); const o = await h.objects(); const c = await h.page.evaluate(() => window.__cuuVuc.scene.getScene("Stage").updateCostMs); samples.push({ s: Math.round((Date.now() - t0) / 1000), heapMB: m && +(m.used / 1048576).toFixed(1), objects: o, updateMs: +c.toFixed(3) }); } catch {} }, 10000);
     const tEnd = Date.now() + 120000; let fights = 0;
     while (Date.now() < tEnd) {
-      await bot.moveTo(1600, 8);
+      await bot.moveTo(700, 8);
       const res = await bot.fightBoss({ chargeTactic: fights % 2 ? "jump" : "dodge", maxMs: Math.max(5000, tEnd - Date.now()) });
       fights++;
       const s = await bot.snap();
-      if (s.choosing) { await h.tap("1", 50); await h.wait(3500); await h.tap("r", 50); await h.wait(1500); await bot.moveTo(1600, 8, 30000); }
+      if (s.choosing) { await h.tap("1", 50); await h.wait(3500); await h.tap("r", 50); await h.wait(1500); await bot.moveTo(700, 8, 30000); }
       if (res === "died") await h.wait(2600);
     }
     clearInterval(sampler);

@@ -23,7 +23,7 @@ export function mix(a: Color, b: Color, t: number): Color {
   const A = hx(a), B = hx(b);
   return th(A.map((v, i) => v + (B[i] - v) * t));
 }
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   return () => {
     seed |= 0;
     seed = (seed + 0x6d2b79f5) | 0;

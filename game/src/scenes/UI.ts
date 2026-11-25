@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { KIT, PHA_THE_COST, PLAYER, VIEW } from "../tuning";
 import { input } from "../core/input";
 import { music } from "../music";
-import { t } from "../core/i18n";
+import { t, StringKey } from "../core/i18n";
 import { onSettings, settings } from "../core/settings";
 import { setFlag } from "../core/save";
 import type { FlagName, FlagValue } from "../core/flags";
@@ -37,11 +37,12 @@ export class UIScene extends Phaser.Scene {
   private card: { panel: Phaser.GameObjects.Text; onConfirm: () => void } | null = null;
   private pause: { bg: Phaser.GameObjects.Rectangle; title: Phaser.GameObjects.Text; menu: Menu } | null = null;
   private options: OptionsPanel | null = null;
+  private narration: Narration | null = null;
 
   constructor() { super("UI"); }
 
   /** True while something modal has the input (dialogue, end card, pause, options): gameplay ignores input. */
-  get busy(): boolean { return !!(this.dialogue || this.card || this.pause || this.options); }
+  get busy(): boolean { return !!(this.dialogue || this.card || this.pause || this.options || this.narration); }
 
   create(): void {
     this.hud = this.add.graphics().setDepth(100);
@@ -73,7 +74,9 @@ export class UIScene extends Phaser.Scene {
   private setHudVisible(v: boolean): void { this.hudOn = v; this.hud.setVisible(v); this.hudText.setVisible(v); this.updateStrip(); }
   /** Bottom space the strip takes right now (0 when hidden), so the boss bar sits just above whatever is there. */
   private get stripH(): number { return this.stripShown ? STRIP_H : 0; }
-  private get stripShown(): boolean { return this.hudOn && settings().showControls && !this.dialogue && !this.card && !this.pause && !this.options; }
+  /** The combat controls strip is noise in a quiet scene (S3): only stages with fighting show it. */
+  private get combatStage(): boolean { const d = this.stage?.def; return !!d && (d.boars.length > 0 || !!d.arena || d.brush.length > 0); }
+  private get stripShown(): boolean { return this.hudOn && this.combatStage && settings().showControls && !this.dialogue && !this.card && !this.pause && !this.options; }
   private updateStrip(): void { const v = this.stripShown; this.strip.forEach((o) => (o as Phaser.GameObjects.Text).setVisible(v)); }
 
   private refreshStrip(): void {
@@ -94,6 +97,25 @@ export class UIScene extends Phaser.Scene {
       for (const [k, v] of Object.entries(opt?.flags ?? {})) setFlag(k as FlagName, v as FlagValue);
       done(opt?.outcome ?? "");
     });
+  }
+
+  /** One line of dialogue or narration (`who` null): cutscenes and things to look at. `done` runs when it is closed. */
+  line(who: StringKey | null, text: StringKey, done?: () => void): void {
+    this.dialogue?.destroy();
+    const script: Script = { id: "line", lines: [{ who: who ?? undefined, text }] };
+    this.dialogue = new DialogueBox(this, script, () => { this.dialogue = null; done?.(); });
+  }
+
+  /** Close the current line as if confirmed (skipping a cutscene). */
+  closeLine(): void { this.dialogue?.finishNow(); }
+
+  /**
+   * Full-screen narration cards between stages (S2, S4–S6 aren't built yet; the cards carry the story across).
+   * Confirm moves on; after the last card `done` runs.
+   */
+  narrate(keys: StringKey[], done: () => void): void {
+    if (!keys.length) { done(); return; }
+    this.narration = new Narration(this, keys, () => { this.narration = null; done(); });
   }
 
   /** The closing card: confirm returns to the title (quick mode: restarts the stage). */
@@ -121,6 +143,7 @@ export class UIScene extends Phaser.Scene {
     const title = text(this, VIEW.width / 2, 60, t("pause.title"), { size: 32, ox: 0.5, depth: 201, color: PALETTE.gold });
     const menu = new Menu(this, [
       { label: () => t("pause.resume"), onConfirm: () => this.closePause() },
+      { label: () => t("pause.skip"), disabled: () => !this.stage?.cutscene, onConfirm: () => { const st = this.stage; this.closePause(); st?.skipCutscene(); } },
       { label: () => t("pause.options"), onConfirm: () => { menu.setVisible(false); title.setVisible(false); this.options = new OptionsPanel(this, () => { this.options = null; menu.setVisible(true); title.setVisible(true); menu.refresh(); }, 300); } },
       { label: () => t("pause.title.menu"), onConfirm: () => this.toTitle() },
     ], { x: VIEW.width / 2, y: 110, align: "center", depth: 201, onCancel: () => this.closePause() });
@@ -140,12 +163,14 @@ export class UIScene extends Phaser.Scene {
     if (this.pause) { this.pause.menu.destroy(); this.pause.bg.destroy(); this.pause.title.destroy(); this.pause = null; }
     this.dialogue?.destroy(); this.dialogue = null;
     this.card?.panel.destroy(); this.card = null;
+    this.narration?.destroy(); this.narration = null;
   }
 
   update(time: number, delta: number): void {
     // modal input first: options > pause > end card > dialogue
     if (this.options) this.options.update();
     else if (this.pause) { this.pause.menu.update(); if (this.pause && input.consume("pause")) this.closePause(); }
+    else if (this.narration) this.narration.update();
     else if (this.card) { if (input.consume("confirm") || (this.stage?.mode === "quick" && input.rawPresses.has("KeyR"))) this.card.onConfirm(); }
     else if (this.stage && input.consume("pause")) this.openPause();
     else if (this.dialogue) this.dialogue.update();
@@ -158,6 +183,7 @@ export class UIScene extends Phaser.Scene {
   private drawHud(dtMs: number): void {
     const g = this.hud, st = this.stage!, p = st.player;
     if (!p) return;
+    if (!this.combatStage) { g.clear(); this.hudText.setText(""); return; } // a quiet scene shows no combat HUD
     // damage trail: the white part of the bar drains after a short delay so the size of a hit is readable
     this.hpTrail = this.hpTrail > p.hp ? Math.max(p.hp, this.hpTrail - (dtMs / 1000) * 60) : p.hp;
     g.clear();
@@ -240,6 +266,40 @@ class DialogueBox {
   }
 
   private finish(opt: Option | null): void { this.destroy(); this.done(opt); }
+  finishNow(): void { this.finish(null); }
 
   destroy(): void { this.menu?.destroy(); this.menu = null; this.bg.destroy(); this.who.destroy(); this.body.destroy(); this.more.destroy(); }
+}
+
+/** Narration cards: black screen, one centred paragraph at a time, confirm to move on. */
+class Narration {
+  private i = 0;
+  private bg: Phaser.GameObjects.Rectangle;
+  private body: Phaser.GameObjects.Text;
+  private next: Phaser.GameObjects.Text;
+  private shownAt = 0;
+
+  constructor(private scene: Phaser.Scene, private keys: StringKey[], private done: () => void) {
+    this.bg = scene.add.rectangle(0, 0, VIEW.width, VIEW.height, 0x05070a, 1).setOrigin(0).setDepth(260);
+    this.body = text(scene, VIEW.width / 2, VIEW.height / 2 - 8, "", { ox: 0.5, oy: 0.5, align: "center", depth: 261, wrap: 400, color: PALETTE.text });
+    this.next = text(scene, VIEW.width - 18, VIEW.height - 22, "", { ox: 1, depth: 261, color: PALETTE.dim });
+    this.show();
+  }
+
+  private show(): void {
+    this.shownAt = this.scene.time.now;
+    this.body.setText(t(this.keys[this.i])).setAlpha(0);
+    this.scene.tweens.add({ targets: this.body, alpha: 1, duration: 500 });
+    this.next.setText(t("card.next"));
+  }
+
+  update(): void {
+    if (this.scene.time.now - this.shownAt < 350) { input.consume("confirm"); return; } // no accidental skips
+    if (input.consume("confirm")) {
+      if (this.i < this.keys.length - 1) { this.i++; this.show(); }
+      else { this.destroy(); this.done(); }
+    }
+  }
+
+  destroy(): void { this.bg.destroy(); this.body.destroy(); this.next.destroy(); }
 }

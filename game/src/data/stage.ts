@@ -4,6 +4,7 @@
  */
 import type { StringKey } from "./strings.vi";
 import type { Track } from "../music";
+import type { FatherClip } from "../clips";
 
 export interface StageDef {
   id: string;
@@ -26,7 +27,26 @@ export interface StageDef {
   /** Startled boars with their territory. Respawn when the player rests (Combat Bible §10). */
   boars: { x: number; min: number; max: number; tellMs?: number }[];
   /** Mạch shrines: rest, refill, save (ADR-0006). */
-  shrines: { id: string; x: number }[];
+  shrines: { id: string; x: number; sign?: StringKey }[];
+  /**
+   * Drifting leaves. Story-bound (Ch1): green in the morning; none at lunch, where one yellow leaf is the whole beat;
+   * yellow only once the forest has changed (night).
+   */
+  leaves?: "green" | "yellow" | "none";
+  /** Time of day: night darkens the backdrop (the world and characters stay readable). */
+  time?: "morning" | "noon" | "night";
+  /** Walking right past `x` leaves for stage `to`, after its cards. */
+  exit?: { x: number; to: string; card?: StringKey[] };
+  /** Static scenery: `key` is a texture; `x` its centre, `y` its bottom (default: the ground). An `id` lets a cutscene hide it. */
+  props?: { key: string; x: number; y?: number; depth?: number; id?: string; left?: boolean }[];
+  /** Characters the stage places (the Father in S3). */
+  npcs?: { id: string; kind: "father"; x: number; clip: FatherClip; facing?: 1 | -1 }[];
+  /** Things to look at: interact nearby shows a narration line. `while` hides it once a prop is gone. */
+  examine?: { id: string; x: number; text: StringKey; while?: string }[];
+  /** Interacting near an NPC runs a cutscene (src/data/cutscenes.ts). */
+  talk?: { npc: string; cutscene: string; hint?: StringKey }[];
+  /** A cutscene that runs when the stage starts. */
+  opening?: string;
   arena?: {
     min: number;
     max: number;

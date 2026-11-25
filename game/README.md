@@ -2,7 +2,7 @@
 
 The first playable slice, built to the scope of the Combat & Class Bible §11:
 
-**Prologue S1** (forest-edge chores as the tutorial) → **shrine checkpoint** → **Nanh Rễ** (Prologue boss) → **choice C2** (spare or finish her). The choice sets `PRO_SOW_SPARED`.
+**Prologue S1** (forest-edge chores as the tutorial, ending at the shrine) → **S3 "Bữa trưa"** (lunch with the Father: the yellow leaf, "Khóa cửa"; a scene, no combat) → **S7** (the village square at night: a panicked boar, the shrine, **Nanh Rễ**) → **choice C2** (spare or finish her; sets `PRO_SOW_SPARED`). The stages not built yet (S2, S4–S6, S8) are carried by short narration cards.
 
 Engine: **Phaser 4.2.1 + TypeScript + Vite** ([ADR-0008](../docs/decisions/ADR-0008-engine-phaser.md)).
 
@@ -56,6 +56,20 @@ npm run build      # type-check + production build into dist/
 | **Pixel font:** VT323 (OFL), full Vietnamese coverage | `public/fonts/`, `src/ui/text.ts` |
 
 URL options: `?quick=1` (straight into the stage with a throwaway save: used by the playtest tools), `?kit=kiem`, `?seed=N`, `?renderer=canvas|webgl`.
+
+## Phase 2 (branch `phase-2`)
+
+| Piece | Where |
+|---|---|
+| **Air slash:** one overhead chop per jump, reaching below the feet | `src/player.ts`, `AIR_SLASH` in `src/tuning.ts` |
+| **Heal punish:** healing within reach of an idle Nanh Rễ draws an immediate, telegraphed attack | `punishHeal` in `src/enemies.ts`, `healPunish` in `src/data/enemies.ts` |
+| **Music** in ngũ cung (Bắc for day, Oán for night and the fight), synthesised; its own volume setting | `src/music.ts` |
+| **Stages chain:** exits, narration cards, the save moving on, time of day (night darkens only the backdrop), story-bound drifting leaves | `src/data/stages/`, `src/scenes/Stage.ts` |
+| **Cutscenes:** lines, walks, poses, the falling leaf, camera; skippable from the pause menu | `src/data/cutscenes.ts`, `runCutscene` in `Stage.ts` |
+| **Interaction:** the interact key acts on the nearest thing in reach (talking beats looking) | `Stage.ts` |
+| **The Father** (greybox frames from the concept pick: stoop, grey hair and beard, burn-white left hand, the bag with copper rods) and the house, yard and night-village props | `src/artVillage.ts`, `src/npc.ts` |
+
+`?quick=1&stage=prologue-s3` (or `-s7`) starts a test run at that stage.
 
 ## Kits (ADR-0010)
 

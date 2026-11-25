@@ -87,6 +87,13 @@ export function saveAtCheckpoint(stage: string, checkpoint: string, herbCap: num
   write();
 }
 
+/** Moving on to the next stage: it starts from its beginning; the pouch and the used-up things carry over. */
+export function enterStage(stage: string, herbCap: number, taken: Iterable<string>): void {
+  if (!current) return;
+  current.stage = stage; current.checkpoint = null; current.herbCap = herbCap; current.taken = [...new Set(taken)];
+  write();
+}
+
 export function markDone(stage: string): void {
   if (!current) return;
   if (!current.done.includes(stage)) current.done.push(stage);

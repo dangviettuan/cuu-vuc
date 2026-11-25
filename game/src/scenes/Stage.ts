@@ -12,11 +12,13 @@ import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
 import { Rng, runSeed } from "../core/rng";
 import { onSettings, settings } from "../core/settings";
-import { markDone, save, saveAtCheckpoint } from "../core/save";
+import { enterStage, markDone, save, saveAtCheckpoint } from "../core/save";
 import { DIFFICULTY } from "../data/difficulty";
-import { STAGES } from "../data/stages/prologue-s1";
+import { FIRST_STAGE, STAGES } from "../data/stages";
 import type { StageDef } from "../data/stage";
 import { SCRIPTS } from "../data/dialogue";
+import { CUTSCENES, Step } from "../data/cutscenes";
+import { Npc } from "../npc";
 import { text } from "../ui/text";
 import type { UIScene } from "./UI";
 
@@ -25,15 +27,19 @@ const ARENA_WALL = 16;
 /** Same idea at the two ends of the world. */
 const EDGE = 12;
 
-export type StageMode = "new" | "continue" | "quick";
+/** new: a fresh game · continue: from the save's checkpoint · enter: arriving from the previous stage · quick: test tools. */
+export type StageMode = "new" | "continue" | "enter" | "quick";
 export interface StageInit { mode: StageMode }
 
 interface Herb { id: string; img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; }
 interface Drift { img: Phaser.GameObjects.Image; x: number; y: number; vx: number; vy: number; phase: number; }
 interface Sign { x: number; key: StringKey; label: Phaser.GameObjects.Text; }
+/** Something the interact key does when the hero stands near it: rest at a shrine, look at a thing, talk to someone. */
+interface Interactable { x: number; range: number; y: number; act: () => void; when?: () => boolean; quiet?: () => boolean; priority?: number; }
 
 /**
- * A playable stage, built from data (src/data/stages). The greybox has one: Prologue S1 → shrine → Nanh Rễ (S7) → C2.
+ * A playable stage, built from data (src/data/stages). The Prologue greybox runs S1 (morning chores) → S3 (lunch, a
+ * cutscene) → S7 (Nanh Rễ at night, then C2); exits carry the hero on, with narration cards for the stages between.
  * Sources: docs/04-chapters/prologue-an-moc-v0.1.md, docs/05-gameplay/combat-class-bible-v0.1.md.
  *
  * - **Time model:** `sim` is gameplay time. Hit-stop freezes `sim` (and physics, and character animation) while FX,
@@ -61,8 +67,20 @@ export class StageScene extends Phaser.Scene {
   private tufts: Phaser.GameObjects.Image[] = [];
   private motes: Drift[] = [];
   private leaves: Drift[] = [];
-  private shrine!: Phaser.GameObjects.Image;
-  private shrineAnim!: Animator;
+  private shrine: Phaser.GameObjects.Image | null = null;
+  private shrineAnim: Animator | null = null;
+  npcs = new Map<string, Npc>();
+  private props = new Map<string, Phaser.GameObjects.Image>();
+  private interactables: Interactable[] = [];
+  /** The cutscene playing, if any (gameplay input is locked; the pause menu can skip it). */
+  cutscene: string | null = null;
+  private skipping = false;
+  /** A scripted walk for the hero (cutscenes): the target x and what to call on arrival. */
+  private heroWalk: { to: number; done: () => void } | null = null;
+  private leaving = false;
+  /** Set when the scene shuts down, so a cutscene still awaiting a step stops instead of acting on a dead stage. */
+  private gone = false;
+  private leafKey = "leaf";
   shrineLit = false;
   /** One-time world changes used up in this playthrough (herbs, brush): saved at the shrine. */
   private taken = new Set<string>();
@@ -100,11 +118,14 @@ export class StageScene extends Phaser.Scene {
 
   create(): void {
     const sv = save();
-    this.def = STAGES[sv?.stage ?? "prologue-s1"] ?? STAGES["prologue-s1"];
+    this.def = STAGES[sv?.stage ?? FIRST_STAGE] ?? STAGES[FIRST_STAGE];
     const def = this.def, cont = this.mode === "continue" && !!sv;
     this.sim = 0; this.hitstopLeft = 0; this.engaged = false; this.finished = false; this.choosing = false;
     this.boars = []; this.bushes = []; this.roots = []; this.herbs = []; this.signs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
-    this.taken = new Set(cont ? sv!.taken : []);
+    this.gone = false;
+    this.npcs = new Map(); this.props = new Map(); this.interactables = []; this.cutscene = null; this.skipping = false; this.heroWalk = null; this.leaving = false; this.boss = null;
+    // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
+    this.taken = new Set(sv?.taken ?? []);
     this.checkpoint = { x: def.start.x, y: def.groundY };
     this.seed = runSeed();
     configureEnemies(new Rng(this.seed), DIFFICULTY[settings().difficulty]);
@@ -117,10 +138,24 @@ export class StageScene extends Phaser.Scene {
     this.bg = this.add.tileSprite(0, 0, VIEW.width, VIEW.height, "bg_thanhmoc").setOrigin(0).setScrollFactor(0).setTileScale(4, 4).setDepth(-10);
     this.bg.tilePositionY = Math.round(camY / 4); // keep the backdrop aligned with the world as it was at 640×360
     const mid = this.add.graphics().setScrollFactor(0.5).setDepth(-5);
+    const night = def.time === "night";
     for (let i = 0; i < 18; i++) {
       const x = i * 90 + (i % 3) * 23, w = 18 + (i % 4) * 6;
-      mid.fillStyle(0x2c3a26, 1).fillRect(x, 0, w, def.groundY);
-      mid.fillStyle(0x354630, 1).fillRect(x + 3, 0, 2, def.groundY);
+      mid.fillStyle(night ? 0x141a1c : 0x2c3a26, 1).fillRect(x, 0, w, def.groundY);
+      mid.fillStyle(night ? 0x1c2426 : 0x354630, 1).fillRect(x + 3, 0, 2, def.groundY);
+    }
+    if (night) {
+      // Night (S7): only the backdrop darkens; the ground lane, characters and tells keep their colours, so combat
+      // stays as readable as by day. A cold wash over the sky and trunks, and a faint moon glow high up.
+      this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0x070b18, 0.62).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+      this.add.circle(VIEW.width * 0.78, 34, 14, 0xdfe6f0, 0.55).setScrollFactor(0).setDepth(-4.4);
+      this.cameras.main.setBackgroundColor("#0a0e14");
+    } else if (def.time === "noon") {
+      this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0xfff2c8, 0.08).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+    }
+    for (const pr of def.props ?? []) {
+      const img = this.add.image(pr.x, pr.y ?? def.groundY, pr.key).setOrigin(pr.left ? 0 : 0.5, 1).setDepth(pr.depth ?? -3);
+      if (pr.id) this.props.set(pr.id, img);
     }
 
     // Ground and ledges.
@@ -154,16 +189,30 @@ export class StageScene extends Phaser.Scene {
 
     // Shrine checkpoint (ADR-0006).
     const sh = def.shrines[0];
-    this.shrine = this.add.image(sh.x, def.groundY, "shrine_off").setOrigin(0.5, 1).setDepth(5);
-    this.shrineAnim = new Animator(this.shrine);
-    this.shrineLit = false;
-    this.player.herbCap = cont ? sv!.herbCap : 0;
-    if (cont && sv!.checkpoint === sh.id) {
-      this.lightShrine(false);
-      this.checkpoint = { x: sh.x + 20, y: def.groundY };
-      this.player.setPosition(this.checkpoint.x, def.groundY);
+    this.shrine = null; this.shrineAnim = null; this.shrineLit = false;
+    if (sh) {
+      this.shrine = this.add.image(sh.x, def.groundY, "shrine_off").setOrigin(0.5, 1).setDepth(5);
+      this.shrineAnim = new Animator(this.shrine);
+      if (sh.sign) this.sign(sh.x - 40, sh.sign);
+      this.interactables.push({ x: sh.x, range: 30, y: def.groundY - 42, act: () => this.rest(), quiet: () => this.shrineLit });
+      if (cont && sv!.checkpoint === sh.id) {
+        this.lightShrine(false);
+        this.checkpoint = { x: sh.x + 20, y: def.groundY };
+        this.player.setPosition(this.checkpoint.x, def.groundY);
+      }
     }
+    this.player.herbCap = sv?.herbCap ?? 0;
     this.player.refillHerbs();
+
+    // People and things to look at (S3).
+    for (const n of def.npcs ?? []) this.npcs.set(n.id, new Npc(this, n.x, def.groundY, n.id, n.clip, n.facing ?? 1));
+    for (const ex of def.examine ?? []) {
+      this.interactables.push({ x: ex.x, range: 16, y: def.groundY - 50, act: () => this.ui.line(null, ex.text), when: () => !ex.while || !!this.props.get(ex.while)?.visible });
+    }
+    for (const tk of def.talk ?? []) {
+      const npc = this.npcs.get(tk.npc);
+      if (npc) this.interactables.push({ x: npc.x, range: 30, y: def.groundY - 56, priority: 1, act: () => void this.runCutscene(tk.cutscene), when: () => !this.cutscene && !this.leaving && npc.clip === "sit" });
+    }
 
     // Arena + boss.
     this.walls = this.physics.add.staticGroup();
@@ -211,7 +260,7 @@ export class StageScene extends Phaser.Scene {
     // Labels follow the device in use and the player's bindings.
     this.unsub.push(input.onDevice(() => this.refreshLabels()));
     this.unsub.push(onSettings(() => { this.refreshLabels(); this.applyDifficulty(); }));
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.unsub.forEach((u) => u()); this.unsub = []; });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.gone = true; this.waits.clear(); this.unsub.forEach((u) => u()); this.unsub = []; });
 
     music.play(def.music ?? "forest");
     // The UI scene runs for the whole session (launched in Boot); it draws the HUD for whichever stage is attached.
@@ -219,6 +268,7 @@ export class StageScene extends Phaser.Scene {
     this.ui.attach(this);
     if (cont && this.shrineLit) this.ui.toast(t("toast.wakeShrine"));
     else if (def.intro) this.ui.toast(t(def.intro));
+    if (def.opening) void this.runCutscene(def.opening);
   }
 
   /* ------------------------------------------------------------ helpers */
@@ -261,8 +311,10 @@ export class StageScene extends Phaser.Scene {
       const img = this.add.image(0, 0, "mote").setDepth(-4).setScrollFactor(0.7).setAlpha(0.7);
       this.motes.push({ img, x: Math.random() * VIEW.width * 1.5, y: 100 + Math.random() * 200, vx: 4 + Math.random() * 6, vy: -3 - Math.random() * 4, phase: Math.random() * 6 });
     }
-    for (let i = 0; i < 5; i++) {
-      const img = this.add.image(0, 0, "leaf0").setDepth(4);
+    const leafKind = def.leaves ?? "yellow";
+    this.leafKey = leafKind === "green" ? "leafg" : "leaf";
+    for (let i = 0; i < (leafKind === "none" ? 0 : 5); i++) {
+      const img = this.add.image(0, 0, this.leafKey + "0").setDepth(4);
       this.leaves.push({ img, x: Math.random() * VIEW.width, y: -Math.random() * 300, vx: 8, vy: 22 + Math.random() * 14, phase: Math.random() * 6 });
     }
   }
@@ -292,7 +344,7 @@ export class StageScene extends Phaser.Scene {
       l.x += (l.vx + Math.sin(now / 400 + l.phase) * 18) * sec; l.y += l.vy * sec;
       if (l.y > this.def.groundY - 2 || l.x > cam.scrollX + VIEW.width + 20) { l.y = cam.scrollY - 10 - Math.random() * 120; l.x = cam.scrollX + Math.random() * VIEW.width; }
       l.img.setPosition(l.x, l.y);
-      const key = Math.floor(now / 160 + l.phase) % 2 ? "leaf0" : "leaf1";
+      const key = this.leafKey + (Math.floor(now / 160 + l.phase) % 2 ? "0" : "1");
       if (l.img.texture.key !== key) l.img.setTexture(key);
     }
   }
@@ -338,14 +390,15 @@ export class StageScene extends Phaser.Scene {
   }
 
   private lightShrine(fx: boolean): void {
+    const sh = this.shrine; if (!sh) return;
     this.shrineLit = true;
-    this.shrineAnim.play(SHRINE_LIT);
-    if (fx) { sfx.shrine(); this.fx.ring(this.shrine.x, this.shrine.y - 20); this.fx.motes(this.shrine.x, this.shrine.y - 30, 8); }
+    this.shrineAnim?.play(SHRINE_LIT);
+    if (fx) { sfx.shrine(); this.fx.ring(sh.x, sh.y - 20); this.fx.motes(sh.x, sh.y - 30, 8); }
   }
 
   /** Resting at a Mạch shrine (Combat Bible §10): full heal, pouch refilled, enemies respawn, progress saved. */
   private rest(): void {
-    const sh = this.def.shrines[0];
+    const sh = this.def.shrines[0]; if (!sh) return;
     this.checkpoint = { x: sh.x + 20, y: this.def.groundY };
     this.player.hp = PLAYER.maxHp;
     this.player.refillHerbs();
@@ -354,6 +407,111 @@ export class StageScene extends Phaser.Scene {
     if (missing > 0) { this.boars.forEach((b) => b.destroy()); this.boars = []; this.spawnBoars(); }
     saveAtCheckpoint(this.def.id, sh.id, this.player.herbCap, this.taken);
     this.ui.toast(t("toast.shrine"));
+  }
+
+  /* ------------------------------------------------------------ stage exits */
+
+  /**
+   * Leave for the next stage: the save moves on (the pouch and used-up things carry over), the screen fades, the
+   * narration cards play, and the stage restarts as the next one.
+   */
+  private leave(to: string, card?: StringKey[]): void {
+    if (this.leaving) return;
+    this.leaving = true;
+    enterStage(to, this.player.herbCap, this.taken);
+    music.stop(1.2);
+    this.cameras.main.fadeOut(600, 0, 0, 0);
+    this.time.delayedCall(650, () => this.ui.narrate(card ?? [], () => this.scene.restart({ mode: this.mode === "quick" ? "quick" : "enter" })));
+  }
+
+  /* ------------------------------------------------------------ cutscenes */
+
+  private waits = new Set<() => void>();
+  private delay(ms: number): Promise<void> {
+    return new Promise((res) => {
+      const done = () => { this.waits.delete(done); res(); };
+      this.waits.add(done);
+      this.time.delayedCall(ms, done);
+    });
+  }
+
+  /** Play a cutscene (src/data/cutscenes.ts): its steps in order. Gameplay input is locked until it ends. */
+  async runCutscene(id: string): Promise<void> {
+    const steps = CUTSCENES[id];
+    if (!steps || this.cutscene) return;
+    this.cutscene = id; this.skipping = false;
+    for (const st of steps) {
+      if (this.gone) return; // the stage was left (title, restart) mid-scene
+      await this.step(st);
+    }
+    this.cutscene = null; this.skipping = false;
+  }
+
+  /** Skip (pause menu): every pending wait, walk and line completes at once; the remaining steps run instantly. */
+  skipCutscene(): void {
+    if (!this.cutscene) return;
+    this.skipping = true;
+    this.ui.closeLine();
+    for (const n of this.npcs.values()) n.finishWalk();
+    if (this.heroWalk) this.finishHeroWalk();
+    for (const f of [...this.waits]) f();
+  }
+
+  private walkHero(to: number): Promise<void> {
+    return new Promise((res) => {
+      this.heroWalk = { to, done: res };
+      if (this.skipping) this.finishHeroWalk();
+    });
+  }
+  private finishHeroWalk(): void {
+    const w = this.heroWalk; if (!w) return;
+    this.heroWalk = null;
+    this.player.x = w.to; this.player.body2.reset(w.to, this.player.y - this.player.body2.height - 4); this.player.body2.setVelocity(0, 0);
+    w.done();
+  }
+
+  /** The yellow leaf (S3): it drifts down from the evergreen into the yard, turning as it falls. */
+  private leafFall(l: { from: number; to: number; top: number }): Promise<void> {
+    const gy = this.def.groundY;
+    const img = this.add.image(l.from, l.top, "big_leaf0").setDepth(8);
+    this.props.set("leaf", img);
+    if (this.skipping) { img.setPosition(l.to, gy - 3); return Promise.resolve(); }
+    return new Promise((res) => {
+      const t0 = this.time.now, dur = 2600;
+      const ev = this.time.addEvent({ delay: 16, loop: true, callback: () => {
+        const u = Math.min(1, (this.time.now - t0) / dur);
+        img.setPosition(l.from + (l.to - l.from) * u + Math.sin(u * 9) * 10, l.top + (gy - 3 - l.top) * u);
+        img.setTexture(Math.floor(u * 14) % 2 ? "big_leaf1" : "big_leaf0");
+        if (u >= 1 || this.skipping) { img.setPosition(l.to, gy - 3).setTexture("big_leaf0"); ev.remove(); res(); }
+      } });
+    });
+  }
+
+  private step(st: Step): Promise<void> {
+    const done = Promise.resolve(), fast = this.skipping, cam = this.cameras.main;
+    if ("say" in st) return fast ? done : new Promise((res) => this.ui.line(st.who ?? null, st.say, res));
+    if ("walk" in st) {
+      if (st.walk === "player") return this.walkHero(st.to);
+      const n = this.npcs.get(st.walk); if (!n) return done;
+      if (fast) { n.x = st.to; n.pose("idle"); return done; }
+      return n.walkTo(st.to);
+    }
+    if ("face" in st) { if (st.face === "player") this.player.facing = st.dir; else { const n = this.npcs.get(st.face); if (n) n.facing = st.dir; } return done; }
+    if ("pose" in st) { this.npcs.get(st.pose)?.pose(st.clip); return done; }
+    if ("wait" in st) return fast ? done : this.delay(st.wait);
+    if ("leaf" in st) return this.leafFall(st.leaf);
+    if ("hideProp" in st) { this.props.get(st.hideProp)?.setVisible(false); return done; }
+    if ("bag" in st) { const n = this.npcs.get(st.bag); if (n) { n.bag = true; n.pose(n.clip === "walk" ? "walk" : "idle"); } return done; }
+    if ("camera" in st) {
+      if (st.camera === "follow") { cam.startFollow(this.player, true, 0.1, 0.1, Math.round(this.lookAhead), 40); return done; }
+      cam.stopFollow();
+      if (fast) { cam.centerOnX(st.camera); return done; }
+      cam.pan(st.camera, cam.midPoint.y, 800, "Sine.easeInOut");
+      return this.delay(800);
+    }
+    if ("toast" in st) { if (!fast) this.ui.toast(t(st.toast), 3200); return done; }
+    if ("goto" in st) { this.leave(st.goto, st.card); return done; }
+    return done;
   }
 
   /* ------------------------------------------------------------ events */
@@ -484,8 +642,8 @@ export class StageScene extends Phaser.Scene {
     // Real-time systems (run during hit-stop too).
     this.fx.update(delta);
     this.updateAmbience(time, delta);
-    this.shrineAnim.update(delta);
-    if (this.shrineLit && Math.random() < delta / 260) this.fx.motes(this.shrine.x, this.shrine.y - 30, 1);
+    this.shrineAnim?.update(delta);
+    if (this.shrine && this.shrineLit && Math.random() < delta / 260) this.fx.motes(this.shrine.x, this.shrine.y - 30, 1);
     for (const h of this.herbs) if (!h.taken) { h.anim.update(delta); h.img.y = Math.round(h.baseY - 1.5 - Math.sin(time / 380 + h.phase) * 1.5); }
     this.updateFloat(delta);
 
@@ -501,7 +659,7 @@ export class StageScene extends Phaser.Scene {
     this.sim += dt;
     const now = this.sim;
 
-    const locked = this.choosing || this.finished || this.ui.busy;
+    const locked = this.choosing || this.finished || this.ui.busy || !!this.cutscene || this.leaving;
     const c: Controls = {
       left: input.held("left"), right: input.held("right"),
       jumpHeld: input.held("jump"), jumpPressed: input.pressed("jump"),
@@ -510,7 +668,15 @@ export class StageScene extends Phaser.Scene {
       herbPressed: input.pressed("herb"),
     };
     if (locked) { c.left = c.right = c.jumpHeld = c.jumpPressed = c.lightPressed = c.heavyHeld = c.heavyPressed = c.dodgePressed = c.parryPressed = c.parryHeld = c.herbPressed = false; }
+    if (this.heroWalk) { // a cutscene walks the hero
+      const d = this.heroWalk.to - this.player.x;
+      if (Math.abs(d) < 3) { this.player.body2.setVelocityX(0); const w = this.heroWalk; this.heroWalk = null; w.done(); }
+      else { c.left = d < 0; c.right = d > 0; }
+    }
     this.player.update(now, dt, c);
+    for (const n of this.npcs.values()) n.tick(dt);
+    const exit = this.def.exit;
+    if (exit && !this.leaving && !locked && this.player.x > exit.x) this.leave(exit.to, exit.card);
     this.bg.tilePositionX = this.cameras.main.scrollX * 0.15 / 4;
 
     // Camera look-ahead: lean ~32 px toward the facing direction, eased.
@@ -524,9 +690,18 @@ export class StageScene extends Phaser.Scene {
         this.fx.sparkle(h.img.x, h.baseY - 6, 8); this.float(h.img.x, h.baseY - 14, t("toast.herb"));
       }
     }
-    const nearShrine = Math.abs(this.player.x - this.shrine.x) < 30;
-    this.keyHint.setVisible(nearShrine && !this.shrineLit && !locked).setText(input.label("interact")).setPosition(this.shrine.x, this.shrine.y - 42 - Math.round(Math.sin(time / 250)));
-    if (!locked && input.pressed("interact") && nearShrine) this.rest();
+    // The interact key acts on the nearest thing in reach: rest at a shrine, look at something, talk to someone.
+    let near: Interactable | null = null;
+    for (const it of this.interactables) {
+      const d = Math.abs(it.x - this.player.x);
+      if (d >= it.range || (it.when && !it.when())) continue;
+      // talking to someone beats looking at a thing beside them; otherwise the nearest wins
+      const better = !near || (it.priority ?? 0) > (near.priority ?? 0) || ((it.priority ?? 0) === (near.priority ?? 0) && d < Math.abs(near.x - this.player.x));
+      if (better) near = it;
+    }
+    this.keyHint.setVisible(!!near && !locked && !near.quiet?.());
+    if (near) this.keyHint.setText(input.label("interact")).setPosition(near.x, near.y - Math.round(Math.sin(time / 250)));
+    if (!locked && near && input.pressed("interact")) near.act();
     const ar = this.def.arena;
     if (ar && this.boss && !this.engaged && !this.finished && this.boss.isAlive() && this.player.x > ar.min + 30) this.engage();
 
