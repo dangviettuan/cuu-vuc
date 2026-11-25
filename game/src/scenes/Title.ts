@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { VIEW } from "../tuning";
 import { input } from "../core/input";
+import { music } from "../music";
 import { t } from "../core/i18n";
 import { clearSave, loadSave } from "../core/save";
 import { Menu } from "../ui/menu";
@@ -33,6 +34,7 @@ export class TitleScene extends Phaser.Scene {
     this.hint = text(this, VIEW.width / 2, VIEW.height - 22, "", { ox: 0.5, color: PALETTE.dim });
     this.buildMenu();
     this.scene.bringToTop("UI");
+    music.play("title");
   }
   private hint!: Phaser.GameObjects.Text;
 

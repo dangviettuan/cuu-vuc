@@ -23,7 +23,7 @@ export function mix(a: Color, b: Color, t: number): Color {
   const A = hx(a), B = hx(b);
   return th(A.map((v, i) => v + (B[i] - v) * t));
 }
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   return () => {
     seed |= 0;
     seed = (seed + 0x6d2b79f5) | 0;
@@ -315,7 +315,9 @@ export function protagonistLying(): Px {
 }
 
 /* ---------------- startled boar (thú hoảng) ---------------- */
-export interface BoarPose { legs?: number; gallop?: boolean; headDy?: number; bodyDy?: number; side?: boolean; squint?: boolean; recoil?: number; }
+export interface BoarPose { legs?: number; gallop?: boolean; headDy?: number; bodyDy?: number; side?: boolean; squint?: boolean; recoil?: number;
+  /** Prologue S6: a boar with a clump of Linh Suy roots through its shoulder (black, wet, green-tipped; prose Ch. 2). */
+  roots?: boolean; }
 export function boar(p: BoarPose = {}): Px {
   const P = new Px(36, 24);
   const body = "#5a4a3c", belly = mix(body, "#c9a78a", 0.35), dark = shade(body, 0.78);
@@ -342,6 +344,13 @@ export function boar(p: BoarPose = {}): Px {
   P.line(32 + rx, 16 + bd + hd, 34 + rx, 13 + bd + hd, "#e9e1cf");
   P.tri(25 + rx, 8 + bd + hd, 27 + rx, 5 + bd + hd, 28 + rx, 9 + bd + hd, shade(body, 0.85));
   for (let i = 0; i < 6; i++) P.set(9 + i * 2 + rx, 6 + bd + (i % 2) - (p.gallop ? 1 : 0), dark);
+  if (p.roots) { // a clump of roots breaking out of the shoulder, still wet
+    for (const [x0, h, lean] of [[19, 6, -1], [21, 8, 0], [23, 5, 1], [20, 4, -2]] as const) {
+      P.line(x0 + rx, 7 + bd, x0 + lean + rx, 7 + bd - h, "#1a1512");
+      P.set(x0 + lean + rx, 6 + bd - h, "#7fa65a");
+    }
+    P.set(22 + rx, 8 + bd, "#2c2420");
+  }
   return P.outline();
 }
 
@@ -476,20 +485,66 @@ export function herb(glint: number): Px {
   return P;
 }
 
-export function shrine(lit: boolean, flicker = 0): Px {
-  const P = new Px(26, 38);
-  P.rect(3, 32, 20, 6, "#6f6a5c");
-  P.rect(6, 8, 14, 25, "#8a8576"); P.rect(6, 8, 1, 25, "#6f6a5c");
-  P.tri(4, 9, 13, 3, 22, 9, "#6f6a5c");
-  const g = lit ? ["#7ee08a", "#9cf0a4", "#6fd07c"][flicker % 3] : "#5d6a5a";
-  for (let a = 0; a < 5; a++) { P.line(8 + a * 2, 13, 13, 20, g); P.line(18 - a * 2, 28, 13, 20, g); }
-  P.set(13, 20, lit ? "#e8ffd0" : "#7a8676");
-  P.outline();
-  if (lit) { // flame-like Mạch glow on the cap
-    const fh = [3, 4, 2][flicker % 3];
-    P.rect(12, 3 - fh, 3, fh, ["#cfffd6", "#b6f5c0", "#e8ffe8"][flicker % 3]); P.set(13, 2 - fh, "#ffffff");
+/**
+ * The Mạch motif: curved grooves converging on one point at the centre ("những đường rãnh uốn cong, hội tụ vào một
+ * điểm ở giữa", Ch1). The same mark is on the shrine's altar stone, the station's face and the Mạch Ấn itself, so
+ * the player learns to read it (Art Bible §4).
+ */
+export function machGrooves(P: Px, cx: number, cy: number, r: number, col: string, arms = 5, swirl = 1.3): void {
+  for (let k = 0; k < arms; k++) {
+    const a0 = (k / arms) * Math.PI * 2 - Math.PI / 2;
+    for (let t = 1; t >= 0.08; t -= 0.04) {
+      const rr = r * t, a = a0 + (1 - t) * swirl;
+      P.set(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.9, col);
+    }
   }
-  return P;
+  P.set(cx, cy, col);
+}
+
+/**
+ * The miếu Mạch (ADR-0006 checkpoint): a small village shrine under the old tree. Three stone steps up to a plinth,
+ * lime-washed walls between two stone columns, a mossy tiled roof with upturned corners, and through the open front,
+ * the altar and its grey stone slab carved with the Mạch grooves (Ch. 2: "Trên bàn thờ không có tượng thần nào, chỉ có
+ * một phiến đá xám khắc những đường cong uốn lượn hội tụ vào giữa"). Lit: the grooves glow Mạch-green and a small oil
+ * lamp burns beside the stone; `flicker` 0–2 breathes the glow.
+ */
+export function shrine(lit: boolean, flicker = 0): Px {
+  const P = new Px(64, 62), r = rng(4242);
+  const step = "#7a776c", stepHi = "#96938a", wall = "#aaa088", wallS = "#8e846c", col = "#6e6a5e", colHi = "#86826f";
+  const tile = "#4e5a4c", tileHi = "#62705e", tileS = "#3c463a", dark = "#15120e";
+  // steps and plinth
+  P.rect(4, 58, 56, 4, step); P.rect(4, 58, 56, 1, stepHi);
+  P.rect(8, 54, 48, 4, step); P.rect(8, 54, 48, 1, stepHi);
+  P.rect(10, 48, 44, 6, "#6a675d"); P.rect(10, 48, 44, 1, stepHi);
+  for (let i = 0; i < 14; i++) P.set(5 + r() * 54, 55 + r() * 6, r() < 0.5 ? "#5e6a50" : "#6a6658"); // moss in the joints
+  // walls and columns
+  P.rect(12, 24, 40, 24, wall);
+  for (let i = 0; i < 40; i++) P.set(12 + r() * 40, 24 + r() * 24, r() < 0.6 ? wallS : "#7e8a6a"); // old lime, damp, moss
+  P.rect(12, 24, 4, 24, col); P.rect(48, 24, 4, 24, col); P.rect(13, 24, 1, 24, colHi); P.rect(49, 24, 1, 24, colHi);
+  // the open front: the dark inside, the altar, the stone
+  P.rect(19, 28, 26, 20, dark);
+  P.rect(21, 42, 22, 2, "#4a3524"); P.rect(22, 44, 2, 4, "#3a2a1c"); P.rect(40, 44, 2, 4, "#3a2a1c");
+  P.rect(26, 31, 12, 11, lit ? "#8e8a7c" : "#77736a"); P.rect(26, 31, 12, 1, "#a19d8e");
+  const glow = lit ? ["#7ee08a", "#9cf0a4", "#6fd07c"][flicker % 3] : "#5a5a52";
+  machGrooves(P, 32, 36, 5, glow);
+  if (lit) {
+    const halo = ["#2a4a30", "#30583a", "#264430"][flicker % 3]; // Mạch light on the dark wall behind the stone
+    for (const [x, y] of [[24, 30], [40, 30], [23, 36], [41, 36], [25, 41], [39, 41], [32, 29]]) P.set(x, y, halo);
+    P.rect(39, 39, 2, 3, "#8a7a52"); P.set(39, 38 - (flicker % 2), "#ffcf6a"); P.set(40, 37, "#fff2c8"); // the oil lamp
+  }
+  // roof: mossy tiles, a curved eave, the corners turned up (đầu đao), a ridge
+  for (let y = 10; y < 25; y++) {
+    const u = (y - 10) / 14, half = 18 + u * 14, sag = Math.round(Math.sin(u * Math.PI) * 0); // straight pitch
+    P.rect(32 - half, y + sag, half * 2, 1, (y % 3 === 0) ? tileHi : tile);
+  }
+  for (let x = 4; x < 60; x += 4) for (let y = 11; y < 24; y++) if (P.get(x, y) === tile || P.get(x, y) === tileHi) P.set(x, y, tileS);
+  P.rect(2, 24, 60, 2, tileS);
+  P.line(2, 24, 0, 18, tileS, 2); P.set(0, 17, tileHi); P.line(61, 24, 63, 18, tileS, 2); P.set(63, 17, tileHi); // upturned corners
+  P.rect(14, 8, 36, 3, tileS); P.rect(14, 8, 36, 1, tileHi);
+  P.line(14, 9, 11, 5, tileS, 2); P.line(49, 9, 52, 5, tileS, 2); // ridge ends curling up
+  P.ell(32, 6, 2, 2, lit ? "#9cf0a4" : "#7a776c"); // the ridge pearl
+  for (let i = 0; i < 10; i++) P.set(6 + r() * 52, 12 + r() * 12, "#6a7a4a"); // moss on the tiles
+  return P.outline();
 }
 
 export function sign(): Px {
@@ -618,6 +673,12 @@ export function registerTextures(scene: Phaser.Scene): void {
   pose("p_land0", { bob: 5, lean: 1, front: { dx: 5 }, back: { dx: -5 }, arm: "swingF", backArm: "swingB", coat: 2, hair: 1 });
   pose("p_land1", { bob: 2, front: { dx: 3 }, back: { dx: -3 }, coat: 1 });
   // light A (downward diagonal)
+  // air slash: legs tucked as at the apex, an overhead chop forward and down (Phase 2)
+  const tuck = { front: { dx: 3, lift: 4 }, back: { dx: -2, lift: 3 } };
+  pose("p_airW", { ...tuck, lean: -1, arm: "over1", backArm: "swingF", coat: 3, hair: 2 });
+  pose("p_airS", { ...tuck, lean: 3, arm: "chop", backArm: "swingB", coat: 3, hair: 2, smear: "over" });
+  pose("p_airH", { ...tuck, lean: 3, arm: "slam", backArm: "swingB", coat: 4, hair: 2 });
+  pose("p_airF", { front: { dx: 2, lift: 1 }, back: { dx: -3 }, lean: 1, arm: "follow", backArm: "swingF", coat: 4, hair: 2 });
   pose("p_aW1", { lean: -1, front: { dx: 2 }, back: { dx: -3 }, arm: "wind1", backArm: "swingF" });
   pose("p_aW2", { lean: -2, bob: 1, front: { dx: 2 }, back: { dx: -4 }, arm: "wind2", backArm: "swingF", hair: 0 });
   pose("p_aS", { lean: 3, front: { dx: 5 }, back: { dx: -4 }, arm: "strike", backArm: "swingB", coat: 2, hair: 2, smear: "down" });
@@ -669,6 +730,15 @@ export function registerTextures(scene: Phaser.Scene): void {
   add("boar_hurt", boar({ recoil: 2, squint: true }));
   add("boar_dead0", boar({ headDy: 3, bodyDy: 2, squint: true }));
   add("boar_dead1", boar({ side: true }));
+  // the rooted boar (S6): same frames, roots through the shoulder
+  for (let i = 0; i < 2; i++) add(`rboar_idle${i}`, boar({ bodyDy: i, roots: true }));
+  for (let i = 0; i < 4; i++) add(`rboar_walk${i}`, boar({ legs: i, roots: true }));
+  for (let i = 0; i < 2; i++) add(`rboar_paw${i}`, boar({ headDy: 2, legs: i * 2, bodyDy: 1, roots: true }));
+  for (let i = 0; i < 2; i++) add(`rboar_gal${i}`, boar({ gallop: true, legs: i, roots: true }));
+  for (let i = 0; i < 2; i++) add(`rboar_stun${i}`, boar({ headDy: 3, squint: true, bodyDy: i, roots: true }));
+  add("rboar_hurt", boar({ recoil: 2, squint: true, roots: true }));
+  add("rboar_dead0", boar({ headDy: 3, bodyDy: 2, squint: true, roots: true }));
+  add("rboar_dead1", boar({ side: true }));
   // Nanh Rễ
   for (let i = 0; i < 4; i++) add(`nanh_idle${i}`, nanhRe({ bob: i === 1 || i === 2 ? 1 : 0, sway: [0, 1, 0, -1][i] }));
   for (let i = 0; i < 4; i++) add(`nanh_walk${i}`, nanhRe({ legs: i, bob: i % 2, sway: i % 2 ? -1 : 1 }));

@@ -11,6 +11,15 @@ export interface Option { text: StringKey; outcome: string; flags?: Partial<Reco
 export interface Script { id: string; lines: Line[]; options?: Option[] }
 
 export const SCRIPTS: Record<string, Script> = {
+  /** Prologue C1 (§7): the headman asks what his father said. Axis: trust vs control (low weight). */
+  c1: {
+    id: "c1",
+    lines: [{ who: "who.headman", text: "c1.ask" }, { text: "c1.think" }],
+    options: [
+      { text: "c1.tell", outcome: "told", flags: { PRO_VILLAGE_TOLD: true } },
+      { text: "c1.keep", outcome: "kept", flags: { PRO_VILLAGE_TOLD: false } },
+    ],
+  },
   /** Prologue C2 (§7): spare or finish Nanh Rễ. Axes: forgiveness vs punishment, one vs many (low weight). */
   c2: {
     id: "c2",

@@ -1,8 +1,10 @@
 import Phaser from "phaser";
 import { registerTextures } from "../art";
+import { registerVillageTextures } from "../artVillage";
 import { buildOutlines } from "../outline";
 import { loadSave, migrateLegacy, newSave } from "../core/save";
-import { isQuick } from "../core/mode";
+import { isQuick, quickStage } from "../core/mode";
+import { FIRST_STAGE, STAGES } from "../data/stages";
 import { loadFont } from "../ui/text";
 
 /**
@@ -33,9 +35,14 @@ export class BootScene extends Phaser.Scene {
 
   private async finish(): Promise<void> {
     registerTextures(this);
+    registerVillageTextures(this);
     buildOutlines(this, "p_");
     await loadFont();
-    if (isQuick()) newSave("Thử nghiệm", "prologue-s1");
+    if (isQuick()) {
+      const st = quickStage(), stage = st && STAGES[st] ? st : FIRST_STAGE;
+      const sv = newSave("Thử nghiệm", stage);
+      if (stage !== FIRST_STAGE) { sv.herbCap = 2; } // arriving later in the Prologue: the two S1 herbs are in the pouch
+    }
     else { loadSave(); migrateLegacy(); }
     this.scene.launch("UI");
     if (isQuick()) this.scene.start("Stage", { mode: "quick" });

@@ -73,9 +73,23 @@
 - data-driven stages (`game/src/data/stages/`); a dialogue and choice runner with a Vietnamese string table; the VT323 pixel font;
 - enemy tuning tables, Story / Standard / Hard, and a seeded RNG (`?seed=N`).
 
+**Phase 2 is merged and live** (2026-11-25, v0.6; the playtest continues on it, see `game/playtest/HUMAN_PLAYTESTS.md`). Built:
+- the air slash and the boss's heal punish;
+- placeholder music in ngũ cung;
+- **the whole Prologue, S1 to S8, playable in story order** (greybox fidelity):
+  - S1 morning chores;
+  - **S2 "Cái giếng cạn"**: the dry well, the Father's rods, the third one trembles: "Không.";
+  - **S3 "Bữa trưa"**: lunch with the Father, the first story scene;
+  - **S4 "Buổi chiều lệch"**: the leaves, the birds, the four men ("Chúng mọc lại"), and **choice C1**;
+  - **S5 "Căn phòng của cha"**: the search puzzle that ends in the half Mạch Ấn (a key item in the save);
+  - **S6 "Đêm rừng đổi"**: the stampede through the village, bà Dần's house as C1 left it, and a rooted boar;
+  - S7: the shrine, Nanh Rễ and choice C2;
+  - **S8 "Lối rễ"**: the aftermath (shaped by C1 and C2), the keeper's hint (optional), the spare satchel and red thread, the roots parting, the station and its clues; the end card.
+
 Next:
-- **a 3–5 person human playtest** (review §8);
-- then Phase 2: combat depth (air slash, boss heal punish), music, and the first new content: Prologue S3 at greybox fidelity.
+- **a 3–5 person human playtest** (review §8; in progress, `game/playtest/HUMAN_PLAYTESTS.md`), then tune Nanh Rễ from it on the branch;
+- a human pass on the whole Prologue's pacing (it is now about 20–30 minutes, much of it reading);
+- then Ch. I (review §10 Phase 3).
 
 Roadmap:
 

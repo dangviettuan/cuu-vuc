@@ -3,13 +3,14 @@
  * Attack clips are *built from tuning.ts*: the windup/active/recovery frame runs sum exactly to the
  * AttackDef timings, and gameplay reads the frame tag to open the hitbox (animation-driven hitboxes).
  */
-import { AttackDef, DODGE, HEAVY, LIGHT, PARRY, PHA_THE, PLAYER, RIPOSTE } from "./tuning";
+import { AIR_SLASH, AttackDef, DODGE, HEAVY, LIGHT, PARRY, PHA_THE, PLAYER, RIPOSTE } from "./tuning";
 import { Clip, PRI, clip, loop, phase } from "./anim";
 
 type Set3 = { w: [string, number][]; a: [string, number, string?][]; r: [string, number][] };
 const SWING_A: Set3 = { w: [["p_aW1", 0.45], ["p_aW2", 0.55]], a: [["p_aS", 0.5, "swing"], ["p_aH", 0.5]], r: [["p_aF", 0.45], ["p_aR", 0.35], ["p_idle0", 0.2]] };
 const SWING_B: Set3 = { w: [["p_bW1", 0.45], ["p_bW2", 0.55]], a: [["p_bS", 0.5, "swing"], ["p_bH", 0.5]], r: [["p_bF", 0.45], ["p_bR", 0.35], ["p_idle0", 0.2]] };
 const OVERHEAD: Set3 = { w: [["p_oW1", 0.4], ["p_oW2", 0.6]], a: [["p_oS", 0.45, "swing"], ["p_oH", 0.55, "slam"]], r: [["p_oF", 0.5], ["p_oR", 0.5]] };
+const AIR: Set3 = { w: [["p_airW", 1]], a: [["p_airS", 0.5, "swing"], ["p_airH", 0.5]], r: [["p_airF", 1]] };
 const HEAVY_REL: Set3 = { w: [["p_oW3", 1]], a: OVERHEAD.a, r: OVERHEAD.r };
 
 function attack(name: string, d: AttackDef, s: Set3): Clip {
@@ -40,6 +41,7 @@ export const PC = {
   heavy: attack("heavy", HEAVY.def, HEAVY_REL),
   riposte: attack("riposte", RIPOSTE, OVERHEAD),
   phaThe: attack("phaThe", PHA_THE, HEAVY_REL),
+  air: attack("air", AIR_SLASH, AIR),
   charge: loop("charge", ["p_charge0", "p_charge1"], 70, PRI.ACTION),
   dodge: clip("dodge", phase(DODGE.duration, "dodge", [["p_d0", 0.14], ["p_d1", 0.3], ["p_d2", 0.3], ["p_d3", 0.26]]), PRI.ACTION),
   guard: clip("guard", phase(PARRY.window + PARRY.recovery, "guard", [["p_g0", 0.1], ["p_g1", 0.9]]), PRI.ACTION),
@@ -55,15 +57,21 @@ export const PC = {
 /** Light string: 1 down-diagonal, 2 rising, 3 overhead slam. */
 export const lightClip = (combo: number): Clip => PC.light[Math.min(combo, 2)];
 
-export const BC = {
-  idle: loop("idle", ["boar_idle0", "boar_idle1"], 320),
-  walk: loop("walk", ["boar_walk0", "boar_walk1", "boar_walk2", "boar_walk3"], 110, PRI.LOCO, { 0: "step" }),
-  paw: loop("paw", ["boar_paw0", "boar_paw1"], 90, PRI.ACTION, { 1: "paw" }),
-  gallop: loop("gallop", ["boar_gal0", "boar_gal1"], 60, PRI.ACTION, { 0: "step" }),
-  stun: loop("stun", ["boar_stun0", "boar_stun1"], 200, PRI.ACTION),
-  hurt: clip("hurt", [{ key: "boar_hurt", ms: 130 }], PRI.HURT),
-  death: clip("death", [{ key: "boar_dead0", ms: 150 }, { key: "boar_dead1", ms: 99999, event: "thud" }], PRI.DEAD),
-};
+/** Boar clips by texture prefix: "boar" (the startled boars) or "rboar" (the rooted boar in S6). */
+function boarClips(k: string) {
+  return {
+    idle: loop("idle", [`${k}_idle0`, `${k}_idle1`], 320),
+    walk: loop("walk", [`${k}_walk0`, `${k}_walk1`, `${k}_walk2`, `${k}_walk3`], 110, PRI.LOCO, { 0: "step" }),
+    paw: loop("paw", [`${k}_paw0`, `${k}_paw1`], 90, PRI.ACTION, { 1: "paw" }),
+    gallop: loop("gallop", [`${k}_gal0`, `${k}_gal1`], 60, PRI.ACTION, { 0: "step" }),
+    stun: loop("stun", [`${k}_stun0`, `${k}_stun1`], 200, PRI.ACTION),
+    hurt: clip("hurt", [{ key: `${k}_hurt`, ms: 130 }], PRI.HURT),
+    death: clip("death", [{ key: `${k}_dead0`, ms: 150 }, { key: `${k}_dead1`, ms: 99999, event: "thud" }], PRI.DEAD),
+  };
+}
+export type BoarClips = ReturnType<typeof boarClips>;
+export const BC = boarClips("boar");
+export const RBC = boarClips("rboar");
 
 export const NC = {
   idle: loop("idle", ["nanh_idle0", "nanh_idle1", "nanh_idle2", "nanh_idle3"], 260),
@@ -80,6 +88,39 @@ export const NC = {
   flinch: clip("flinch", [{ key: "nanh_flinch", ms: 90 }], PRI.SETTLE),
   collapse: clip("collapse", [{ key: "nanh_fall1", ms: 170 }, { key: "nanh_fall2", ms: 170 }, { key: "nanh_fall3", ms: 99999, event: "thud" }], PRI.DEAD),
 };
+
+/** The Father (Prologue S3). Mostly held poses: the scene is acted in stillness, as the prose writes it. */
+export const FC = {
+  idle: loop("idle", ["f_idle0", "f_idle1"], 420),
+  bidle: loop("bidle", ["f_bidle0", "f_bidle1"], 420),
+  sit: loop("sit", ["f_sit0", "f_sit1"], 600),
+  stand: clip("stand", [{ key: "f_stand", ms: 260 }, { key: "f_idle0", ms: 99999 }]),
+  walk: loop("walk", ["f_walk0", "f_walk1", "f_walk2", "f_walk3"], 150, PRI.LOCO, { 0: "step", 2: "step" }),
+  bwalk: loop("bwalk", ["f_bwalk0", "f_bwalk1", "f_bwalk2", "f_bwalk3"], 150, PRI.LOCO, { 0: "step", 2: "step" }),
+  crouch: clip("crouch", [{ key: "f_crouch", ms: 380 }, { key: "f_crouchLeaf", ms: 99999 }]),
+  hold: loop("hold", ["f_hold"], 99999),
+  offer: clip("offer", [{ key: "f_offer", ms: 99999 }]),
+  drop: clip("drop", [{ key: "f_drop", ms: 99999 }]),
+  /** kneeling at the well (S2), no leaf in hand */
+  kneel: clip("kneel", [{ key: "f_crouch", ms: 99999 }]),
+};
+export type FatherClip = keyof typeof FC;
+
+/** A villager's clips (S4, S6), from the textures registered per look in src/artVillage.ts. */
+export function villagerClips(look: string) {
+  const k = `v_${look}_`;
+  return {
+    idle: loop("idle", [`${k}idle0`, `${k}idle1`], 480),
+    walk: loop("walk", [`${k}walk0`, `${k}walk1`, `${k}walk2`, `${k}walk3`], 140, PRI.LOCO, { 0: "step", 2: "step" }),
+    kneel: loop("kneel", [`${k}kneel0`, `${k}kneel1`], 260),
+    brow: clip("brow", [{ key: `${k}brow`, ms: 99999 }]),
+    torch: loop("torch", [`${k}torch0`, `${k}torch1`], 160),
+    lie: clip("lie", [{ key: `${k}lie`, ms: 99999 }]),
+  };
+}
+export type VillagerClip = keyof ReturnType<typeof villagerClips>;
+/** Any NPC pose a stage or cutscene can name. An NPC without that clip holds its idle. */
+export type NpcClip = FatherClip | VillagerClip;
 
 export const ROOT = ["root0", "root1", "root2"] as const;
 export const SHRINE_LIT = loop("lit", ["shrine_on0", "shrine_on1", "shrine_on2", "shrine_on1"], 110);

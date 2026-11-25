@@ -14,6 +14,14 @@ const MASTER = 0.4;
 let volume = 0.8;
 export function setVolume(v: number): void { volume = Math.max(0, Math.min(1, v)); if (master) master.gain.value = MASTER * volume; }
 
+const unlockListeners: ((c: AudioContext) => void)[] = [];
+/** The shared AudioContext once a user gesture has created it (music uses it too), else null. */
+export function audioContext(): AudioContext | null { return ctx; }
+/** One second of white noise, shared by effects and the music's wind layer. */
+export function noiseBuffer(): AudioBuffer | null { return noiseBuf; }
+/** Called once, when the first user gesture creates the AudioContext (immediately if it already exists). */
+export function onAudioUnlock(fn: (c: AudioContext) => void): void { if (ctx) fn(ctx); else unlockListeners.push(fn); }
+
 export function unlockAudio(): void {
   if (ctx) { if (ctx.state === "suspended") void ctx.resume(); return; }
   try {
@@ -22,7 +30,8 @@ export function unlockAudio(): void {
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  } catch { ctx = null; }
+  } catch { ctx = null; return; }
+  for (const f of unlockListeners.splice(0)) f(ctx);
 }
 
 function env(g: GainNode, t: number, a: number, peak: number, dur: number): void {
@@ -80,4 +89,22 @@ export const sfx = {
   roar(): void { tone("sawtooth", 110, 60, 0.7, 0.25); noise("bandpass", 500, 250, 0.6, 0.2, 2); },
   death(): void { tone("triangle", 330, 110, 0.8, 0.25); },
   bossDown(): void { tone("sawtooth", 90, 40, 1.2, 0.25); },
+  // ---- the village scenes (Prologue S4–S6)
+  /** His heart, and the Mạch Ấn beating with it (S5): lub-dub, low. */
+  heartbeat(): void { tone("sine", 62, 40, 0.16, 0.7); tone("sine", 58, 38, 0.14, 0.5, 0.2); },
+  /** A bird's beak on his hand (S4). */
+  peck(): void { noise("highpass", 3200, 4200, 0.03, 0.3); tone("triangle", 2400, 1800, 0.05, 0.12); },
+  bark(): void { noise("bandpass", 700, 500, 0.09, 0.18, 3); noise("bandpass", 650, 480, 0.08, 0.14, 3, 0.16); },
+  door(): void { tone("sawtooth", 180, 140, 0.5, 0.05); noise("bandpass", 600, 400, 0.4, 0.08, 6); },
+  bolt(): void { tone("triangle", 300, 220, 0.06, 0.3); noise("lowpass", 1500, 400, 0.06, 0.25); },
+  /** Wood under weight: the door, the bed pushed, the bamboo frame. */
+  creak(): void { tone("sawtooth", 140, 110, 0.6, 0.06); noise("bandpass", 420, 300, 0.5, 0.07, 8); },
+  board(): void { tone("triangle", 220, 120, 0.1, 0.35); noise("lowpass", 1200, 300, 0.12, 0.3); },
+  crash(): void { noise("lowpass", 2200, 150, 0.7, 0.45); tone("sine", 90, 40, 0.5, 0.4); },
+  /** The long sound from the forest (S5): "Không giống tiếng thú. Cũng không giống gió." Low, far, the windows hum. */
+  far(): void { tone("sawtooth", 48, 42, 2.6, 0.12); tone("sine", 96, 84, 2.4, 0.08, 0.1); noise("lowpass", 160, 90, 2.4, 0.12); },
+  /** A copper rod ringing faintly against the stone (the third rod, S2). */
+  rod(): void { tone("triangle", 1760, 1740, 0.5, 0.12); tone("sine", 2640, 2600, 0.4, 0.05, 0.02); },
+  /** Silence falling (the dogs stop): nothing to play; the cue is there so scripts read as written. */
+  hush(): void {},
 };

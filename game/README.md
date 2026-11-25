@@ -2,7 +2,7 @@
 
 The first playable slice, built to the scope of the Combat & Class Bible §11:
 
-**Prologue S1** (forest-edge chores as the tutorial) → **shrine checkpoint** → **Nanh Rễ** (Prologue boss) → **choice C2** (spare or finish her). The choice sets `PRO_SOW_SPARED`.
+**Prologue S1** (forest-edge chores as the tutorial, ending at the shrine) → **S3 "Bữa trưa"** (lunch with the Father: the yellow leaf, "Khóa cửa"; a scene, no combat) → **S7** (the village square at night: a panicked boar, the shrine, **Nanh Rễ**) → **choice C2** (spare or finish her; sets `PRO_SOW_SPARED`). The stages not built yet (S2, S4–S6, S8) are carried by short narration cards.
 
 Engine: **Phaser 4.2.1 + TypeScript + Vite** ([ADR-0008](../docs/decisions/ADR-0008-engine-phaser.md)).
 
@@ -56,6 +56,29 @@ npm run build      # type-check + production build into dist/
 | **Pixel font:** VT323 (OFL), full Vietnamese coverage | `public/fonts/`, `src/ui/text.ts` |
 
 URL options: `?quick=1` (straight into the stage with a throwaway save: used by the playtest tools), `?kit=kiem`, `?seed=N`, `?renderer=canvas|webgl`.
+
+## Phase 2
+
+| Piece | Where |
+|---|---|
+| **Air slash:** one overhead chop per jump, reaching below the feet | `src/player.ts`, `AIR_SLASH` in `src/tuning.ts` |
+| **Heal punish:** healing within reach of an idle Nanh Rễ draws an immediate, telegraphed attack | `punishHeal` in `src/enemies.ts`, `healPunish` in `src/data/enemies.ts` |
+| **Music** in ngũ cung (Bắc for day, Oán for night and the fight), synthesised; its own volume setting | `src/music.ts` |
+| **Stages chain:** exits, narration cards, the save moving on, time of day (night darkens only the backdrop), story-bound drifting leaves | `src/data/stages/`, `src/scenes/Stage.ts` |
+| **Cutscenes:** lines, walks, poses, the falling leaf, camera; skippable from the pause menu | `src/data/cutscenes.ts`, `runCutscene` in `Stage.ts` |
+| **Interaction:** the interact key acts on the nearest thing in reach (talking beats looking) | `Stage.ts` |
+| **The Father** (greybox frames from the concept pick: stoop, grey hair and beard, burn-white left hand, the bag with copper rods) and the house, yard and night-village props | `src/artVillage.ts`, `src/npc.ts` |
+| **Villagers** by look (bà Dần, ông Dần, the headman, the four men): idle, walk, kneel, a hand at the brow, a torch, lying pinned | `LOOKS` in `src/artVillage.ts`, `villagerClips` in `src/clips.ts` |
+| **Story gates in data:** marks set by things used and scenes played; `after` (needs these marks), `once`, `while` (a prop is still there); triggers by position or marks; walls that open with a prop or a mark | `src/data/stage.ts`, `updateStory` in `Stage.ts` |
+| **Flag conditions:** a prop, NPC, trigger or enemy can exist only for one C1 outcome (`when`); an unset flag counts as the prose branch | `When` in `src/data/stage.ts` |
+| **Choices inside cutscenes** (C1): a skip stops at the choice; its flags save at once; the chosen branch plays. Lines leading to a choice ignore confirm (J is also attack) for 550 ms; number keys always pick | `choose` step, `CHOICE_GUARD_MS` in `src/scenes/UI.ts` |
+| **S6 combat:** the stampede (panicked runners, jump or dodge; one at a time, sound first) and the rooted boar (roots through the shoulder; bolts when beaten) | `Runner`, `BoarOpts` in `src/enemies.ts`; `STAMPEDE`, `ROOTED_BOAR` in `src/data/enemies.ts` |
+| **Key items** in the save (the half Mạch Ấn) | `addItem` in `src/core/save.ts` |
+
+| **Conditional scene steps** (`when` on a flag, `marks` on what was examined): the S8 aftermath follows C1 and C2; PRO_STATION_READ needs every clue read | `src/data/cutscenes.ts` |
+| **S8:** the pouch grows with the spare satchel; the end card closes the Prologue | `pouch`, `end` steps in `Stage.ts` |
+
+`?quick=1&stage=prologue-s4` (or `-s2` … `-s8`, `-s8-station`) starts a test run at that stage. Starting at S6 without having made C1 plays the prose branch (kept the Father's word).
 
 ## Kits (ADR-0010)
 

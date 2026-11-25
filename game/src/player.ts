@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, PARRY, PHA_THE, PHA_THE_COST, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
+import { AIR_SLASH, AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, PARRY, PHA_THE, PHA_THE_COST, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
 import { EnemyHit, HitResult, PlayerHit, flash } from "./combat";
 import { Animator } from "./anim";
 import { PC, lightClip } from "./clips";
@@ -18,12 +18,12 @@ export interface Controls {
   herbPressed: boolean;
 }
 
-type State = "move" | "light" | "charge" | "heavy" | "riposte" | "phaThe" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
+type State = "move" | "light" | "air" | "charge" | "heavy" | "riposte" | "phaThe" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
 export type PlayerEvent =
   | "parry" | "block" | "guardBreak" | "perfectDodge" | "hurt" | "riposte" | "phaThe" | "heal" | "dead"
   | "jump" | "land" | "dodge" | "step" | "skid" | "swing" | "slam" | "ghost" | "thud";
 
-const ATTACKING: ReadonlySet<State> = new Set(["light", "heavy", "riposte", "phaThe"]);
+const ATTACKING: ReadonlySet<State> = new Set(["light", "air", "heavy", "riposte", "phaThe"]);
 /** States in which stamina does not regenerate. */
 const NO_REGEN: ReadonlySet<State> = new Set(["dead", "charge", "dodge", "block"]);
 const clamp = Phaser.Math.Clamp;
@@ -73,6 +73,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private coyoteUntil = 0;
   private jumpBufferUntil = 0;
   private jumpCut = false;
+  /** One air slash per jump (reset on landing). */
+  private airSlashUsed = false;
   private flashUntil = 0;
   private wasGrounded = true;
   private fallSpeed = 0;
@@ -138,7 +140,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private startAttack(def: AttackDef, damage: number, s: State, slashLevel: number): void {
     this.attack = def; this.attackDamage = damage; this.swingId++; this.slashLevel = slashLevel;
     this.enter(s);
-    const c = s === "heavy" ? PC.heavy : s === "riposte" ? PC.riposte : s === "phaThe" ? PC.phaThe : lightClip(this.combo);
+    const c = s === "heavy" ? PC.heavy : s === "riposte" ? PC.riposte : s === "phaThe" ? PC.phaThe : s === "air" ? PC.air : lightClip(this.combo);
     this.anim.play(c, true, true);
   }
 
@@ -149,7 +151,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (!NO_REGEN.has(this.state) && now > this.staminaRegenAt)
       this.stamina = Math.min(PLAYER.maxStamina, this.stamina + PLAYER.staminaRegenPerSec * sec);
     const grounded = this.grounded;
-    if (grounded) { this.coyoteUntil = now + PLAYER.coyote; this.jumpCut = false; }
+    if (grounded) { this.coyoteUntil = now + PLAYER.coyote; this.jumpCut = false; this.airSlashUsed = false; }
     if (grounded && !this.wasGrounded && this.fallSpeed > 160) { this.landUntil = now + 130; this.onEvent("land"); }
     this.wasGrounded = grounded;
     this.fallSpeed = body.velocity.y;
@@ -174,7 +176,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         if (KIT.classKit && light && grounded && now < this.riposteUntil) { // free after a parry (review D5)
           this.riposteUntil = 0; this.bufLight = NEVER;
           this.startAttack(RIPOSTE, RIPOSTE.damage, "riposte", 2); this.onEvent("riposte");
-        } else if (light && grounded && this.spend(LIGHT[0].stamina)) { // no ground swing in mid-air (playtest I-10)
+        } else if (light && !grounded && !this.airSlashUsed && this.spend(AIR_SLASH.stamina)) { // the air slash (Phase 2)
+          this.bufLight = NEVER; this.airSlashUsed = true;
+          this.startAttack(AIR_SLASH, AIR_SLASH.damage, "air", 1);
+        } else if (light && grounded && this.spend(LIGHT[0].stamina)) {
           this.bufLight = NEVER;
           this.combo = 0; this.comboQueued = false; this.startAttack(LIGHT[0], LIGHT[0].damage, "light", 0);
         } else if (c.heavyHeld && grounded && this.stamina > HEAVY.stamina[0] * 0.5) {
@@ -188,6 +193,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         } else if (c.herbPressed && this.herbs > 0 && this.hp < PLAYER.maxHp && grounded) {
           this.enter("heal"); body.setVelocityX(0); this.anim.play(PC.heal, true, true);
         }
+        break;
+      }
+      case "air": {
+        // keeps the jump's arc and most of its air control; landing ends the recovery early
+        this.horizontal(dir, sec, 0.6, false);
+        if (!c.jumpHeld && body.velocity.y < -60 && !this.jumpCut) { body.setVelocityY(body.velocity.y * PLAYER.jumpCutFactor); this.jumpCut = true; }
+        if (this.anim.finished || (grounded && this.anim.tag === "recovery")) { this.attack = null; this.enter("move"); }
         break;
       }
       case "light":
@@ -327,7 +339,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     h.id = this.swingId; h.damage = this.attackDamage; h.guardBreak = a.guardBreak; h.direction = this.facing;
     h.poise = a.poise ?? (a.guardBreak ? this.attackDamage : 0);
     // Cover chest to shins so low targets (brush, boars) are hittable; a.height sets a minimum.
-    h.rect.setTo(x, b.y + 8, a.reach, Math.max(a.height, b.height - 10));
+    // The air slash reaches below the feet instead, so it can hit what the jump is clearing.
+    if (this.state === "air") h.rect.setTo(x, b.y + 8, a.reach, b.height + 4);
+    else h.rect.setTo(x, b.y + 8, a.reach, Math.max(a.height, b.height - 10));
     return h;
   }
 
