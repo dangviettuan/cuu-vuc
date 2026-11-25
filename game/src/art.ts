@@ -618,6 +618,12 @@ export function registerTextures(scene: Phaser.Scene): void {
   pose("p_land0", { bob: 5, lean: 1, front: { dx: 5 }, back: { dx: -5 }, arm: "swingF", backArm: "swingB", coat: 2, hair: 1 });
   pose("p_land1", { bob: 2, front: { dx: 3 }, back: { dx: -3 }, coat: 1 });
   // light A (downward diagonal)
+  // air slash: legs tucked as at the apex, an overhead chop forward and down (Phase 2)
+  const tuck = { front: { dx: 3, lift: 4 }, back: { dx: -2, lift: 3 } };
+  pose("p_airW", { ...tuck, lean: -1, arm: "over1", backArm: "swingF", coat: 3, hair: 2 });
+  pose("p_airS", { ...tuck, lean: 3, arm: "chop", backArm: "swingB", coat: 3, hair: 2, smear: "over" });
+  pose("p_airH", { ...tuck, lean: 3, arm: "slam", backArm: "swingB", coat: 4, hair: 2 });
+  pose("p_airF", { front: { dx: 2, lift: 1 }, back: { dx: -3 }, lean: 1, arm: "follow", backArm: "swingF", coat: 4, hair: 2 });
   pose("p_aW1", { lean: -1, front: { dx: 2 }, back: { dx: -3 }, arm: "wind1", backArm: "swingF" });
   pose("p_aW2", { lean: -2, bob: 1, front: { dx: 2 }, back: { dx: -4 }, arm: "wind2", backArm: "swingF", hair: 0 });
   pose("p_aS", { lean: 3, front: { dx: 5 }, back: { dx: -4 }, arm: "strike", backArm: "swingB", coat: 2, hair: 2, smear: "down" });

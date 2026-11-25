@@ -53,4 +53,9 @@ export const NANH_RE = {
   stagger: { poise: 60, ms: 1100 },
   /** Anti-repeat (review §3.5): never the same move three times in a row. */
   maxRepeat: 2,
+  /**
+   * Heal punish (review §3.5, Phase 2): healing within this range while she is idle makes her attack at once, with
+   * her normal telegraph. Healing during her recovery window stays safe: reading that window is the skill.
+   */
+  healPunish: { range: 140 },
 } as const;

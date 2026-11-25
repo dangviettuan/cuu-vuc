@@ -3,13 +3,14 @@
  * Attack clips are *built from tuning.ts*: the windup/active/recovery frame runs sum exactly to the
  * AttackDef timings, and gameplay reads the frame tag to open the hitbox (animation-driven hitboxes).
  */
-import { AttackDef, DODGE, HEAVY, LIGHT, PARRY, PHA_THE, PLAYER, RIPOSTE } from "./tuning";
+import { AIR_SLASH, AttackDef, DODGE, HEAVY, LIGHT, PARRY, PHA_THE, PLAYER, RIPOSTE } from "./tuning";
 import { Clip, PRI, clip, loop, phase } from "./anim";
 
 type Set3 = { w: [string, number][]; a: [string, number, string?][]; r: [string, number][] };
 const SWING_A: Set3 = { w: [["p_aW1", 0.45], ["p_aW2", 0.55]], a: [["p_aS", 0.5, "swing"], ["p_aH", 0.5]], r: [["p_aF", 0.45], ["p_aR", 0.35], ["p_idle0", 0.2]] };
 const SWING_B: Set3 = { w: [["p_bW1", 0.45], ["p_bW2", 0.55]], a: [["p_bS", 0.5, "swing"], ["p_bH", 0.5]], r: [["p_bF", 0.45], ["p_bR", 0.35], ["p_idle0", 0.2]] };
 const OVERHEAD: Set3 = { w: [["p_oW1", 0.4], ["p_oW2", 0.6]], a: [["p_oS", 0.45, "swing"], ["p_oH", 0.55, "slam"]], r: [["p_oF", 0.5], ["p_oR", 0.5]] };
+const AIR: Set3 = { w: [["p_airW", 1]], a: [["p_airS", 0.5, "swing"], ["p_airH", 0.5]], r: [["p_airF", 1]] };
 const HEAVY_REL: Set3 = { w: [["p_oW3", 1]], a: OVERHEAD.a, r: OVERHEAD.r };
 
 function attack(name: string, d: AttackDef, s: Set3): Clip {
@@ -40,6 +41,7 @@ export const PC = {
   heavy: attack("heavy", HEAVY.def, HEAVY_REL),
   riposte: attack("riposte", RIPOSTE, OVERHEAD),
   phaThe: attack("phaThe", PHA_THE, HEAVY_REL),
+  air: attack("air", AIR_SLASH, AIR),
   charge: loop("charge", ["p_charge0", "p_charge1"], 70, PRI.ACTION),
   dodge: clip("dodge", phase(DODGE.duration, "dodge", [["p_d0", 0.14], ["p_d1", 0.3], ["p_d2", 0.3], ["p_d3", 0.26]]), PRI.ACTION),
   guard: clip("guard", phase(PARRY.window + PARRY.recovery, "guard", [["p_g0", 0.1], ["p_g1", 0.9]]), PRI.ACTION),

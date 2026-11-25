@@ -529,7 +529,10 @@ export class StageScene extends Phaser.Scene {
     const px = this.player.x;
     this.boars = this.boars.filter((b) => b.active);
     for (const b of this.boars) b.tick(now, dt, px);
-    if (this.boss?.active) this.boss.tick(now, dt, px);
+    if (this.boss?.active) {
+      if (this.engaged && this.player.state === "heal") this.boss.punishHeal(Math.abs(px - this.boss.x));
+      this.boss.tick(now, dt, px);
+    }
     for (const b of this.bushes) b.tick(time);
     this.separate();
     for (const r of this.roots) {

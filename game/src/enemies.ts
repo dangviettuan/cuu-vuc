@@ -373,6 +373,13 @@ export class NanhRe extends Enemy {
     this.finish(dt, vx);
   }
 
+  /** The player started healing nearby: if she is only idling, she answers at once (healPunish in the tuning table). */
+  punishHeal(dist: number): void {
+    if (this.state !== "idle" || dist > NANH_RE.healPunish.range) return;
+    if (dist < NANH_RE.nearDist) { this.history.push("swipe"); this.enter("tSwipe"); }
+    else { this.history.push("charge"); this.chargesLeft = 0; this.enter("tCharge"); }
+  }
+
   /**
    * Move choice by distance, weighted, from the seeded RNG. Anti-repeat (review §3.5): a move already used
    * `maxRepeat` times in a row is taken out of the draw, so the fight never becomes a loop of one attack.

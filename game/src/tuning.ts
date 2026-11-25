@@ -99,6 +99,12 @@ export const HEAVY = {
   chargeMoveFactor: 0.25,
 } as const;
 
+/**
+ * Air slash (Phase 2; playtest I-10 / review A5): one overhead chop per jump, aimed forward and down. It keeps the
+ * jump's momentum (no lunge) and resets on landing, so jumping a charge can end in a hit without becoming a juggle.
+ */
+export const AIR_SLASH: AttackDef = { name: "air", startup: f(4), active: f(5), recovery: f(12), damage: 10, stamina: 8, reach: 30 + R, height: 34, guardBreak: false, lunge: 0 };
+
 /** Riposte: Kiếm Khách signature (parry → heavy counter). Free after a parry (review D5): it costs no Thế. */
 export const RIPOSTE: AttackDef = { name: "riposte", startup: f(4), active: f(5), recovery: f(14), damage: 40, stamina: 0, reach: 44, height: 28, guardBreak: true, lunge: 120 };
 /** After a parry: the Riposte window (Kiếm Khách), or the "strike now" cue for the universal kit. */
