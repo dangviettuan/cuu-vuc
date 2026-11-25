@@ -98,6 +98,15 @@ The beast is a sow with roots growing through her flesh. When she is beaten, her
 
 **Weighting rule:** Prologue choices carry **low weight** on the axes. They establish patterns and do not decide endings.
 
+**C1 as played** *(locked 2026-11-25 with the greybox S4–S6; source: prose Ch. 2 for the kept branch)*:
+- **The ask:** after the four men's report, the headman asks *"Cha mày nói gì?"* The hero remembers the leaf and *"Đừng nói từ đó ngoài đường."*
+- **Tell:** *"Là Linh Suy. Mọi người nên chuẩn bị."* The headman orders the preparations that Ch. 2 lists as undone in the other branch (*"Buộc trâu cho chắc. Chất đá chặn cổng. Đưa trẻ con lên gác."*). The last beat of S4 shows nhà Tư already packing their carrying poles.
+- **Keep:** *"Cha đang kiểm tra. Mọi người cứ bình tĩnh."* (verbatim from Ch. 2). The headman: *"Ừ. Cha mày biết việc."* People disperse, a little relieved.
+- **In S6:**
+  - Kept: bà Dần's porch is down and ông Dần's leg is broken under the frame, as in Ch. 2.
+  - Told: the house stands behind its stoned-up gate. At the square, nhà Tư is found gone into the forest with their small son, which matches the Ch. I spec (mother and child found, the father dead).
+- **The rooted boar** in S6 bolts when beaten and does not die, as in Ch. 2.
+
 ### 8. Immediate and delayed consequences
 
 | Flag | Immediate (same night) | Delayed |
