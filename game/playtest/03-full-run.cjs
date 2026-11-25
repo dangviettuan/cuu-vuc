@@ -22,7 +22,7 @@ const { makeBot } = require("./bot.cjs");
   // Boars
   await bot.moveTo(780);
   const b1 = await bot.fightBoar(930, "parry");
-  s = await bot.snap(); step("boar 1 defeated (parry → riposte)", b1, { hp: s.p.hp, herbs: s.p.herbs });
+  s = await bot.snap(); step("boar 1 defeated (parry → counter)", b1, { hp: s.p.hp, herbs: s.p.herbs });
   R.shots.push(await h.shot("f01-after-boar1"));
   await bot.moveTo(1120);
   const b2 = await bot.fightBoar(1240, "dodge");

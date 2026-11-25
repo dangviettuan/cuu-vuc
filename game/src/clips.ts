@@ -3,7 +3,7 @@
  * Attack clips are *built from tuning.ts*: the windup/active/recovery frame runs sum exactly to the
  * AttackDef timings, and gameplay reads the frame tag to open the hitbox (animation-driven hitboxes).
  */
-import { AttackDef, DODGE, HEAVY, LIGHT, PARRY, PLAYER, RIPOSTE } from "./tuning";
+import { AttackDef, DODGE, HEAVY, LIGHT, PARRY, PHA_THE, PLAYER, RIPOSTE } from "./tuning";
 import { Clip, PRI, clip, loop, phase } from "./anim";
 
 type Set3 = { w: [string, number][]; a: [string, number, string?][]; r: [string, number][] };
@@ -39,10 +39,14 @@ export const PC = {
   light: [attack("light1", LIGHT[0], SWING_A), attack("light2", LIGHT[1], SWING_B), attack("light3", LIGHT[2], OVERHEAD)],
   heavy: attack("heavy", HEAVY.def, HEAVY_REL),
   riposte: attack("riposte", RIPOSTE, OVERHEAD),
+  phaThe: attack("phaThe", PHA_THE, HEAVY_REL),
   charge: loop("charge", ["p_charge0", "p_charge1"], 70, PRI.ACTION),
   dodge: clip("dodge", phase(DODGE.duration, "dodge", [["p_d0", 0.14], ["p_d1", 0.3], ["p_d2", 0.3], ["p_d3", 0.26]]), PRI.ACTION),
   guard: clip("guard", phase(PARRY.window + PARRY.recovery, "guard", [["p_g0", 0.1], ["p_g1", 0.9]]), PRI.ACTION),
   parry: clip("parry", [{ key: "p_parry", ms: 100 }, { key: "p_g1", ms: 110 }], PRI.ACTION),
+  /** Held guard (review D6). SETTLE, so a blocked hit's brace (the ACTION `parry` clip) plays over it, then it resumes. */
+  block: loop("block", ["p_g1"], 1000, PRI.SETTLE),
+  unguard: clip("unguard", [{ key: "p_g0", ms: 120 }], PRI.SETTLE),
   heal: clip("heal", phase(PLAYER.herbUseTime, "heal", [["p_heal0", 0.4], ["p_heal1", 0.6]]), PRI.ACTION),
   hurt: clip("hurt", phase(PLAYER.hurtStun, "hurt", [["p_hurt0", 0.45], ["p_hurt1", 0.55]]), PRI.HURT),
   death: clip("death", [{ key: "p_death0", ms: 160 }, { key: "p_death1", ms: 200 }, { key: "p_death2", ms: 150, event: "thud" }, { key: "p_death3", ms: 99999 }], PRI.DEAD),

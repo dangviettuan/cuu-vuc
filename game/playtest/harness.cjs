@@ -52,7 +52,7 @@ async function launch({ width = 960, height = 540 } = {}) {
       const g = window.__cuuVuc; if (!g) return null;
       const s = g.scene.getScene("Prologue"); if (!s || !s.player) return null;
       const p = s.player, b = p.body;
-      const en = (e) => ({ x: Math.round(e.x), state: e.state, hp: e.hp, facing: e.facing, anim: e.anim ? e.anim.name : "", alive: e.hp > 0 });
+      const en = (e) => ({ x: Math.round(e.x), state: e.state, hp: e.hp, maxHp: e.maxHp, facing: e.facing, anim: e.anim ? e.anim.name : "", alive: e.hp > 0 });
       return {
         t: performance.now(), sim: s.sim,
         p: { x: +p.x.toFixed(1), y: +p.y.toFixed(1), vx: Math.round(b.velocity.x), vy: Math.round(b.velocity.y), state: p.state, anim: p.anim.name, tag: p.anim.tag || "", frame: p.texture.key, hp: p.hp, st: Math.round(p.stamina), the: p.the, herbs: p.herbs, facing: p.facing, grounded: p.grounded, hit: !!p.currentHit() },

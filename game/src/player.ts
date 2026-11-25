@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { AttackDef, DODGE, HEAVY, LIGHT, PARRY, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
+import { AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, PARRY, PHA_THE, PHA_THE_COST, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
 import { EnemyHit, HitResult, PlayerHit, flash } from "./combat";
 import { Animator } from "./anim";
 import { PC, lightClip } from "./clips";
@@ -11,22 +11,29 @@ export interface Controls {
   heavyHeld: boolean;
   dodgePressed: boolean;
   parryPressed: boolean;
+  /** Parry key still down: after the parry window this becomes a block (review D6). */
+  parryHeld: boolean;
+  /** K pressed this frame (Phá Thế from a held guard). */
+  heavyPressed: boolean;
   herbPressed: boolean;
 }
 
-type State = "move" | "light" | "charge" | "heavy" | "riposte" | "dodge" | "parry" | "heal" | "hurt" | "dead";
+type State = "move" | "light" | "charge" | "heavy" | "riposte" | "phaThe" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
 export type PlayerEvent =
-  | "parry" | "perfectDodge" | "hurt" | "riposte" | "heal" | "dead"
+  | "parry" | "block" | "guardBreak" | "perfectDodge" | "hurt" | "riposte" | "phaThe" | "heal" | "dead"
   | "jump" | "land" | "dodge" | "step" | "skid" | "swing" | "slam" | "ghost" | "thud";
 
-const ATTACKING: ReadonlySet<State> = new Set(["light", "heavy", "riposte"]);
+const ATTACKING: ReadonlySet<State> = new Set(["light", "heavy", "riposte", "phaThe"]);
+/** States in which stamina does not regenerate. */
+const NO_REGEN: ReadonlySet<State> = new Set(["dead", "charge", "dodge", "block"]);
 const clamp = Phaser.Math.Clamp;
 /** Presses are remembered this long and consumed when the action becomes legal (playtest I-05). */
 const BUFFER_MS = 150;
 const NEVER = -1e9;
 
 /**
- * The protagonist with the greybox Kiếm Khách kit (Combat & Class Bible §2–3).
+ * The protagonist. The kit (tuning.ts `KIT`, ADR-0010) is the canon Prologue kit by default: brush-knife, universal
+ * 8-frame parry, block. `?kit=kiem` adds the Kiếm Khách class kit: 12-frame parry, Thế, Riposte, Phá Thế.
  * Gameplay state (`state`) and presentation (`present()` → Animator clips) are separate:
  * gameplay decides what is happening, presentation decides which frames show it.
  * Attack hit windows are read from the animation's frame tags (src/clips.ts).
@@ -37,11 +44,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   the = 0; // Thế: Kiếm Khách stance charge
   herbs = 0;
   /**
-   * Herbs found so far. Respawning and resting at a shrine refill `herbs` to this (review 2026-11-23, B2: spent herbs
-   * never came back, so a struggling player faced every later boss attempt with none). Interim until the healing
-   * model (flask vs consumable) is decided.
+   * Herb pouch capacity (review D4): each herb found adds a slot, up to PLAYER.herbCapMax. Respawning and resting at a
+   * shrine refill `herbs` to this.
    */
-  herbMax = 0;
+  herbCap = 0;
   facing: 1 | -1 = 1;
   state: State = "move";
   readonly anim: Animator;
@@ -76,7 +82,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private bufDodge = NEVER;
   private bufParry = NEVER;
   private readonly hb = new Phaser.Geom.Rectangle();
-  private readonly hit: PlayerHit = { id: 0, rect: new Phaser.Geom.Rectangle(), damage: 0, guardBreak: false, direction: 1 };
+  private readonly hit: PlayerHit = { id: 0, rect: new Phaser.Geom.Rectangle(), damage: 0, guardBreak: false, poise: 0, direction: 1 };
   onEvent: (kind: PlayerEvent, data?: number) => void = () => {};
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -91,8 +97,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.anim.play(PC.idle);
   }
 
-  /** True while a parry has opened the riposte window and a Thế pip is available (drives the on-screen J prompt). */
-  riposteReady(now: number): boolean { return now < this.riposteUntil && this.the > 0 && !this.isDead(); }
+  /** True just after a parry: J now riposts (Kiếm Khách) or strikes the staggered enemy (drives the on-screen J prompt). */
+  riposteReady(now: number): boolean { return now < this.riposteUntil && !this.isDead(); }
+  /** Picking up a field herb: a new pouch slot (up to the cap), filled. */
+  addHerb(): void { if (this.herbCap < PLAYER.herbCapMax) this.herbCap++; this.herbs = Math.min(this.herbCap, this.herbs + 1); }
+  refillHerbs(): void { this.herbs = this.herbCap; }
   get body2(): Phaser.Physics.Arcade.Body { return this.body as Phaser.Physics.Arcade.Body; }
   get grounded(): boolean { return this.body2.blocked.down || this.body2.touching.down; }
   isDead(): boolean { return this.state === "dead"; }
@@ -105,7 +114,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   respawn(x: number, y: number): void {
-    this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0; this.herbs = this.herbMax;
+    this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0; this.herbs = this.herbCap;
     this.setPosition(x, y); this.body2.setVelocity(0, 0);
     this.setAlpha(1); flash(this, false);
     this.attack = null;
@@ -126,7 +135,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private startAttack(def: AttackDef, damage: number, s: State, slashLevel: number): void {
     this.attack = def; this.attackDamage = damage; this.swingId++; this.slashLevel = slashLevel;
     this.enter(s);
-    const c = s === "heavy" ? PC.heavy : s === "riposte" ? PC.riposte : lightClip(this.combo);
+    const c = s === "heavy" ? PC.heavy : s === "riposte" ? PC.riposte : s === "phaThe" ? PC.phaThe : lightClip(this.combo);
     this.anim.play(c, true, true);
   }
 
@@ -134,7 +143,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.now = now;
     const body = this.body2;
     const sec = dt / 1000;
-    if (this.state !== "dead" && now > this.staminaRegenAt && this.state !== "charge" && this.state !== "dodge")
+    if (!NO_REGEN.has(this.state) && now > this.staminaRegenAt)
       this.stamina = Math.min(PLAYER.maxStamina, this.stamina + PLAYER.staminaRegenPerSec * sec);
     const grounded = this.grounded;
     if (grounded) { this.coyoteUntil = now + PLAYER.coyote; this.jumpCut = false; }
@@ -159,8 +168,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           this.onEvent("jump");
         }
         if (!c.jumpHeld && body.velocity.y < -60 && !this.jumpCut) { body.setVelocityY(body.velocity.y * PLAYER.jumpCutFactor); this.jumpCut = true; }
-        if (light && grounded && now < this.riposteUntil && this.the > 0) {
-          this.the--; this.riposteUntil = 0; this.bufLight = NEVER;
+        if (KIT.classKit && light && grounded && now < this.riposteUntil) { // free after a parry (review D5)
+          this.riposteUntil = 0; this.bufLight = NEVER;
           this.startAttack(RIPOSTE, RIPOSTE.damage, "riposte", 2); this.onEvent("riposte");
         } else if (light && grounded && this.spend(LIGHT[0].stamina)) { // no ground swing in mid-air (playtest I-10)
           this.bufLight = NEVER;
@@ -180,7 +189,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       case "light":
       case "heavy":
-      case "riposte": {
+      case "riposte":
+      case "phaThe": {
         const a = this.attack!, tag = this.anim.tag;
         // Allow re-aiming during the windup: responsive without cancelling the commitment of the swing.
         if (tag === "windup" && dir !== 0) this.facing = dir > 0 ? 1 : -1;
@@ -222,7 +232,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         break;
       }
       case "parry":
-        if (t >= PARRY.window + PARRY.recovery) this.enter("move");
+        // still holding after the parry window: guard (review D6). Releasing early keeps the whiff recovery.
+        if (t >= PARRY.window && c.parryHeld) { this.enter("block"); this.anim.play(PC.block, true, true); }
+        else if (t >= PARRY.window + PARRY.recovery) this.enter("move");
+        break;
+      case "block":
+        this.horizontal(0, sec, 0.3);
+        if (KIT.classKit && c.heavyPressed && this.the >= PHA_THE_COST && grounded && this.spend(PHA_THE.stamina)) {
+          this.the -= PHA_THE_COST;
+          this.startAttack(PHA_THE, PHA_THE.damage, "phaThe", 2); this.onEvent("phaThe");
+        } else if (!c.parryHeld) { this.enter("unguard"); this.anim.play(PC.unguard, true, true); }
+        break;
+      case "unguard":
+        this.horizontal(0, sec, 0.3);
+        if (t >= BLOCK.releaseRecovery) this.enter("move");
         break;
       case "heal":
         if (t >= PLAYER.herbUseTime) {
@@ -265,7 +288,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         else if (a.name === "idle" && now > this.nextBlink) { a.play(PC.blink); this.nextBlink = now + 2500 + Math.random() * 3000; }
         else if (!(a.name === "blink" && !a.finished)) a.play(PC.idle);
       }
-    } else if (this.state === "dodge") a.play(PC.dodge);
+    } else if (this.state === "block") a.play(PC.block);
+    else if (this.state === "dodge") a.play(PC.dodge);
     else if (this.state === "charge") a.play(PC.charge);
     else if (this.state === "hurt") a.play(PC.hurt);
     else if (this.state === "dead") a.play(PC.death);
@@ -298,6 +322,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const x = this.facing > 0 ? b.right : b.x - a.reach;
     const h = this.hit;
     h.id = this.swingId; h.damage = this.attackDamage; h.guardBreak = a.guardBreak; h.direction = this.facing;
+    h.poise = a.poise ?? (a.guardBreak ? this.attackDamage : 0);
     // Cover chest to shins so low targets (brush, boars) are hittable; a.height sets a minimum.
     h.rect.setTo(x, b.y + 8, a.reach, Math.max(a.height, b.height - 10));
     return h;
@@ -317,7 +342,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       // turn to face what was parried, so the riposte goes toward it (fix-pass finding: backwards parries whiffed the riposte)
       const toward = Math.sign(hit.rect.centerX - this.x);
       if (toward !== 0) this.facing = toward > 0 ? 1 : -1;
-      this.the = Math.min(PLAYER.maxThe, this.the + 1);
+      if (KIT.classKit) this.the = Math.min(PLAYER.maxThe, this.the + 1);
       this.riposteUntil = now + RIPOSTE_WINDOW;
       this.stamina = Math.min(PLAYER.maxStamina, this.stamina + PARRY.stamina);
       this.enter("move");
@@ -328,7 +353,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
     if (now < this.invulnUntil) return "ignored";
     this.hitIds.add(hit.id);
-    this.hp = Math.max(0, this.hp - hit.damage);
+    let damage = hit.damage;
+    // Block (review D6): only parryable hits, only from the front. Chip damage plus a stamina drain; a drain that
+    // would empty stamina breaks the guard and the rest of the hit lands.
+    const front = Math.sign(hit.rect.centerX - this.x) !== -this.facing;
+    if (this.state === "block" && hit.parryable && front) {
+      const chip = Math.round(hit.damage * BLOCK.chip), cost = hit.damage * BLOCK.staminaPerDamage;
+      if (this.stamina > cost) {
+        this.stamina -= cost; this.staminaRegenAt = now + PLAYER.staminaRegenDelay;
+        this.hp = Math.max(1, this.hp - chip);
+        this.body2.setVelocityX(hit.knockback * BLOCK.pushback);
+        this.anim.play(PC.parry, true, true); // brace; present() returns to the held guard (lower priority) after it
+        this.onEvent("block", chip);
+        return "blocked";
+      }
+      this.stamina = 0; damage = hit.damage - chip;
+      this.onEvent("guardBreak");
+    }
+    this.hp = Math.max(0, this.hp - damage);
     this.invulnUntil = now + PLAYER.hurtInvuln;
     this.attack = null;
     this.body2.setVelocity(hit.knockback, -150);
@@ -338,7 +380,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.onEvent("dead");
     } else {
       this.enter("hurt"); this.anim.play(PC.hurt, true, true);
-      this.onEvent("hurt", hit.damage);
+      this.onEvent("hurt", damage);
     }
     return "hit";
   }

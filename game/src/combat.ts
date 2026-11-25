@@ -17,10 +17,12 @@ export interface PlayerHit {
   rect: Phaser.Geom.Rectangle;
   damage: number;
   guardBreak: boolean;
+  /** Poise damage to bosses (AttackDef.poise, else `damage` for guard breaks, else 0). */
+  poise: number;
   direction: 1 | -1;
 }
 
-export type HitResult = "hit" | "dodged" | "perfectDodge" | "parried" | "ignored";
+export type HitResult = "hit" | "dodged" | "perfectDodge" | "parried" | "blocked" | "ignored";
 
 /** Anything the player can strike. */
 export interface Hittable {

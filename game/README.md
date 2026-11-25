@@ -1,4 +1,4 @@
-# Cửu Vực — Greybox Prototype v0.1
+# Cửu Vực — Greybox Prototype (v0.4)
 
 The first playable slice, built to the scope of the Combat & Class Bible §11:
 
@@ -26,20 +26,31 @@ npm run build      # type-check + production build into dist/
 | Light attack (3-hit string) | J |
 | Heavy attack (hold to charge, 2 levels) | K |
 | Dodge (i-frames) | Shift or L |
-| Parry (then J within the window to **Riposte**) | I |
-| Use herb (heals 35) | Q |
-| Light the shrine (checkpoint, full heal) | E |
+| Parry (tap; then J to strike the staggered enemy) | I |
+| **Block** (keep holding after the parry window) | hold I |
+| Riposte (Kiếm Khách kit only: J right after a parry) | J |
+| **Phá Thế** (Kiếm Khách kit only: from a held guard, costs 2 Thế) | hold I + K |
+| Use herb (heals 35; the pouch refills at the shrine and on respawn) | Q |
+| Light the shrine (checkpoint, full heal, refills the herb pouch) | E |
 | Choice after the boss | 1 (spare) / 2 (finish her) |
 | Restart after the ending | R |
 | Show hitboxes | F1 |
+
+## Kits (ADR-0010)
+
+The greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class abilities. Add **`?kit=kiem`** to the URL to load the **Kiếm Khách** kit, which adds the 12-frame parry, Thế, Riposte, Phá Thế and the straight sword.
 
 ## What is implemented
 
 | System | Spec | Where |
 |---|---|---|
 | Move, jump with coyote time and jump buffer (6 frames each), variable jump height | Combat Bible §2 | `src/player.ts` |
-| Light 3-hit string, heavy attack with 2 charge levels, dodge with 10 i-frames and a perfect window, parry (Kiếm Khách 12-frame window) | §2–3 | `src/player.ts`, `src/tuning.ts` |
-| **Thế** stance pips (gained from parries) and **Riposte** (the Kiếm Khách signature) | §3 | `src/player.ts` |
+| Light 3-hit string, heavy attack with 2 charge levels, dodge with 10 i-frames and a perfect window, parry (8 frames; Kiếm Khách 12) | §2–3 | `src/player.ts`, `src/tuning.ts` |
+| **Block** (hold parry): 25% chip damage, a stamina drain, guard break at zero stamina | §2 (amended) | `src/player.ts` |
+| **Herb pouch**: a slot per herb found (cap 2), refilled at the shrine and on respawn | §2 (amended) | `src/player.ts` |
+| Kiếm Khách kit: **Thế** pips from parries, a free **Riposte**, and **Phá Thế** (2 Thế, staggers the boss) | §3 (amended) | `src/player.ts`, `src/enemies.ts` |
+| Logical resolution **480×270**, camera pinned to the ground lane | ADR-0009 | `src/tuning.ts`, `src/scenes/Prologue.ts` |
+| Authored-art loader: Aseprite atlases listed in `public/art/manifest.json` replace generated frames by key | ADR-0011 | `src/scenes/Boot.ts` |
 | Stamina (the Souls-lite rule: you may act while above zero) | §2 | `src/player.ts` |
 | Startled boar: telegraph, charge, stun; its charge is parryable | §9; Prologue §9 | `src/enemies.ts` |
 | **Nanh Rễ**: three phases; charge (dodge only), tusk swipe (parryable, causes a stagger), root-burst (telegraphed spikes); poise break from heavy hits and ripostes | Prologue §9; §8 | `src/enemies.ts` |
@@ -99,8 +110,7 @@ Clip timings, tags and events are already in place, so authored frames can repla
 
 ## Known greybox simplifications
 
-- **The class kit is merged into the Prologue.** In the final game the Prologue has no class (PB L9); Riposte is here only to test the Kiếm Khách loop.
-- **Weapon:** the greybox uses the Kiếm Khách **straight sword**: a 24 px blade, drawn at the same length in every pose, with a crossguard and a hip scabbard. Reach past the body edge is 36 px (light 1–2), 40 px (light 3) and 44 px (heavy, riposte). In the final game the Prologue uses the brush-knife (PB L2); the class weapon comes in Chapter I.
+- **Weapons:** the Prologue kit draws the **brush-knife** (a 15 px hooked blade). Its reach past the body edge is 28 px for lights 1–2, 32 px for light 3 and 36 px for the heavy. The Kiếm Khách kit draws the **straight sword** (24 px blade, crossguard, hip scabbard), with reach of 36 / 40 / 44 px.
 - **Renderer:** WebGL when the browser supports it, otherwise Canvas (`Phaser.AUTO`, `src/main.ts`).
   - Canvas has no tints, so the hit flash, telegraph glow and dodge afterimage use an additive blend (`src/render.ts`), and particle colours are lost.
   - Add `?renderer=canvas` or `?renderer=webgl` to the URL to force one.
@@ -110,6 +120,14 @@ Clip timings, tags and events are already in place, so authored frames can repla
 - Tuning values are the Bible's starting targets. Expect to change them after the first playtest.
 
 ## Testing
+
+**CI smoke test.** `.github/workflows/ci.yml` builds the game and runs `playtest/ci-smoke.cjs` on every push and pull request that touches `game/`. It runs for the Prologue kit, the Kiếm Khách kit and the Canvas renderer. The test is DEBUG-ASSISTED (teleports, one forced boss defeat), which keeps it deterministic. It checks the slice's spine: boot, move, the brush chore, the herb pouch, the shrine, the arena lock, block, death and respawn, the C2 choice and its flag, and R restart. Any console error fails it. To run it locally:
+
+```bash
+npm ci && npx playwright-core install chromium-headless-shell
+npm run build && npx vite preview --port 4173 &
+GAME_URL=http://localhost:4173/ node playtest/ci-smoke.cjs
+```
 
 The autonomous playtest scripts are in `playtest/`, and the findings are in [PLAYTEST_REPORT.md](PLAYTEST_REPORT.md). Section H of that report covers the fix pass and its re-test. The checks below were the original v0.3 checks:
 - **Smoke:** clear the bush, meet the boars, damage the boss, take the C2 choice.

@@ -35,7 +35,7 @@ const { makeBot } = require("./bot.cjs");
   await h.wait(900); R.shots.push(await h.shot("d02-death-pose"));
   await h.wait(1800);
   s = await bot.snap();
-  step("respawn at the lit shrine with full HP; boss reset and arena unlocked", Math.abs(s.p.x - 1440) < 30 && s.p.hp === 100 && !s.engaged && s.boss.hp === 320, { x: s.p.x, hp: s.p.hp, engaged: s.engaged, bossHp: s.boss.hp, herbs: s.p.herbs });
+  step("respawn at the lit shrine with full HP; boss reset and arena unlocked", Math.abs(s.p.x - 1440) < 30 && s.p.hp === 100 && !s.engaged && s.boss.hp === s.boss.maxHp, { x: s.p.x, hp: s.p.hp, engaged: s.engaged, bossHp: s.boss.hp, herbs: s.p.herbs });
   R.shots.push(await h.shot("d03-respawn"));
 
   // Rematch with F1 hitboxes on; screenshot each telegraph type once.

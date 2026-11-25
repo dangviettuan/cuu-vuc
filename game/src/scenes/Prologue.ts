@@ -8,9 +8,16 @@ import { HERB_GLINT, SHRINE_LIT } from "../clips";
 import { Fx } from "../fx";
 import { buildOutlines } from "../outline";
 import { sfx, unlockAudio } from "../sfx";
-import { PLAYER, VIEW, WORLD } from "../tuning";
+import { KIT, PHA_THE_COST, PLAYER, VIEW, WORLD } from "../tuning";
 
 const ARENA = { min: 1520, max: 2160 };
+/**
+ * The world is 360 px tall, the view 270 (ADR-0009). The camera is pinned to the bottom of the world, so the ground
+ * sits at about 79% of the screen height and the canopy fills the top.
+ */
+const CAM_Y = WORLD.height - VIEW.height;
+/** Bottom controls strip: two lines. The boss bar and name sit just above it. */
+const STRIP_H = 24;
 /** Arena walls sit *inside* the camera bounds so the hero's drawn sprite (wider than its 10 px body) is never cut off at the edge. */
 const ARENA_WALL = 16;
 /** Same idea at the two ends of the world. */
@@ -88,10 +95,11 @@ export class PrologueScene extends Phaser.Scene {
     this.boars = []; this.roots = []; this.herbs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     // Keep a margin at the world's edges: the drawn hero is wider than its 10 px body (cloud playtest: idle sprite clipped at x=0).
     this.physics.world.setBounds(EDGE, -200, WORLD.width - EDGE * 2, WORLD.height + 200);
-    this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height).setRoundPixels(true).setBackgroundColor("#1b2a1e");
+    this.cameras.main.setBounds(0, CAM_Y, WORLD.width, VIEW.height).setRoundPixels(true).setBackgroundColor("#1b2a1e");
 
     // Parallax: Thanh Mộc mood A (concept pick), drawn at ×4.
     this.bg = this.add.tileSprite(0, 0, VIEW.width, VIEW.height, "bg_thanhmoc").setOrigin(0).setScrollFactor(0).setTileScale(4, 4).setDepth(-10);
+    this.bg.tilePositionY = Math.round(CAM_Y / 4); // keep the backdrop aligned with the world as it was at 640×360
     const mid = this.add.graphics().setScrollFactor(0.5).setDepth(-5);
     for (let i = 0; i < 18; i++) {
       const x = i * 90 + (i % 3) * 23, w = 18 + (i % 4) * 6;
@@ -108,7 +116,7 @@ export class PrologueScene extends Phaser.Scene {
 
     // Ground and ledges.
     this.solids = this.physics.add.staticGroup();
-    this.platform(0, WORLD.groundY, WORLD.width, VIEW.height - WORLD.groundY);
+    this.platform(0, WORLD.groundY, WORLD.width, WORLD.height - WORLD.groundY); // world height, not view height (ADR-0009: the view is shorter than the world)
     // Ledges are one-way (land from above, walk underneath, jump up through) and sit
     // ≤ 42 px above the ground so a full 48 px jump clears them.
     this.platform(300, 270, 96, 10, true);
@@ -136,7 +144,7 @@ export class PrologueScene extends Phaser.Scene {
     this.addHerb(560, WORLD.groundY - 6);
     this.sign(600, "Thảo dược rừng.\nQ: dùng (hồi máu)");
     // One lesson per boar (cloud playtest: three new actions on one sign was too much at once).
-    this.sign(790, "Lợn rừng hoảng loạn!\nI: đỡ ngay lúc nó lao tới\nrồi J: phản đòn");
+    this.sign(790, KIT.classKit ? "Lợn rừng hoảng loạn!\nI: đỡ ngay lúc nó lao tới\nrồi J: phản đòn" : "Lợn rừng hoảng loạn!\nI: đỡ ngay lúc nó lao tới\nrồi J: chém khi nó choáng");
     this.sign(1105, "Thêm một con.\nShift: lướt né xuyên qua nó\nrồi J: chém khi nó khựng lại");
     for (const [x, a, b, tell] of [[930, 860, 1010, 800], [1230, 1160, 1300, 600]] as const) {
       const boar = new Boar(this, x, a, b, tell);
@@ -176,7 +184,7 @@ export class PrologueScene extends Phaser.Scene {
 
     // Input.
     const K = Phaser.Input.Keyboard.KeyCodes;
-    this.keys = this.input.keyboard!.addKeys({ left: K.A, right: K.D, left2: K.LEFT, right2: K.RIGHT, jump: K.SPACE, jump2: K.W, jump3: K.UP, heavy: K.K }) as Record<string, Phaser.Input.Keyboard.Key>;
+    this.keys = this.input.keyboard!.addKeys({ left: K.A, right: K.D, left2: K.LEFT, right2: K.RIGHT, jump: K.SPACE, jump2: K.W, jump3: K.UP, heavy: K.K, parry: K.I }) as Record<string, Phaser.Input.Keyboard.Key>;
     this.input.keyboard!.addCapture([K.SPACE, K.UP, K.DOWN, K.LEFT, K.RIGHT, K.F1]);
     this.input.keyboard!.on("keydown", (e: KeyboardEvent) => { unlockAudio(); if (!e.repeat) this.pressed.add(e.code); });
     this.pressed.clear();
@@ -188,11 +196,13 @@ export class PrologueScene extends Phaser.Scene {
       this.label(x, y, s, size, color, extra).setScrollFactor(0).setDepth(101);
     this.hudText = txt(10, 31, "", 9);
     this.toastText = txt(VIEW.width / 2, 50, "", 11, "#f6e7a0", { backgroundColor: "#0b0d11cc", padding: { x: 6, y: 3 } }).setOrigin(0.5, 0);
-    this.bossName = txt(VIEW.width / 2, VIEW.height - 40, "NANH RỄ", 10, "#ebe6dc").setOrigin(0.5, 0).setVisible(false);
-    this.prompt = txt(VIEW.width / 2, 110, "", 12, "#ebe6dc", { align: "center", backgroundColor: "#0b0d11dd", padding: { x: 10, y: 8 } }).setOrigin(0.5, 0).setVisible(false);
+    this.bossName = txt(VIEW.width / 2, VIEW.height - STRIP_H - 26, "NANH RỄ", 10, "#ebe6dc").setOrigin(0.5, 0).setVisible(false);
+    this.prompt = txt(VIEW.width / 2, 70, "", 12, "#ebe6dc", { align: "center", backgroundColor: "#0b0d11dd", padding: { x: 10, y: 8 } }).setOrigin(0.5, 0).setVisible(false);
     // Controls strip: its own dark band and near-white text (cloud playtest: the old 8 px grey line was the hardest text to read).
-    this.add.rectangle(0, VIEW.height - 15, VIEW.width, 15, 0x0b0d11, 0.86).setOrigin(0).setScrollFactor(0).setDepth(100);
-    txt(VIEW.width / 2, VIEW.height - 13, "A/D chạy · Space nhảy · J chém · K giữ: chém mạnh · Shift né · I đỡ · Q thảo dược · E tương tác · F1 hitbox", 9, "#e4e7ec").setOrigin(0.5, 0);
+    this.add.rectangle(0, VIEW.height - STRIP_H, VIEW.width, STRIP_H, 0x0b0d11, 0.86).setOrigin(0).setScrollFactor(0).setDepth(100);
+    const guardLine = KIT.classKit ? "I đỡ · giữ I: chặn · giữ I + K: Phá Thế" : "I đỡ · giữ I: chặn";
+    txt(VIEW.width / 2, VIEW.height - STRIP_H + 1, "A/D chạy · Space nhảy · J chém · K giữ: chém mạnh · Shift né", 9, "#e4e7ec").setOrigin(0.5, 0);
+    txt(VIEW.width / 2, VIEW.height - STRIP_H + 12, `${guardLine} · Q thảo dược · E tương tác · F1 hitbox`, 9, "#e4e7ec").setOrigin(0.5, 0);
     this.keyHint = this.label(0, 0, "E", 9, "#0b0d11", { backgroundColor: "#f6e7a0", padding: { x: 3, y: 1 } }).setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.jHint = this.label(0, 0, "J", 10, "#0b0d11", { backgroundColor: "#ffc860", padding: { x: 4, y: 1 } }).setOrigin(0.5, 1).setDepth(50).setVisible(false);
     this.floatText = this.label(0, 0, "", 9, "#f6e7a0").setOrigin(0.5, 1).setDepth(50).setVisible(false);
@@ -317,13 +327,22 @@ export class PrologueScene extends Phaser.Scene {
       case "thud": this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
       case "parry": {
         sfx.parry();
-        this.toast("Đỡ được! J: phản đòn", 900);
+        this.toast(KIT.classKit ? "Đỡ được! J: phản đòn" : "Đỡ được! J: chém", 900);
         // Compact, warm burst at the blade (cloud playtest: pale flashes were lost against the light shafts).
         const bx = p.x + f * 14, by = p.y - 34;
         this.fx.sparks(bx, by, f, 7, 0.75); this.fx.impact(bx, by, false); this.fx.sparkle(bx, by, 6, 0xffc860);
         this.shake(18); this.hitstop(110);
         break;
       }
+      case "block": { // a duller, lower burst than a parry: it held, but it cost something
+        sfx.block();
+        const bx = p.x + f * 12, by = p.y - 30;
+        this.fx.sparks(bx, by, f, 4, 0.6); this.fx.dust(p.x - f * 6, p.y, 2, -f, 0.8);
+        this.shake(10); this.hitstop(50);
+        break;
+      }
+      case "guardBreak": sfx.guardBreak(); this.toast("Thủ bị phá!", 800); break;
+      case "phaThe": sfx.phaThe(); this.toast("Phá Thế!", 700); this.fx.sparkle(p.x + f * 10, p.y - 34, 8, 0xffc860); break;
       case "perfectDodge": this.toast("Né hoàn hảo!", 700); this.fx.sparkle(p.x, p.y - 24, 6, 0x9fd0c0); break;
       case "riposte": this.toast("Phản đòn!", 600); break;
       case "heal": sfx.heal(); this.float(p.x, p.y - 50, `+${PLAYER.herbHeal}`); this.fx.sparkle(p.x, p.y - 30, 8, 0x9cf0a4); break;
@@ -356,7 +375,7 @@ export class PrologueScene extends Phaser.Scene {
       if (this.engaged && this.boss.isAlive()) {
         this.engaged = false; this.walls.clear(true, true);
         this.boss.reset(1960); this.boss.facing = -1; this.bossTrail = 1;
-        this.cameras.main.setBounds(0, 0, WORLD.width, WORLD.height);
+        this.cameras.main.setBounds(0, CAM_Y, WORLD.width, VIEW.height);
         this.bossName.setVisible(false);
       }
       this.cameras.main.fadeIn(300);
@@ -367,7 +386,7 @@ export class PrologueScene extends Phaser.Scene {
   private engage(): void {
     this.engaged = true;
     for (const x of [ARENA.min + ARENA_WALL / 2, ARENA.max - ARENA_WALL / 2]) this.walls.add(this.add.rectangle(x, WORLD.groundY / 2, 16, WORLD.groundY + 200).setVisible(false));
-    this.cameras.main.setBounds(ARENA.min, 0, ARENA.max - ARENA.min, WORLD.height);
+    this.cameras.main.setBounds(ARENA.min, CAM_Y, ARENA.max - ARENA.min, VIEW.height);
     this.bossName.setVisible(true);
     this.toast("Nanh Rễ: rễ cây mọc xuyên qua da thịt nó.", 2000);
     this.time.delayedCall(900, () => { this.boss.wake(); sfx.roar(); });
@@ -445,10 +464,10 @@ export class PrologueScene extends Phaser.Scene {
       jumpHeld: k.jump.isDown || k.jump2.isDown || k.jump3.isDown,
       jumpPressed: tap("Space", "KeyW", "ArrowUp"),
       lightPressed: tap("KeyJ"), heavyHeld: k.heavy.isDown,
-      dodgePressed: tap("ShiftLeft", "ShiftRight", "KeyL"), parryPressed: tap("KeyI"),
-      herbPressed: tap("KeyQ"),
+      dodgePressed: tap("ShiftLeft", "ShiftRight", "KeyL"), parryPressed: tap("KeyI"), parryHeld: k.parry.isDown,
+      heavyPressed: tap("KeyK"), herbPressed: tap("KeyQ"),
     };
-    if (this.choosing || this.finished) { c.lightPressed = false; c.heavyHeld = false; c.parryPressed = false; c.dodgePressed = false; }
+    if (this.choosing || this.finished) { c.lightPressed = false; c.heavyHeld = false; c.heavyPressed = false; c.parryPressed = false; c.parryHeld = false; c.dodgePressed = false; }
     this.player.update(now, dt, c);
     this.bg.tilePositionX = this.cameras.main.scrollX * 0.15 / 4;
 
@@ -459,7 +478,7 @@ export class PrologueScene extends Phaser.Scene {
     // Pickups and interactions (with feedback).
     for (const h of this.herbs) {
       if (!h.taken && Math.abs(h.img.x - this.player.x) < 12 && Math.abs(h.img.y - this.player.y) < 30) {
-        h.taken = true; h.img.destroy(); this.player.herbs++; this.player.herbMax++; sfx.pickup();
+        h.taken = true; h.img.destroy(); this.player.addHerb(); sfx.pickup();
         this.fx.sparkle(h.img.x, h.baseY - 6, 8); this.float(h.img.x, h.baseY - 14, "+1 thảo dược");
       }
     }
@@ -468,7 +487,7 @@ export class PrologueScene extends Phaser.Scene {
     if (tap("KeyE") && nearShrine) {
       this.checkpoint = { x: this.shrine.x + 20, y: WORLD.groundY };
       this.player.hp = PLAYER.maxHp;
-      this.player.herbs = this.player.herbMax; // resting refills the herbs found so far (review B2)
+      this.player.refillHerbs(); // resting refills the herb pouch (review D4)
       if (!this.shrineLit) { sfx.shrine(); this.shrineLit = true; this.shrineAnim.play(SHRINE_LIT); this.fx.ring(this.shrine.x, this.shrine.y - 20); this.fx.motes(this.shrine.x, this.shrine.y - 30, 8); }
       this.toast("Miếu Mạch đã thắp. Máu và thảo dược hồi đầy.");
     }
@@ -577,13 +596,17 @@ export class PrologueScene extends Phaser.Scene {
     g.fillStyle(0xb8574a, 1).fillRect(10, 10, Math.round(120 * (p.hp / PLAYER.maxHp)), 6);
     g.fillStyle(0x2a3a34, 1).fillRect(10, 19, 120, 4);
     g.fillStyle(0x62d3c3, 1).fillRect(10, 19, Math.round(120 * (p.stamina / PLAYER.maxStamina)), 4);
-    for (let i = 0; i < PLAYER.maxThe; i++) g.fillStyle(i < p.the ? 0xf6e7a0 : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
-    this.hudText.setText(`Thảo dược × ${p.herbs}`);
+    // Thế pips (Kiếm Khách only); a gold tick marks the Phá Thế threshold
+    if (KIT.classKit) {
+      for (let i = 0; i < PLAYER.maxThe; i++) g.fillStyle(i < p.the ? 0xf6e7a0 : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
+      g.fillStyle(p.the >= PHA_THE_COST ? 0xffc860 : 0x3a3f48, 1).fillRect(136 + PHA_THE_COST * 8 - 2, 17, 1, 3);
+    }
+    this.hudText.setText(p.herbCap > 0 ? `Thảo dược ${p.herbs}/${p.herbCap}` : ""); // the pouch appears with the first herb
     const boss = this.boss;
     if (this.engaged && boss.isAlive()) {
       const ratio = boss.hp / boss.maxHp;
       this.bossTrail = this.bossTrail > ratio ? Math.max(ratio, this.bossTrail - (dtMs / 1000) * 0.35) : ratio;
-      const w = 300, x = (VIEW.width - w) / 2, y = VIEW.height - 22;
+      const w = 260, x = (VIEW.width - w) / 2, y = VIEW.height - STRIP_H - 10;
       g.fillStyle(0x0b0d11, 0.8).fillRect(x - 2, y - 2, w + 4, 8);
       g.fillStyle(0x3a2a2a, 1).fillRect(x, y, w, 4);
       g.fillStyle(0xebe6dc, 1).fillRect(x, y, Math.round(w * this.bossTrail), 4);

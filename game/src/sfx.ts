@@ -48,6 +48,10 @@ export const sfx = {
   swing(level: number): void { noise("bandpass", 900 + level * 300, 2600, 0.09 + level * 0.03, 0.22 + level * 0.06, 1.2); },
   hit(strength: number): void { tone("sine", 140, 55, 0.12 + strength * 0.002, 0.55); noise("lowpass", 2400, 400, 0.06, 0.3); },
   parry(): void { tone("triangle", 1850, 1700, 0.32, 0.35); tone("sine", 2780, 2600, 0.26, 0.18); noise("highpass", 4000, 6000, 0.04, 0.25); },
+  /** Blocked hit: a dull wooden-metal knock, lower and shorter than the parry ring. */
+  block(): void { tone("triangle", 620, 480, 0.12, 0.3); noise("bandpass", 1400, 700, 0.07, 0.3, 2); },
+  guardBreak(): void { tone("square", 220, 70, 0.22, 0.22); noise("lowpass", 1800, 200, 0.16, 0.35); },
+  phaThe(): void { tone("sawtooth", 180, 90, 0.2, 0.2); tone("triangle", 1500, 1300, 0.25, 0.2, 0.05); },
   hurt(): void { tone("square", 160, 90, 0.14, 0.18); noise("lowpass", 1200, 300, 0.1, 0.3); },
   dodge(): void { noise("highpass", 600, 2400, 0.16, 0.18, 0.7); },
   step(): void {

@@ -169,7 +169,7 @@ export class Boar extends Enemy {
       this.kb = hit.direction * 120; this.b.checkCollision.left = this.b.checkCollision.right = false;
       return;
     }
-    if (this.state !== "charge") {
+    if (this.state !== "charge" || hit.poise >= 40) { // a poise strike (Phá Thế) stops even a charge
       this.facing = hit.direction > 0 ? -1 : 1;
       this.enter("stun"); this.stateAt -= 400;
       this.show(BC.hurt, true); // HURT outranks the stun loop, so stun resumes only once the flinch has played
@@ -239,7 +239,7 @@ export class NanhRe extends Enemy {
   private lastPhase = 1;
 
   constructor(scene: Phaser.Scene, x: number, private arenaMin: number, private arenaMax: number) {
-    super(scene, x, WORLD.groundY, "nanh_idle0", 320);
+    super(scene, x, WORLD.groundY, "nanh_idle0", 260); // 260 (was 320): tuned for the canon Prologue kit, no Riposte (ADR-0010)
     this.b.setSize(66, 28).setOffset(17, 26);
     this.kbResist = 4; // heavy: barely moved by hits
     this.hit = { id: this.swing, rect: new Phaser.Geom.Rectangle(), damage: 0, knockback: 0, parryable: false };
@@ -370,7 +370,7 @@ export class NanhRe extends Enemy {
 
   protected onDamaged(hit: PlayerHit): void {
     if (this.state === "dormant") this.wake();
-    if (hit.guardBreak) this.poise += hit.damage;
+    this.poise += hit.poise;
     if (this.hp <= 0) {
       this.enter("down"); this.kb = 0; this.show(NC.collapse, true); this.b.setVelocity(0, 0);
       this.onDown(); return;

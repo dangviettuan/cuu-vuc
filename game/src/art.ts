@@ -175,8 +175,15 @@ const PRO = {
   coat: "#4b5f45", hair: "#1f1a19", strap: "#5e3f27", bag: "#7a5534",
   blade: "#b4bec2", bladeHi: "#e3eaec", grip: "#5a3b25", guard: "#8a7b5a", sheath: "#4a3424",
 };
-/** Kiếm Khách straight sword: ~24 px blade (Art Bible: one-hand sword ≈ 22 px; +guard). */
-const BLADE = 24;
+/**
+ * Weapon drawn in the hand (ADR-0010):
+ * - **Kiếm Khách straight sword:** a ~24 px blade (the Art Bible's one-hand sword is about 22 px) plus a crossguard.
+ * - **Brush-knife (dao phát):** the Prologue's tool (PB L2). A 15 px broad, hooked blade on a long wooden grip, no guard.
+ * Set once before `registerTextures` (main.ts reads the kit).
+ */
+let WEAPON: "knife" | "sword" = "sword";
+let BLADE = 24;
+export function setWeapon(w: "knife" | "sword"): void { WEAPON = w; BLADE = w === "sword" ? 24 : 15; }
 
 export function protagonist(p: Pose): Px {
   // 72×76 frame so a full sword fits in every pose (windup behind, overhead above, thrust ahead)
@@ -203,12 +210,23 @@ export function protagonist(p: Pose): Px {
       // ARMS give the blade *direction*; length is fixed so the sword reads the same in every pose
       const dx0 = a.blade[0] - a.h[0], dy0 = a.blade[1] - a.h[1], L = Math.hypot(dx0, dy0) || 1;
       const ux = dx0 / L, uy = dy0 / L, bx = hx2 + ux * BLADE, by = hy + uy * BLADE;
-      P.line(hx2 - ux * 3, hy - uy * 3, hx2, hy, PRO.grip, 1); // grip + pommel
-      P.line(hx2 + ux - uy * 2, hy + uy + ux * 2, hx2 + ux + uy * 2, hy + uy - ux * 2, PRO.guard, 1); // crossguard
-      P.line(hx2 + ux * 2, hy + uy * 2, bx, by, PRO.blade, 1);
-      P.line(hx2 + ux * 3 - uy, hy + uy * 3 + ux, hx2 + ux * (BLADE - 4) - uy, hy + uy * (BLADE - 4) + ux, shade(PRO.blade, 0.8), 1); // blade width
-      P.set(hx2 + ux * BLADE * 0.65, hy + uy * BLADE * 0.65, PRO.bladeHi);
-      P.set(bx, by, PRO.bladeHi);
+      if (WEAPON === "sword") {
+        P.line(hx2 - ux * 3, hy - uy * 3, hx2, hy, PRO.grip, 1); // grip + pommel
+        P.line(hx2 + ux - uy * 2, hy + uy + ux * 2, hx2 + ux + uy * 2, hy + uy - ux * 2, PRO.guard, 1); // crossguard
+        P.line(hx2 + ux * 2, hy + uy * 2, bx, by, PRO.blade, 1);
+        P.line(hx2 + ux * 3 - uy, hy + uy * 3 + ux, hx2 + ux * (BLADE - 4) - uy, hy + uy * (BLADE - 4) + ux, shade(PRO.blade, 0.8), 1); // blade width
+        P.set(hx2 + ux * BLADE * 0.65, hy + uy * BLADE * 0.65, PRO.bladeHi);
+        P.set(bx, by, PRO.bladeHi);
+      } else {
+        // brush-knife: long wooden grip, broad dull blade that widens toward a hooked tip
+        P.line(hx2 - ux * 4, hy - uy * 4, hx2 + ux, hy + uy, PRO.grip, 1);
+        const dull = shade(PRO.blade, 0.72);
+        P.line(hx2 + ux * 2, hy + uy * 2, bx, by, dull, 1);
+        P.line(hx2 + ux * 3 - uy, hy + uy * 3 + ux, bx - uy, by + ux, shade(PRO.blade, 0.6), 1); // blade width
+        P.line(hx2 + ux * (BLADE - 6) - uy * 2, hy + uy * (BLADE - 6) + ux * 2, bx - uy * 2, by + ux * 2, shade(PRO.blade, 0.55), 1); // wider near the tip
+        P.set(bx + ux - uy * 2, by + uy + ux * 2, dull); // the hook
+        P.set(hx2 + ux * BLADE * 0.6, hy + uy * BLADE * 0.6, PRO.blade);
+      }
     }
     if (isFront) {
       const fx = a.h[0] - a.e[0], fy = a.h[1] - a.e[1], L = Math.hypot(fx, fy) || 1;
@@ -257,18 +275,22 @@ export function protagonist(p: Pose): Px {
   else P.set(X(2) + hx0, Y(5) + b, "#1b1714");
 
   const arm = ARMS[p.arm ?? "rest"] as ArmPose;
-  if (!arm.blade) { // sheathed sword at the hip: grip forward-up, scabbard trailing back-down
+  if (!arm.blade && WEAPON === "sword") { // sheathed sword at the hip: grip forward-up, scabbard trailing back-down
     P.line(X(4) + ln, Y(19) + b, X(2) + ln, Y(22) + b, PRO.grip, 1);
     P.line(X(1) + ln, Y(21) + b, X(4) + ln, Y(23) + b, PRO.guard, 1);
     P.line(X(2) + ln, Y(23) + b, X(-9) + ln, Y(37) + b, PRO.sheath, 2);
     P.set(X(-9) + ln, Y(37) + b, PRO.guard);
+  } else if (!arm.blade) { // brush-knife tucked through the belt, blade down and back
+    P.line(X(4) + ln, Y(18) + b, X(2) + ln, Y(22) + b, PRO.grip, 1);
+    P.line(X(2) + ln, Y(23) + b, X(-4) + ln, Y(31) + b, PRO.sheath, 2);
   }
   drawArm(arm, PRO.sleeve, PRO.skin, true);
   P.outline();
 
   // smear: a 2-tone arc along the blade path, drawn after the outline so it reads as motion, not form
   if (p.smear) {
-    const [a0, a1, r] = p.smear === "down" ? [-1.15, 0.95, 30] : p.smear === "up" ? [0.9, -1.25, 30] : [-2.0, 0.45, 33];
+    const k = BLADE - 24; // the smear follows the blade tip, so it shrinks with a shorter weapon
+    const [a0, a1, r] = p.smear === "down" ? [-1.15, 0.95, 30 + k] : p.smear === "up" ? [0.9, -1.25, 30 + k] : [-2.0, 0.45, 33 + k];
     const steps = 30;
     for (let i = 0; i <= steps; i++) {
       const a = a0 + ((a1 - a0) * i) / steps, fade = i / steps;
