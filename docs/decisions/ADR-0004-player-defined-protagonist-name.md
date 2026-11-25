@@ -30,4 +30,4 @@ Design documents must refer to the protagonist as `PLAYER_NAME` or **Protagonist
 
 ## Implementation note
 
-The eventual name-entry system should support Unicode so Vietnamese names and other writing systems are not artificially excluded. Exact length, filtering and validation rules will be finalized during UI/save-system design.
+The eventual name-entry system should support Unicode so Vietnamese names and other writing systems are not artificially excluded. Exact length, filtering and validation rules will be finalized during UI/save-system design. *(Finalized 2026-11-25 in [ADR-0012](ADR-0012-save-settings-and-names.md) §4: any script, NFC, up to 16 characters, no default name.)*

@@ -45,6 +45,7 @@
 - ADR-0009: logical resolution **480×270** (amends the Art Bible's 640×360); sprite and tile sizes are unchanged
 - ADR-0010: **the classless Prologue kit** (brush-knife, 8-frame parry, block, herb pouch; no Thế or Riposte). Class kits are added in Ch. I; Nanh Rễ's HP is 260
 - ADR-0011: authored art pipeline (Aseprite → Hash JSON atlases in `game/public/art/`, frame names = clip keys, replacing generated frames one at a time)
+- ADR-0012: saves (one slot; saved at checkpoints, on choices and on stage completion; typed flag registry), settings (volume, shake, reduced flashes, difficulty, pixel-perfect scaling, controls strip, bindings), keyboard + gamepad with rebinding, and the name rules (any script, NFC, ≤ 16 characters, no default; completes ADR-0004)
 - Combat Bible amendments (2026-11-25): **block** (hold parry; chip 25%, stamina 1.6 per damage, guard break); a **herb pouch** refilled at checkpoints; **Thế** from parries only, a free Riposte, and **Phá Thế** (guard + heavy, 2 Thế, boss stagger)
 - Prose Chương 2 "Đêm rừng đổi" drafted (Prologue S6–S8, reference path C1 = withheld, C2 = spared)
 - Prose Chương 3 "Mộc Thành" drafted (Ch. I stage I-1)
@@ -65,12 +66,16 @@
 
 **Foundations for the vertical slice**, then **a human playtest**. The greybox (Prologue S1 → shrine → Nanh Rễ → choice C2) has been bot-playtested and tuned (`game/PLAYTEST_REPORT.md`), and reviewed (`game/REVIEW-2026-11-23.md`). Decisions D1–D6 from the review are locked (ADR-0009 to 0011 and the Combat Bible amendments) and implemented in the greybox.
 
-Next, before any new content (review §10, Phase 1):
-- an input service with gamepad and rebinding; title, pause and options;
-- a versioned save and flags service following the flags registry; name entry (ADR-0004);
-- a data-driven stage loader; a dialogue and choice runner with string tables; a pixel font with Vietnamese glyphs;
-- enemy tuning tables with Story / Standard / Hard modes; a seeded RNG for AI;
-- **a 3–5 person human playtest** (review §8).
+**Phase 1 foundations are built** (2026-11-25, ADR-0012):
+- input service (keyboard + gamepad, rebinding, device-aware prompts);
+- title, name entry, pause and options; a separate HUD/UI scene;
+- versioned save with a typed flag registry; Continue from the last shrine;
+- data-driven stages (`game/src/data/stages/`); a dialogue and choice runner with a Vietnamese string table; the VT323 pixel font;
+- enemy tuning tables, Story / Standard / Hard, and a seeded RNG (`?seed=N`).
+
+Next:
+- **a 3–5 person human playtest** (review §8);
+- then Phase 2: combat depth (air slash, boss heal punish), music, and the first new content: Prologue S3 at greybox fidelity.
 
 Roadmap:
 
