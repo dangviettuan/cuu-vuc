@@ -6,11 +6,18 @@
 import type { StringKey } from "./strings.vi";
 import type { NpcClip } from "../clips";
 import type { Track } from "../music";
+import type { When } from "./stage";
+import type { FlagName, FlagValue } from "../core/flags";
 
 /** Sounds a cutscene can play (src/sfx.ts). */
-export type CutSfx = "roar" | "far" | "heartbeat" | "peck" | "bark" | "door" | "bolt" | "creak" | "board" | "crash" | "hush";
+export type CutSfx = "roar" | "far" | "heartbeat" | "peck" | "bark" | "door" | "bolt" | "creak" | "board" | "crash" | "hush" | "roots" | "rod";
 
-export type Step =
+/**
+ * One step of a scene. Any step can be conditional: `when` on a story flag (C1, C2 shape the aftermath), `marks` on
+ * stage marks (what the player has looked at). A step whose condition fails is passed over.
+ */
+export type Step = StepBody & { when?: When; marks?: string[] };
+type StepBody =
   | { say: StringKey; who?: StringKey }
   /** `nowait`: start the walk and go straight on (several people moving at once). */
   | { walk: string; to: number; nowait?: boolean }
@@ -35,6 +42,14 @@ export type Step =
   /** A key item into the save (the half Mạch Ấn). */
   | { item: string }
   | { music: Track }
+  /** Write a story flag (saved at once). */
+  | { flag: FlagName; value: FlagValue }
+  /** Grow the herb pouch by `n` slots and refill it (the Father's spare satchel, S8). */
+  | { pouch: number }
+  /** A prop trembles (the third rod on the well, S2). */
+  | { shiver: string }
+  /** The end of the playable slice: the closing card with this text. */
+  | { end: StringKey }
   | { wait: number }
   | { leaf: { from: number; to: number; top: number } }
   | { hideProp: string }
@@ -43,9 +58,64 @@ export type Step =
   | { toast: StringKey }
   | { goto: string; card?: StringKey[] };
 
-const P = "who.player", F = "who.father", DAN = "who.baDan", HM = "who.headman", M1 = "who.man1", VL = "who.villager";
+const P = "who.player", F = "who.father", DAN = "who.baDan", HM = "who.headman", M1 = "who.man1", VL = "who.villager", K = "who.keeper", VL2 = "who.villager2";
+const SPARED = { flag: "PRO_SOW_SPARED", is: true } as const, KILLED = { flag: "PRO_SOW_SPARED", is: false } as const;
+const TOLD = { flag: "PRO_VILLAGE_TOLD", is: true } as const, KEPT = { flag: "PRO_VILLAGE_TOLD", is: false } as const;
 
 export const CUTSCENES: Record<string, Step[]> = {
+  /* ---------------- S2 "Cái giếng cạn" (Ch1; spec §3 S2, §13 beat 1) ---------------- */
+
+  "s2.open": [
+    { wait: 400 },
+    { say: "s2.n1" }, { say: "s2.n2" }, { say: "s2.n3" }, { say: "s2.n4" },
+    { toast: "s2.hint" },
+  ],
+  "s2.dan": [{ face: "player", dir: 1 }, { say: "s2.d1", who: DAN }, { say: "s2.d2", who: DAN }],
+  "s2.headman": [{ say: "s2.h1", who: HM }, { say: "s2.h2", who: P }, { say: "s2.h3", who: HM }],
+  "s2.keeper": [{ say: "s2.k0" }, { say: "s2.k1", who: K }],
+  "s2.crowd": [
+    { say: "s2.c1" }, { say: "s2.c2" }, { say: "s2.c3" },
+    { say: "s2.c4", who: VL }, { say: "s2.c5", who: VL2 }, { say: "s2.c6", who: VL },
+    { say: "s2.c7" },
+  ],
+  /** The well: the rods, the third one trembles, "Không." The keeper: "Đất không còn giữ được nó nữa." */
+  "s2.well": [
+    { walk: "player", to: 524 }, { face: "player", dir: 1 },
+    { say: "s2.w1" }, { say: "s2.w2" }, { say: "s2.w3" },
+    { say: "s2.w4", who: VL },
+    { say: "s2.w5" },
+    { walk: "keeper", to: 452, nowait: true },
+    { walk: "player", to: 580 }, { face: "player", dir: -1 },
+    { showProp: "father" }, { walk: "father", to: 518 }, { face: "father", dir: 1 },
+    { say: "s2.w6" }, { say: "s2.w7" },
+    { say: "s2.w8" },
+    { pose: "father", clip: "kneel" },
+    { say: "s2.w9" },
+    { say: "s2.w10" }, { say: "s2.f1", who: F },
+    { showProp: "rod" },
+    { say: "s2.w11" }, { say: "s2.w12" },
+    { wait: 700 },
+    { say: "s2.w13" },
+    { shiver: "rod" },
+    { say: "s2.w14" },
+    { say: "s2.p1", who: P }, { face: "father", dir: 1 }, { say: "s2.f2", who: F },
+    { say: "s2.w15" }, { say: "s2.w16" },
+    { face: "keeper", dir: 1 },
+    { say: "s2.k2", who: K },
+    { say: "s2.w17" },
+    { say: "s2.k3", who: K },
+    { say: "s2.w18" },
+    { hideProp: "rod" }, { pose: "father", clip: "idle" },
+    { say: "s2.f3", who: F },
+    { say: "s2.d3", who: DAN },
+    { say: "s2.f4", who: F },
+    { say: "s2.d4", who: DAN },
+    { say: "s2.f5", who: F },
+    { say: "s2.w19" },
+    { wait: 400 },
+    { goto: "prologue-s3" },
+  ],
+
   /** Prologue S3, on entering: noon at home (Ch1). */
   "s3.open": [
     { wait: 400 },
@@ -309,6 +379,94 @@ export const CUTSCENES: Record<string, Step[]> = {
     { wait: 400 },
     { goto: "prologue-s7", card: ["card.s6s7.a", "card.s6s7.b"] },
   ],
+  /* ---------------- S8 "Lối rễ" (prose Ch. 2; spec §3 S8, §12, §13 beats 4–5) ---------------- */
+
+  /** After C2, at the square: what the village says, and the two decisions of one day (C1 and C2 both shape it). */
+  "s8.open": [
+    { wait: 500 },
+    { say: "s8.sp1", who: VL, when: SPARED }, { say: "s8.sp2", who: P, when: SPARED },
+    { say: "s8.sp3", who: VL, when: SPARED }, { say: "s8.sp4", who: VL2, when: SPARED }, { say: "s8.sp5", when: SPARED },
+    { say: "s8.kl1", who: VL, when: KILLED }, { say: "s8.kl2", when: KILLED }, { say: "s8.kl3", when: KILLED },
+    { say: "s8.c1kept", when: KEPT }, { say: "s8.c1told", when: TOLD },
+    { say: "s8.c2spared", when: SPARED }, { say: "s8.c2killed", when: KILLED },
+    { say: "s8.two" }, { say: "s8.why" },
+    { toast: "s8.hint" },
+  ],
+  /** The keeper's hint (spec §13 beat 4): optional; speaking to him sets PRO_KEEPER_HINT. */
+  "s8.keeper": [
+    { flag: "PRO_KEEPER_HINT", value: true },
+    { face: "player", dir: -1 },
+    { say: "s8.k1" }, { say: "s8.k2" }, { say: "s8.k3" },
+    { say: "s8.k4", who: K }, { say: "s8.k5", who: P },
+    { say: "s8.k6" },
+    { say: "s8.k7", who: K }, { say: "s8.k8", who: P },
+    { say: "s8.k9" },
+    { say: "s8.k10", who: K },
+    { say: "s8.k11" },
+    { say: "s8.k12", who: K },
+    { say: "s8.k13", who: P },
+    { say: "s8.k14", who: K },
+    { say: "s8.k15" },
+    { face: "keeper", dir: -1 },
+    { say: "s8.k16" },
+    { say: "s8.k17", who: K },
+    { say: "s8.k18" },
+  ],
+  "s8.home": [{ say: "s8.h1" }, { say: "s8.h2" }],
+  /** The Father's spare satchel and the red thread (PB L1): the silhouette anchors; the pouch grows by one. */
+  "s8.satchel": [
+    { say: "s8.s1" }, { say: "s8.s2" },
+    { hideProp: "satchel" },
+    { say: "s8.s3" },
+    { say: "s8.s4", who: P }, { say: "s8.s5", who: F },
+    { say: "s8.s6" }, { say: "s8.s7" }, { say: "s8.s8" },
+    { item: "spareSatchel" }, { pouch: 1 },
+  ],
+  "s8.diep": [{ say: "s8.dp1" }, { say: "s8.dp2" }, { say: "s8.dp3" }, { say: "s8.dp4" }, { say: "s8.dp5" }],
+  /** The roots part for the half Mạch Ấn (FB F3). */
+  "s8.roots": [
+    { say: "s8.r1" }, { say: "s8.r2" }, { say: "s8.r3" },
+    { say: "s8.r4" }, { sfx: "roots" },
+    { say: "s8.r5" }, { say: "s8.r6", who: P },
+    { say: "s8.r7" },
+    { place: { id: "machAn", key: "mach_an0", at: "player", dy: -30 } },
+    { pulse: 2 },
+    { say: "s8.r8" },
+    { walk: "player", to: 1262 }, { face: "player", dir: 1 },
+    { say: "s8.r9" },
+    { say: "s8.r10" },
+    { sfx: "roots" }, { setProp: { id: "rootWall", key: "root_wall1" } }, { mark: "parted" },
+    { say: "s8.r11" },
+    { hideProp: "machAn" },
+    { say: "s8.r12", who: P },
+    { say: "s8.r13" },
+  ],
+  "s8.forest": [{ wait: 400 }, { say: "s8.f1" }, { say: "s8.f2" }],
+  "s8.deer": [{ say: "s8.e1" }, { say: "s8.e2" }, { say: "s8.e3" }, { say: "s8.e4" }],
+  "s8.clearing": [{ say: "s8.t1" }, { say: "s8.t2" }, { toast: "s8.t.hint" }],
+  "s8.housing": [{ say: "s8.t3" }, { say: "s8.t4" }, { say: "s8.t5" }],
+  "s8.prints": [{ say: "s8.t6" }, { say: "s8.t7" }],
+  "s8.ground": [{ say: "s8.t8" }, { say: "s8.t9" }, { say: "s8.t10" }],
+  /**
+   * The dropped rod (spec §13 beat 5): "Họ bắt cha đi." Then the camera shows the undisturbed ground he does not look
+   * at. Having read every clue first (housing, prints, ground) sets PRO_STATION_READ.
+   */
+  "s8.rod": [
+    { walk: "player", to: 884 }, { face: "player", dir: 1 },
+    { say: "s8.t11" }, { say: "s8.t12" },
+    { hideProp: "rod" },
+    { say: "s8.t13" }, { say: "s8.t14" },
+    { flag: "PRO_STATION_READ", value: true, marks: ["housing", "prints", "ground"] },
+    { say: "s8.t15", who: P },
+    { camera: 812 }, { wait: 2200 }, { camera: "follow" },
+    { say: "s8.t16" }, { say: "s8.t17" },
+    { item: "thirdRod" },
+    { say: "s8.t18" }, { say: "s8.t19" }, { say: "s8.t20" }, { say: "s8.t21" },
+    { say: "s8.t22" }, { say: "s8.t23" },
+    { walk: "player", to: 960 },
+    { end: "end.prologue" },
+  ],
+
   "s6.square.told": [
     { walk: "player", to: 1100 }, { face: "player", dir: 1 },
     { say: "s6.qt1" },

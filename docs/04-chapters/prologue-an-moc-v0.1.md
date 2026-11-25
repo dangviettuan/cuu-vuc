@@ -107,6 +107,17 @@ The beast is a sow with roots growing through her flesh. When she is beaten, her
   - Told: the house stands behind its stoned-up gate. At the square, nhà Tư is found gone into the forest with their small son, which matches the Ch. I spec (mother and child found, the father dead).
 - **The rooted boar** in S6 bolts when beaten and does not die, as in Ch. 2.
 
+**S8 as played** *(locked 2026-11-25; source: prose Ch. 2, which follows C1 kept and C2 spared)*:
+- **At the square**, the lines follow both choices.
+  - C2 spared: the prose's *"Mày để nó đi?"* exchange.
+  - C2 killed: the village drags her out; the litter lies still in the hedge.
+  - The reflection *"Hai quyết định. Một ngày."* names the cost of each choice. Kept: ông Dần's broken leg. Told: nhà Tư out in the dark forest. Spared: a beast loose. Killed: a beast that was only heading back to her young.
+- **The keeper's hint** is optional; speaking to him sets `PRO_KEEPER_HINT`.
+- **The spare satchel and red thread** are on the critical path: the root wall stays shut until he has them. The satchel grows the herb pouch to 3.
+- **The station** is its own short stage after the root path.
+  - `PRO_STATION_READ` is set only if the casing, the boot prints *and* the undisturbed ground (with the worn cloth sandals walking in step) were all examined before he picks up the rod.
+  - Picking up the rod ends the Prologue: *"Họ bắt cha đi."*, then the camera rests on the ground he does not look at.
+
 ### 8. Immediate and delayed consequences
 
 | Flag | Immediate (same night) | Delayed |

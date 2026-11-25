@@ -1,6 +1,7 @@
 /**
- * Session 3 — complete playthrough from spawn with NO state manipulation: S1 (tutorial, boars, shrine) → S3 (lunch) →
- * S4 (the afternoon, C1) → S5 (the Father's room) → S6 (the village fight) → S7 (shrine, boss, C2) → ending.
+ * Session 3 — complete playthrough from spawn with NO state manipulation: S1 (tutorial, boars, shrine) → S2 (the well)
+ * → S3 (lunch) → S4 (the afternoon, C1) → S5 (the Father's room) → S6 (the village fight) → S7 (shrine, boss, C2) →
+ * S8 (the keeper, the satchel, the roots, the station) → the end card.
  * C1 takes the prose branch (keep the Father's word) unless C1=1.
  */
 const { launch, stats, save } = require("./harness.cjs");
@@ -38,12 +39,18 @@ const { makeBot } = require("./bot.cjs");
   s = await bot.snap(); step("shrine lit", s.shrineLit, { hp: s.p.hp });
   R.shots.push(await h.shot("f02-shrine"));
 
-  // Into the village: narration cards, then S3 (lunch) played line by line, then the cards into S7 (night).
-  const advance = async (until, ms = 90000) => {
+  // Into the village: the card, then S2 (the well) and S3 (lunch) played line by line.
+  // Lines that lead to a choice ignore confirm for 550 ms, so the pace here is a reader's, not a masher's.
+  const advance = async (until, ms = 120000) => {
     const t1 = Date.now();
     for (;;) { const x = await bot.snap(); if (until(x) || Date.now() - t1 > ms) return x; if (x.dlg || x.narr) await h.tap("Enter", 50); await h.wait(220); }
   };
   await h.down("d"); await h.wait(2200); await h.up("d");
+  s = await advance((x) => x.stage === "prologue-s2" && !x.narr && !x.cut);
+  step("S1 → S2: the village, the opening played", s.stage === "prologue-s2", { stage: s.stage });
+  await bot.moveTo(540, 6); await h.tap("e", 50); await h.wait(400);
+  s = await bot.snap(); step("S2: looking into the well starts the scene", s.cut === "s2.well", { cut: s.cut });
+  R.shots.push(await h.shot("s2-well"));
   s = await advance((x) => x.stage === "prologue-s3" && !x.narr && x.cut === "s3.open");
   s = await advance((x) => !x.cut && !x.dlg);
   step("S3: arrived home; the opening played", s.stage === "prologue-s3", { stage: s.stage });
@@ -125,15 +132,37 @@ const { makeBot } = require("./bot.cjs");
     if (res === "timeout") break;
   }
 
-  // Ending choice
+  // C2, then S8: the square, the keeper, home for the satchel, the roots, the station
   s = await bot.snap();
   if (s.choosing) {
     R.shots.push(await h.shot("f06-choice"));
-    await h.tap("1", 60); await h.wait(3600);
+    await h.tap("1", 60); await h.wait(1500);
     R.shots.push(await h.shot("f07-ending-spare"));
-    s = await bot.snap(); step("ending choice 1 (spare) recorded", s.finished, {});
-    const card = await h.page.evaluate(() => !!window.__cuuVuc.scene.getScene("UI").card);
-    step("the end card shows", card, {});
+    s = await bot.snap(); step("C2: choice 1 (spare) recorded", s.finished, {});
+    s = await advance((x) => x.stage === "prologue-s8" && !x.cut && !x.dlg && !x.narr);
+    step("C2 → S8: the aftermath at the square", s.stage === "prologue-s8", { stage: s.stage });
+    // walk there (scenes on the way play out), settle on the spot, then interact
+    const useAt = async (x, tol = 4) => {
+      for (let i = 0; i < 12; i++) { // a trigger on the way stops the walk: play it out, walk on
+        const y = await bot.moveTo(x, tol, 4000);
+        await advance((z) => !z.cut && !z.dlg);
+        if (Math.abs(y.p.x - x) <= tol) break;
+      }
+      await h.tap("e", 50); await h.wait(300);
+      return advance((y) => !y.cut && !y.dlg);
+    };
+    await useAt(250);
+    s = await useAt(560);
+    step("S8: the keeper's hint and the Father's satchel", s.p.herbs === 3, { herbs: s.p.herbs });
+    s = await useAt(1284);
+    step("S8: the roots part for the half Mạch Ấn", s.marks.includes("parted"), {});
+    await bot.moveTo(1460, 6, 6000);
+    s = await advance((x) => x.stage === "prologue-s8-station" && !x.cut && !x.dlg && !x.narr);
+    for (const x of [800, 732, 850, 900]) s = await useAt(x);
+    await h.wait(400);
+    const fin = await h.page.evaluate(() => ({ flags: window.__cuuVucSave().flags, items: window.__cuuVucSave().items, card: !!window.__cuuVuc.scene.getScene("UI").card }));
+    R.shots.push(await h.shot("f08-end"));
+    step("S8: the station read, the rod taken, the Prologue's end card", fin.card && fin.flags.PRO_STATION_READ === true && fin.flags.PRO_KEEPER_HINT === true, fin);
   } else step("reached ending choice", false, { bossHp: s.boss.hp });
 
   R.minutes = +((Date.now() - t0) / 60000).toFixed(1);

@@ -45,7 +45,7 @@ export interface StageDef {
    */
   leaves?: "green" | "yellow" | "none" | "storm";
   /** Time of day: night darkens the backdrop (the world and characters stay readable); indoor hides the forest. */
-  time?: "morning" | "noon" | "afternoon" | "night" | "indoor";
+  time?: "morning" | "noon" | "afternoon" | "night" | "dawn" | "indoor";
   /** "storm" (S4): hundreds of yellow leaves falling straight down, with no wind (Ch1). */
   leafCount?: number;
   /** Walking right past `x` leaves for stage `to`, after its cards. */
@@ -57,12 +57,13 @@ export interface StageDef {
    */
   props?: { key: string; x: number; y?: number; depth?: number; id?: string; left?: boolean; frames?: string[]; ms?: number; hidden?: boolean; when?: When }[];
   /** Characters the stage places: the Father (S3) or a villager by look (src/artVillage.ts LOOKS). */
-  npcs?: { id: string; kind: "father" | "villager"; look?: LookId; x: number; clip: NpcClip; rest?: NpcClip; facing?: 1 | -1; when?: When }[];
+  npcs?: { id: string; kind: "father" | "villager"; look?: LookId; x: number; clip: NpcClip; rest?: NpcClip; facing?: 1 | -1; when?: When; bag?: boolean; hidden?: boolean }[];
   /**
    * Things to look at or use: interact nearby shows a line, or runs a cutscene. Using one sets the mark `<id>`.
-   * `while`: only while that prop is visible · `after`: only once these marks are set · `once`: gone after use.
+   * `while`: only while that prop is visible · `after`: only once these marks are set · `unless`: gone once any of
+   * these marks is set · `once`: gone after use.
    */
-  examine?: { id: string; x: number; text?: StringKey; cutscene?: string; while?: string; after?: string[]; once?: boolean; range?: number; when?: When }[];
+  examine?: { id: string; x: number; text?: StringKey; cutscene?: string; while?: string; after?: string[]; unless?: string[]; once?: boolean; range?: number; when?: When }[];
   /** Interacting near an NPC runs a cutscene (src/data/cutscenes.ts). `once`: only the first time (sets mark `talk.<npc>`). */
   talk?: { npc: string; cutscene: string; hint?: StringKey; once?: boolean; after?: string[]; when?: When }[];
   /** Cutscenes that start by themselves: when the hero passes `x`, or once every mark in `after` is set. Each runs once. */
@@ -90,5 +91,7 @@ export interface StageDef {
     litter?: { bushX: number; x: number; n: number };
     /** The choice that ends the encounter (src/data/dialogue). */
     outcome: string;
+    /** Where the story goes once the choice is carried out (S7 → S8). */
+    next?: { to: string; card?: StringKey[] };
   };
 }

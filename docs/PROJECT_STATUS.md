@@ -76,17 +76,20 @@
 **Phase 2 is in progress on the `phase-2` branch** (kept off `main` so the live build stays fixed while the playtest runs). Built so far:
 - the air slash and the boss's heal punish;
 - placeholder music in ngũ cung;
-- the Prologue as chained stages, with narration cards where a stage is not built yet (S2; S8 after the boss):
+- **the whole Prologue, S1 to S8, playable in story order** (greybox fidelity):
   - S1 morning chores;
+  - **S2 "Cái giếng cạn"**: the dry well, the Father's rods, the third one trembles: "Không.";
   - **S3 "Bữa trưa"**: lunch with the Father, the first story scene;
   - **S4 "Buổi chiều lệch"**: the leaves, the birds, the four men ("Chúng mọc lại"), and **choice C1**;
   - **S5 "Căn phòng của cha"**: the search puzzle that ends in the half Mạch Ấn (a key item in the save);
   - **S6 "Đêm rừng đổi"**: the stampede through the village, bà Dần's house as C1 left it, and a rooted boar;
-  - S7: the shrine, Nanh Rễ and choice C2.
+  - S7: the shrine, Nanh Rễ and choice C2;
+  - **S8 "Lối rễ"**: the aftermath (shaped by C1 and C2), the keeper's hint (optional), the spare satchel and red thread, the roots parting, the station and its clues; the end card.
 
 Next:
 - **a 3–5 person human playtest** (review §8; in progress, `game/playtest/HUMAN_PLAYTESTS.md`), then tune Nanh Rễ from it on the branch;
-- S2 "Cái giếng cạn" (the dry well, the third rod) and S8 "Lối rễ" (the keeper's hint, the station), to complete the Prologue.
+- a human pass on the whole Prologue's pacing (it is now about 20–30 minutes, much of it reading);
+- then Ch. I (review §10 Phase 3).
 
 Roadmap:
 

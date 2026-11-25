@@ -101,6 +101,8 @@ export const FC = {
   hold: loop("hold", ["f_hold"], 99999),
   offer: clip("offer", [{ key: "f_offer", ms: 99999 }]),
   drop: clip("drop", [{ key: "f_drop", ms: 99999 }]),
+  /** kneeling at the well (S2), no leaf in hand */
+  kneel: clip("kneel", [{ key: "f_crouch", ms: 99999 }]),
 };
 export type FatherClip = keyof typeof FC;
 

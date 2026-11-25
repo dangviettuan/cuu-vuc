@@ -215,9 +215,13 @@ export interface Look {
   /** shorter figure (px less than 46) */
   short?: number;
   stoop?: number;
+  /** a walking staff in the front hand (the shrine keeper) */
+  staff?: boolean;
 }
 
 export const LOOKS = {
+  /** The shrine keeper (cụ trông miếu): very old, back bent, thin white hair, eyes "sáng như hai hạt cườm" (Ch1). */
+  keeper: { skin: "#b88462", top: "#5e5a4e", pants: "#3a3630", hair: "#e6e2da", hat: "none", long: true, beard: "#dedad2", short: 6, stoop: 3, staff: true },
   /** Bà Dần: warm, gossipy, sixties. Brown áo bà ba, a dark khăn over a grey bun, a slight stoop. */
   baDan: { skin: "#c08a66", top: "#7a5236", pants: "#2e2a2a", hair: "#a8a39a", hat: "khan", hatC: "#4a3a30", short: 4, stoop: 1 },
   /** Ông Dần, her husband. */
@@ -284,6 +288,7 @@ export function villager(L: Look, p: VPose): Px {
   else { P.rect(X(-3) + hx0, Y(1) + b, 7, 2, L.hair); P.rect(X(-3) + hx0, Y(3) + b, 2, 3, L.hair); }
   if (L.beard) { P.rect(X(1) + hx0, Y(8) + b, 4, 2, L.beard); }
   const [fx, fy] = arm(FA[p.arm ?? "rest"], L.top, L.skin);
+  if (L.staff && !p.kneel) P.line(fx + 2, fy - 4, fx + 3, base, "#6a5232", 1);
   if (p.torch !== undefined) { // a bamboo torch with a two-frame flame
     P.line(fx + 1, fy + 6, fx + 1, fy - 8, "#7a5a32", 1);
     P.ell(fx + 1, fy - 10, 2.2, 3, p.torch ? "#ffb347" : "#ffd27a"); P.set(fx + 1, fy - 13 - p.torch, "#fff2c8");
@@ -321,15 +326,25 @@ export function dayHouse(variant: number): Px {
  * The old tree beside the miếu Mạch, in the afternoon it drops its leaves (Ch1: "Không phải một chiếc. Hàng trăm
  * chiếc."): the canopy is thinning and yellowed, the ground under it gold.
  */
-export function greatTree(): Px {
+export function greatTree(state: "green" | "yellow" | "bare" = "yellow"): Px {
   const P = new Px(170, 200), r = rng(303);
   const bark = "#4a3a2a", hi = "#6a523a";
   P.rect(74, 80, 22, 120, bark); P.rect(74, 80, 4, 120, hi);
   P.tri(60, 200, 74, 170, 78, 200, bark); P.tri(92, 200, 96, 170, 112, 200, bark);
   P.line(84, 100, 40, 60, bark, 4); P.line(86, 96, 132, 56, bark, 4); P.line(84, 90, 86, 40, bark, 3);
-  for (const [cx, cy, rx, ry, c] of [[85, 50, 70, 40, "#6a7a3a"], [44, 62, 34, 24, "#7a7a34"], [128, 60, 36, 24, "#727a36"], [86, 30, 46, 26, "#7e8a3e"]] as const) P.ell(cx, cy, rx, ry, c);
-  for (let i = 0; i < 260; i++) { const x = 18 + r() * 134, y = 10 + r() * 78; if (P.get(x, y)) P.set(x, y, r() < 0.55 ? "#d4b04a" : r() < 0.5 ? "#b8902e" : "#5a6a2e"); }
-  for (let i = 0; i < 40; i++) { const x = 20 + r() * 130, y = 16 + r() * 70; if (P.get(x, y)) P.set(x, y, "#3a3020"); } // bare twigs showing
+  if (state === "bare") { // after the night (Ch. 2: "gốc cây cổ thụ đã trụi lá"): branches only
+    P.line(40, 60, 20, 30, bark, 2); P.line(132, 56, 150, 24, bark, 2); P.line(86, 40, 70, 8, bark, 2); P.line(86, 40, 104, 6, bark, 2);
+    P.line(60, 78, 44, 58, bark, 2); P.line(112, 74, 128, 50, bark, 2);
+    for (let i = 0; i < 12; i++) P.set(20 + r() * 130, 10 + r() * 60, "#b8902e"); // a last few leaves
+    return P.outline();
+  }
+  const canopy = state === "green" ? ["#3f6a38", "#4a7a40", "#447038", "#558a48"] : ["#6a7a3a", "#7a7a34", "#727a36", "#7e8a3e"];
+  ([[85, 50, 70, 40], [44, 62, 34, 24], [128, 60, 36, 24], [86, 30, 46, 26]] as const).forEach(([cx, cy, rx, ry], i) => P.ell(cx, cy, rx, ry, canopy[i]));
+  for (let i = 0; i < 260; i++) {
+    const x = 18 + r() * 134, y = 10 + r() * 78;
+    if (P.get(x, y)) P.set(x, y, state === "green" ? (r() < 0.5 ? "#6a9a52" : "#2f5a34") : r() < 0.55 ? "#d4b04a" : r() < 0.5 ? "#b8902e" : "#5a6a2e");
+  }
+  if (state === "yellow") for (let i = 0; i < 40; i++) { const x = 20 + r() * 130, y = 16 + r() * 70; if (P.get(x, y)) P.set(x, y, "#3a3020"); } // bare twigs showing
   return P.outline();
 }
 
@@ -542,6 +557,110 @@ export function stones(): Px {
   return P.outline();
 }
 
+
+/* ---------------- the dry well (S2) ---------------- */
+
+/** The village well: a round stone rim, a wooden frame with its pulley, the rope and the bucket on the rim. */
+export function well(): Px {
+  const P = new Px(48, 52), r = rng(909);
+  P.rect(4, 34, 40, 18, "#6a6860"); P.rect(4, 34, 40, 3, "#86847a");
+  for (let i = 0; i < 26; i++) P.set(5 + r() * 38, 38 + r() * 13, r() < 0.5 ? "#5a5850" : "#7a786e");
+  for (const y of [42, 48]) P.rect(4, y, 40, 1, "#54524a");
+  P.rect(6, 4, 3, 30, "#5a4430"); P.rect(39, 4, 3, 30, "#5a4430"); P.rect(4, 2, 40, 3, "#4a3524");
+  P.ell(24, 7, 3, 3, "#3a2a1c"); P.line(24, 10, 24, 28, "#a89a6a"); // pulley, rope
+  P.rect(30, 29, 7, 5, "#6a5232"); P.rect(30, 29, 7, 1, "#8a7044"); // the bucket, set down
+  return P.outline();
+}
+
+/** One of the Father's copper rods laid across the well's mouth (S2), leaf-vein marks at its tip. */
+export function rodOnWell(): Px {
+  const P = new Px(44, 3);
+  P.rect(0, 1, 44, 1, "#b87333"); P.rect(0, 0, 44, 1, "#d8935a");
+  for (const x of [2, 4, 6]) P.set(x, 2, "#7a4a22");
+  return P;
+}
+
+/* ---------------- the root path and the station (S8) ---------------- */
+
+/** A clump of bamboo at the western edge of the village ("cuối bãi tre phía tây", Ch. 2). */
+export function bamboo(v: number): Px {
+  const P = new Px(40, 140), r = rng(1010 + v);
+  for (let i = 0; i < 5; i++) {
+    const x = 6 + i * 7 + (v % 2) * 2, lean = (i - 2) * 1.5, c = ["#6a8a3a", "#5a7a32", "#7a9a44"][i % 3];
+    for (let y = 0; y < 140; y++) { const xx = x + lean * (1 - y / 140); P.rect(xx, y, 2, 1, c); if (y % 18 === 0) P.rect(xx - 1, y, 4, 1, shade(c, 0.7)); }
+  }
+  for (let i = 0; i < 40; i++) P.line(r() * 40, r() * 60, r() * 40 + (r() - 0.5) * 10, r() * 60 + 4, "#7a9a44");
+  return P.outline();
+}
+
+/** The living roots across the station road (Ch1: "Chúng mọc lại"): a low wet wall (0), or parted to let him through (1). */
+export function rootWall(open: number): Px {
+  const P = new Px(70, 60), r = rng(1111);
+  const root = "#2c2420", hi = "#4a3a2e", tip = "#7fa65a";
+  for (let i = 0; i < 16; i++) {
+    let x0 = 4 + r() * 62, y0 = 60;
+    const side = open ? (x0 < 35 ? -1 : 1) : 0;
+    for (let k = 0; k < 7; k++) {
+      const x1 = x0 + (r() - 0.5) * 12 + side * 4, y1 = y0 - 4 - r() * 6;
+      P.line(x0, y0, x1, y1, k % 3 ? root : hi, i % 4 === 0 ? 3 : 2);
+      x0 = open ? Math.max(open && side < 0 ? 0 : 42, Math.min(side < 0 ? 26 : 70, x1)) : x1; y0 = y1;
+    }
+    P.set(x0, y0 - 1, tip);
+  }
+  for (let i = 0; i < 8; i++) P.set(10 + r() * 50, 56 + r() * 3, "#6a4a32"); // fresh-cut stumps sprouting again
+  return P.outline();
+}
+
+/** A deer with roots grown out of both flanks into the ground: it can no longer run (Ch. 2). Seen from behind. */
+export function rootedDeer(): Px {
+  const P = new Px(40, 40);
+  const c = "#8a6a48", d = shade(c, 0.75);
+  P.ell(20, 20, 11, 6, c); P.rect(11, 22, 3, 14, d); P.rect(27, 22, 3, 14, d); P.rect(15, 23, 2, 13, c); P.rect(23, 23, 2, 13, c);
+  P.rect(28, 8, 5, 10, c); P.rect(29, 4, 4, 5, c); P.line(30, 4, 27, 0, "#5a4430"); P.line(33, 4, 36, 0, "#5a4430");
+  P.rect(8, 16, 3, 3, "#d8ccb0"); // the white tail
+  for (const [x0, dir] of [[10, -1], [30, 1], [14, -1], [26, 1]] as const) { P.line(x0, 22, x0 + dir * 6, 34, "#2c2420", 1); P.line(x0 + dir * 6, 34, x0 + dir * 8, 40, "#2c2420", 1); }
+  return P.outline();
+}
+
+/**
+ * The Dẫn Mạch station: a square grey stone, chest-high, cased in tarnished copper, on a low mound in a clearing
+ * (Ch. 2). The casing has been prised open along its seams; inside, where something glowed faintly blue, a dark hollow.
+ */
+export function station(): Px {
+  const P = new Px(110, 70), r = rng(1212);
+  P.ell(55, 70, 55, 12, "#4a5a3a"); P.ell(55, 70, 50, 9, "#5a6a44"); // the mound, its moss
+  for (let i = 0; i < 30; i++) P.set(10 + r() * 90, 61 + r() * 8, "#6a7a50");
+  P.rect(35, 24, 40, 36, "#7a7a76"); P.rect(35, 24, 40, 3, "#9a9a94");
+  for (let i = 0; i < 5; i++) P.line(38 + i * 7, 30, 44 + i * 6, 54, "#5a5a56"); // the grooves, converging
+  P.rect(33, 22, 3, 40, "#7a5a3a"); P.rect(74, 22, 3, 40, "#7a5a3a"); // copper casing edges, dull
+  P.line(77, 24, 88, 18, "#8a6a42", 2); P.line(77, 40, 90, 38, "#8a6a42", 2); // a panel prised open, neat, along the seam
+  P.rect(48, 36, 14, 12, "#0e0c0a"); // the hollow
+  return P.outline();
+}
+
+/** Boot prints in the wet earth, hard soles, deep treads, all one kind, walking in step (Ch. 2). */
+export function bootPrints(): Px {
+  const P = new Px(80, 4);
+  for (let i = 0; i < 10; i++) { const x = 2 + i * 8, y = i % 2; P.rect(x, y + 1, 4, 2, "#2a2018"); P.set(x + 1, y + 1, "#4a3a2a"); }
+  return P;
+}
+
+/** The third rod, dropped in the grass at the edge of the mound. */
+export function droppedRod(): Px {
+  const P = new Px(22, 6);
+  P.line(0, 5, 20, 1, "#b87333"); P.line(1, 5, 21, 1, "#d8935a");
+  P.set(19, 3, "#6a9a52"); P.set(4, 4, "#6a9a52"); P.set(12, 4, "#5a8a46"); // grass over it
+  return P;
+}
+
+/** The Father's spare tool bag, on the floor of his room: measuring paper, ink, a bamboo folding rule, red thread. */
+export function satchel(): Px {
+  const P = new Px(14, 12);
+  P.rect(1, 3, 12, 9, "#5a4030"); P.rect(1, 3, 12, 2, "#6e5038"); P.line(3, 3, 7, 0, "#7b6a5a"); P.line(7, 0, 11, 3, "#7b6a5a");
+  P.set(10, 8, RED);
+  return P.outline();
+}
+
 /** Registers every village texture once (called from Boot, beside registerTextures). */
 export function registerVillageTextures(scene: Phaser.Scene): void {
   const add = (key: string, px: Px) => { if (!scene.textures.exists(key)) scene.textures.addCanvas(key, px.toCanvas()); };
@@ -584,7 +703,18 @@ export function registerVillageTextures(scene: Phaser.Scene): void {
     add(`v_${id}_lie`, villagerLying(L));
   }
   [0, 1, 2].forEach((v) => add(`day_house${v}`, dayHouse(v)));
-  add("great_tree", greatTree());
+  add("great_tree", greatTree("yellow"));
+  add("great_tree_green", greatTree("green"));
+  add("great_tree_bare", greatTree("bare"));
+  add("well", well());
+  add("rod_on_well", rodOnWell());
+  [0, 1, 2].forEach((v) => add(`bamboo${v}`, bamboo(v)));
+  [0, 1].forEach((i) => add(`root_wall${i}`, rootWall(i)));
+  add("rooted_deer", rootedDeer());
+  add("station", station());
+  add("boot_prints", bootPrints());
+  add("dropped_rod", droppedRod());
+  add("satchel", satchel());
   add("leaf_carpet", leafCarpet());
   [0, 1].forEach((i) => { add(`dog${i}`, dog(i)); add(`bird${i}`, bird(i)); add(`bird_down${i}`, birdDown(i)); add(`mach_an${i}`, machAn(i)); add(`dan_house${i}`, danHouse(i)); add(`front_door${i}`, frontDoor(i)); add(`rack${i}`, knifeRack(i)); add(`board${i}`, floorBoard(i)); });
   add("interior", interior());

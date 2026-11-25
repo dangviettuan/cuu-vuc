@@ -58,9 +58,9 @@ const { makeBot } = require("./bot.cjs");
     await h.tap("2", 60); await h.wait(3600);
     R.shots.push(await h.shot("d05-ending-finish"));
     s = await bot.snap(); step("ending choice 2 (finish her) recorded", s.finished);
-    // restart works?
-    await h.tap("r", 50); await h.wait(1200);
-    s = await bot.snap(); step("R restarts the slice", s.p.x < 100 && !s.finished, { x: s.p.x });
+    // on to the aftermath (S8)
+    for (let i = 0; i < 40 && s.stage !== "prologue-s8"; i++) { await h.wait(200); s = await bot.snap().catch(() => s); }
+    step("C2 leads on to S8", s.stage === "prologue-s8", { stage: s.stage });
   }
 
   // Clean perf window: 20 s of boss-arena combat without screenshots (fresh restart → walk → fight).

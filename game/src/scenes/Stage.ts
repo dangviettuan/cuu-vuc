@@ -12,7 +12,7 @@ import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
 import { Rng, runSeed } from "../core/rng";
 import { onSettings, settings } from "../core/settings";
-import { addItem, enterStage, getFlag, markDone, save, saveAtCheckpoint } from "../core/save";
+import { addItem, enterStage, getFlag, markDone, save, saveAtCheckpoint, setFlag } from "../core/save";
 import { DIFFICULTY } from "../data/difficulty";
 import { FIRST_STAGE, STAGES } from "../data/stages";
 import type { StageDef, When } from "../data/stage";
@@ -172,6 +172,11 @@ export class StageScene extends Phaser.Scene {
       this.cameras.main.setBackgroundColor("#0a0e14");
     } else if (def.time === "noon") {
       this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0xfff2c8, 0.08).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+    } else if (def.time === "dawn") {
+      // S8: the cold grey before the sun, the sky paling (the lane keeps its colours)
+      this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0x2a3a52, 0.42).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+      for (let i = 0; i < 8; i++) this.add.rectangle(0, VIEW.height * (0.5 + i * 0.0625), VIEW.width, VIEW.height * 0.0625, 0xc8a080, 0.012 * (i + 1)).setOrigin(0).setScrollFactor(0).setDepth(-4.45);
+      this.cameras.main.setBackgroundColor("#1a2230");
     } else if (def.time === "afternoon") {
       // S4: a low sun, the light going amber over the backdrop (the lane keeps its colours)
       this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0xff9a40, 0.16).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
@@ -234,12 +239,19 @@ export class StageScene extends Phaser.Scene {
     this.player.refillHerbs();
 
     // People, and things to look at or use.
-    for (const n of def.npcs ?? []) if (this.ok(n.when)) this.npcs.set(n.id, new Npc(this, n.x, def.groundY, n.id, n.clip, n.facing ?? 1, n.kind === "villager" ? n.look : undefined, n.rest));
+    for (const n of def.npcs ?? []) {
+      if (!this.ok(n.when)) continue;
+      const npc = new Npc(this, n.x, def.groundY, n.id, n.clip, n.facing ?? 1, n.kind === "villager" ? n.look : undefined, n.rest);
+      if (n.bag) { npc.bag = true; npc.pose(n.clip); }
+      if (n.hidden) npc.setVisible(false);
+      this.npcs.set(n.id, npc);
+    }
     for (const ex of def.examine ?? []) {
       if (!this.ok(ex.when)) continue;
       const use = () => { this.marks.add(ex.id); if (ex.cutscene) void this.runCutscene(ex.cutscene); else if (ex.text) this.ui.line(null, ex.text); };
       this.interactables.push({ x: ex.x, range: ex.range ?? 16, y: def.groundY - 50, act: use,
-        when: () => (!ex.while || !!this.props.get(ex.while)?.visible) && this.has(ex.after) && !(ex.once && this.marks.has(ex.id)) && !this.cutscene });
+        when: () => (!ex.while || !!this.props.get(ex.while)?.visible) && this.has(ex.after) && !(ex.unless ?? []).some((m) => this.marks.has(m))
+          && !(ex.once && this.marks.has(ex.id)) && !this.cutscene });
     }
     for (const tk of def.talk ?? []) {
       const npc = this.npcs.get(tk.npc);
@@ -504,6 +516,7 @@ export class StageScene extends Phaser.Scene {
   private async runSteps(steps: Step[]): Promise<boolean> {
     for (const st of steps) {
       if (this.gone) return false; // the stage was left (title, restart) mid-scene
+      if ((st.when && !this.ok(st.when)) || (st.marks && !this.has(st.marks))) continue;
       if ("choose" in st) {
         // A choice is never skipped: skipping stops here, and the branch after it plays normally.
         this.skipping = false; this.inChoice = true;
@@ -574,7 +587,7 @@ export class StageScene extends Phaser.Scene {
     if ("pose" in st) { this.npcs.get(st.pose)?.pose(st.clip); return done; }
     if ("wait" in st) return fast ? done : this.delay(st.wait);
     if ("leaf" in st) return this.leafFall(st.leaf);
-    if ("hideProp" in st) { this.props.get(st.hideProp)?.setVisible(false); return done; }
+    if ("hideProp" in st) { (this.props.get(st.hideProp) ?? this.npcs.get(st.hideProp))?.setVisible(false); return done; }
     if ("bag" in st) { const n = this.npcs.get(st.bag); if (n) { n.bag = true; n.pose(n.clip === "walk" ? "walk" : "idle"); } return done; }
     if ("camera" in st) {
       if (st.camera === "follow") { cam.startFollow(this.player, true, 0.1, 0.1, Math.round(this.lookAhead), 40); return done; }
@@ -601,7 +614,7 @@ export class StageScene extends Phaser.Scene {
       if (img) { img.setTexture(st.setProp.key); const a = this.propAnims.find((p) => p.img === img); if (a) a.frames = [st.setProp.key]; }
       return done;
     }
-    if ("showProp" in st) { this.props.get(st.showProp)?.setVisible(true); return done; }
+    if ("showProp" in st) { (this.props.get(st.showProp) ?? this.npcs.get(st.showProp))?.setVisible(true); return done; }
     if ("place" in st) {
       const pl = st.place, x = pl.at === "player" ? this.player.x + this.player.facing * 8 : pl.at;
       const y = pl.at === "player" ? this.player.y + (pl.dy ?? -30) : this.def.groundY + (pl.dy ?? 0);
@@ -612,6 +625,23 @@ export class StageScene extends Phaser.Scene {
     if ("flock" in st) { if (!fast) this.flock(st.flock); return done; }
     if ("item" in st) { addItem(st.item); if (!fast) this.ui.toast(t("toast.item", { item: t(`item.${st.item}` as StringKey) }), 2400); return done; }
     if ("music" in st) { music.play(st.music); return done; }
+    if ("flag" in st) { setFlag(st.flag, st.value); return done; }
+    if ("pouch" in st) {
+      this.player.herbCap += st.pouch; this.player.refillHerbs();
+      if (!fast) this.ui.toast(t("toast.pouch", { cap: this.player.herbCap }), 2400);
+      return done;
+    }
+    if ("shiver" in st) {
+      const img = this.props.get(st.shiver); if (!img || fast) return done;
+      sfx.rod();
+      const x0 = img.x;
+      return new Promise((res) => this.tweens.add({ targets: img, x: x0 + 1, duration: 45, yoyo: true, repeat: 4, onComplete: () => { img.x = x0; res(); } }));
+    }
+    if ("end" in st) {
+      this.finished = true; markDone(this.def.id);
+      this.ui.endCard(t(st.end));
+      return done;
+    }
     return done;
   }
 
@@ -758,8 +788,10 @@ export class StageScene extends Phaser.Scene {
       this.piglets.forEach((p) => p.anims.stop());
       this.ui.toast(t("c2.killed.toast"), 3000);
     }
-    const epilogue = t(spared ? "c2.spared.end" : "c2.killed.end");
-    this.time.delayedCall(3200, () => this.ui.endCard(epilogue));
+    // on to the aftermath (S8), or the closing card if the stage is the last one built
+    const next = this.def.arena?.next;
+    if (next) this.time.delayedCall(3600, () => this.leave(next.to, next.card));
+    else this.time.delayedCall(3200, () => this.ui.endCard(t(spared ? "c2.spared.end" : "c2.killed.end")));
   }
 
   /* ------------------------------------------------------------ frame */

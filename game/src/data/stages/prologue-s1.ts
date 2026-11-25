@@ -1,7 +1,6 @@
 /**
  * Prologue S1 "Việc sáng" (forest-edge chores as the tutorial), ending at the miếu Mạch at the village entrance.
- * Spec: docs/04-chapters/prologue-an-moc-v0.1.md §3. Walking on into An Mộc leads to S3 (lunch); the S2 well scene is
- * carried by a narration card until it is built.
+ * Spec: docs/04-chapters/prologue-an-moc-v0.1.md §3. Walking on into An Mộc leads to S2 (the dry well).
  */
 import type { StageDef } from "../stage";
 
@@ -40,6 +39,6 @@ export const PROLOGUE_S1 = {
     { x: 1230, min: 1160, max: 1300 },
   ],
   shrines: [{ id: "s1-shrine", x: 1420 }],
-  exit: { x: 1590, to: "prologue-s3", card: ["card.s1s3.a", "card.s1s3.b"] },
+  exit: { x: 1590, to: "prologue-s2", card: ["card.s1s2"] },
 } satisfies StageDef;
 

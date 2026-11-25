@@ -103,6 +103,8 @@ export const sfx = {
   crash(): void { noise("lowpass", 2200, 150, 0.7, 0.45); tone("sine", 90, 40, 0.5, 0.4); },
   /** The long sound from the forest (S5): "Không giống tiếng thú. Cũng không giống gió." Low, far, the windows hum. */
   far(): void { tone("sawtooth", 48, 42, 2.6, 0.12); tone("sine", 96, 84, 2.4, 0.08, 0.1); noise("lowpass", 160, 90, 2.4, 0.12); },
+  /** A copper rod ringing faintly against the stone (the third rod, S2). */
+  rod(): void { tone("triangle", 1760, 1740, 0.5, 0.12); tone("sine", 2640, 2600, 0.4, 0.05, 0.02); },
   /** Silence falling (the dogs stop): nothing to play; the cue is there so scripts read as written. */
   hush(): void {},
 };

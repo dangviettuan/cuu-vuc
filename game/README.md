@@ -75,7 +75,10 @@ URL options: `?quick=1` (straight into the stage with a throwaway save: used by 
 | **S6 combat:** the stampede (panicked runners, jump or dodge; one at a time, sound first) and the rooted boar (roots through the shoulder; bolts when beaten) | `Runner`, `BoarOpts` in `src/enemies.ts`; `STAMPEDE`, `ROOTED_BOAR` in `src/data/enemies.ts` |
 | **Key items** in the save (the half Mạch Ấn) | `addItem` in `src/core/save.ts` |
 
-`?quick=1&stage=prologue-s4` (or `-s3`, `-s5`, `-s6`, `-s7`) starts a test run at that stage. Starting at S6 without having made C1 plays the prose branch (kept the Father's word).
+| **Conditional scene steps** (`when` on a flag, `marks` on what was examined): the S8 aftermath follows C1 and C2; PRO_STATION_READ needs every clue read | `src/data/cutscenes.ts` |
+| **S8:** the pouch grows with the spare satchel; the end card closes the Prologue | `pouch`, `end` steps in `Stage.ts` |
+
+`?quick=1&stage=prologue-s4` (or `-s2` … `-s8`, `-s8-station`) starts a test run at that stage. Starting at S6 without having made C1 plays the prose branch (kept the Father's word).
 
 ## Kits (ADR-0010)
 

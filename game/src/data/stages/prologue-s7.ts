@@ -35,5 +35,6 @@ export const PROLOGUE_S7 = {
     landmark: { x: 650, key: "split_tree" },
     litter: { bushX: 1230, x: 1212, n: 3 },
     outcome: "c2",
+    next: { to: "prologue-s8" },
   },
 } satisfies StageDef;
