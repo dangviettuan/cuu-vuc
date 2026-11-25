@@ -23,6 +23,8 @@ export const PROLOGUE_S7 = {
   boars: [],
   shrines: [{ id: "s7-shrine", x: 540, sign: "sign.shrine.night" }],
   props: [
+    // the old tree by the miếu, already stripped by the afternoon's leaf-fall (S4); bare by S8
+    { key: "great_tree_bare", x: 500, depth: -4 },
     { key: "night_house0", x: 70, depth: -3 },
     { key: "night_house1", x: 230, depth: -3 },
     { key: "night_house2", x: 430, depth: -3 },

@@ -7,7 +7,7 @@
  * Authored frames replace these by key, as for the hero (ADR-0011).
  */
 import Phaser from "phaser";
-import { Px, RED, rng, shade } from "./art";
+import { Px, RED, machGrooves, rng, shade } from "./art";
 
 type Arm = { e: [number, number]; h: [number, number] };
 const FA = {
@@ -28,8 +28,8 @@ const FA = {
   torch: { e: [3, 3], h: [5, -2] },
   /** both hands reaching down (bà Dần pulling at the fallen frame, S6) */
   pull: { e: [5, 6], h: [9, 9] },
-  /** a hand raised to the brow, looking (the villagers at the shrine, S4) */
-  brow: { e: [4, 1], h: [3, -6] },
+  /** a hand raised to the brow, shading the eyes (the villagers at the shrine, S4) */
+  brow: { e: [7, -1], h: [5, -8] },
 } satisfies Record<string, Arm>;
 export type FatherArm = keyof typeof FA;
 
@@ -187,18 +187,8 @@ export function greenLeaf(f: number): Px {
 
 /* ---------------- night village (S7) ---------------- */
 
-/** A village house at night: dark thatch, a warm lit window (the village is awake: something is coming). */
-export function nightHouse(variant: number): Px {
-  const P = new Px(96, 76), r = rng(91 + variant);
-  const wall = "#2a2a34", roof = "#1d1c24";
-  P.rect(8, 34, 80, 42, wall);
-  P.tri(0, 36, 48, 6 + variant * 2, 96, 36, roof);
-  for (let x = 2; x < 94; x += 3) P.rect(x, 33 + Math.round(r() * 2), 2, 4, "#25242e");
-  const wx = 20 + variant * 30;
-  P.rect(wx, 46, 14, 12, "#e0a24a"); P.rect(wx, 46, 14, 2, "#a8742e"); P.rect(wx + 6, 46, 2, 12, "#3a2a20");
-  P.rect(60 - variant * 20, 50, 12, 26, "#1a1a20");
-  return P.outline();
-}
+/** A village house at night (S6–S8): the walls dark, the window lit; the village is awake. */
+export function nightHouse(variant: number): Px { return villageHouse(variant, true, variant === 2); }
 
 
 /* ---------------- villagers (S4, S6) ---------------- */
@@ -255,8 +245,13 @@ export function villager(L: Look, p: VPose): Px {
   const Y = (v: number) => top + v, X = (v: number) => cx + v;
   const skinS = shade(L.skin, 0.82), topS = shade(L.top, 0.78);
   const hip = Y(28) + b;
-  const leg = (dx: number, lift: number, col: string) => {
-    if (p.kneel) { P.rect(X(-3) + dx, base - 10, 7, 3, col); P.rect(X(-5) + dx, base - 4, 9, 3, col); P.rect(X(-6) + dx, base - 2, 3, 2, shade(col, 0.7)); return; }
+  const leg = (dx: number, lift: number, col: string, front: boolean) => {
+    if (p.kneel) { // one knee up in front, the other knee on the ground with the foot tucked behind
+      const hx = X(0) + ln, hy = hip;
+      if (front) { P.line(hx, hy, hx + 6, hy, col, 3); P.line(hx + 6, hy, hx + 6, base - 2, col, 3); P.rect(hx + 6, base - 2, 4, 2, "#4a3a2e"); }
+      else { P.line(hx, hy, hx - 1, base - 3, col, 3); P.line(hx - 1, base - 3, hx - 8, base - 2, col, 2); }
+      return;
+    }
     const x = X(-2) + dx, len = Math.max(4, base - hip + 1 - lift);
     P.rect(x, hip, 3, len, col); P.rect(x, hip + len - 2, 4, 2, "#4a3a2e"); // bare feet or sandals
   };
@@ -266,7 +261,7 @@ export function villager(L: Look, p: VPose): Px {
     P.line(sx, sy, ex, ey, col, 2); P.line(ex, ey, hx, hy, col, 2); P.rect(hx, hy, 2, 2, hand);
     return [hx, hy] as const;
   };
-  leg((p.back?.dx ?? 0) - 1, p.back?.lift ?? 0, shade(L.pants, 0.78));
+  leg((p.back?.dx ?? 0) - 1, p.back?.lift ?? 0, shade(L.pants, 0.78), false);
   arm(FA[p.backArm ?? "rest"], topS, skinS);
   // tunic: a short áo to the hip, or the headman's long one to the knee
   const hemY = L.long ? Math.min(base - 8, Y(38) + b) : Y(27) + b;
@@ -274,7 +269,7 @@ export function villager(L: Look, p: VPose): Px {
   if (L.long) { P.tri(X(-5) + ln, Y(24) + b, X(-7), hemY, X(-5) + ln, hemY, L.top); P.tri(X(5) + ln, Y(24) + b, X(7), hemY, X(5) + ln, hemY, L.top); }
   P.rect(X(-5) + ln, hemY - 1, 10, 1, topS);
   P.line(X(1) + ln, Y(11) + b, X(1) + ln, hemY - 2, topS); // the button line
-  leg(p.front?.dx ?? 0, p.front?.lift ?? 0, L.pants);
+  leg(p.front?.dx ?? 0, p.front?.lift ?? 0, L.pants, true);
   // head
   const hx0 = ln + 1;
   P.rect(X(0) + hx0, Y(9) + b, 3, 2, skinS);
@@ -308,43 +303,111 @@ export function villagerLying(L: Look): Px {
 
 /* ---------------- An Mộc by afternoon (S4) ---------------- */
 
-/** A village house by day: thatch, wattle-and-daub walls, a dark doorway. Three variants. */
-export function dayHouse(variant: number): Px {
-  const P = new Px(96, 76), r = rng(191 + variant);
-  const wall = ["#8a7658", "#7f6e54", "#8e7a5c"][variant % 3], roof = "#6a5a34", thatch = "#8a7444";
-  P.rect(8, 34, 80, 42, wall);
-  for (let y = 36; y < 76; y += 4) for (let x = 8; x < 88; x += 3) if (r() < 0.07) P.set(x, y, shade(wall, 0.86));
-  P.tri(0, 36, 48, 6 + variant * 2, 96, 36, roof);
-  for (let x = 2; x < 94; x += 3) P.rect(x, 33 + Math.round(r() * 2), 2, 4, thatch);
-  const wx = 20 + variant * 30;
-  P.rect(wx, 46, 14, 12, "#3a2e22"); P.rect(wx, 46, 14, 2, "#5a4632"); P.rect(wx + 6, 46, 2, 12, "#5a4632");
-  P.rect(60 - variant * 20, 50, 12, 26, "#2a2018");
+/**
+ * An An Mộc house (nhà tranh vách đất): a thick thatched roof overhanging the walls, wattle-and-daub walls on bamboo
+ * posts, a bamboo blind over the doorway, a small barred window. By night the walls go dark and the window is lit.
+ * `porch`: an eave on two posts at the right; `broken`: that porch fallen in (bà Dần's, S6, C1 kept).
+ */
+function villageHouse(variant: number, night: boolean, porch = false, broken = false): Px {
+  const W = 120, H = 84, P = new Px(W, H), r = rng(191 + variant * 13 + (night ? 7 : 0));
+  const wall = night ? "#2e2c34" : ["#9a8a66", "#8e7e5e", "#a08e6a"][variant % 3], wallS = shade(wall, 0.82);
+  const post = night ? "#22202a" : "#5a4630", thatch = night ? "#25242c" : "#7e6a3c", thatchHi = night ? "#2e2d36" : "#9a844a", thatchS = night ? "#1c1b22" : "#5e4e2c";
+  const x0 = 12, x1 = 92, wallTop = 40;
+  P.rect(x0, wallTop, x1 - x0, H - wallTop, wall);
+  for (let y = wallTop + 3; y < H; y += 5) for (let x = x0; x < x1; x += 2) if (r() < 0.12) P.set(x, y, wallS); // daub over lath
+  if (!night) for (let i = 0; i < 4; i++) { const px = x0 + 4 + r() * 60, py = wallTop + 8 + r() * 26; P.rect(px, py, 6 + r() * 6, 3 + r() * 3, "#b4a27a"); } // lime patches
+  for (const x of [x0, x1 - 3]) { P.rect(x, wallTop - 2, 3, H - wallTop + 2, post); }
+  // door with a bamboo blind, and a window with bars
+  const dx = variant % 2 ? 22 : 60;
+  P.rect(dx, 52, 14, H - 52, night ? "#141218" : "#2a2018");
+  for (let x = dx + 1; x < dx + 14; x += 2) P.rect(x, 52, 1, 18, night ? "#3a3428" : "#a08a52");
+  P.rect(dx, 52, 14, 1, post);
+  const wx = variant % 2 ? 60 : 26;
+  P.rect(wx, 50, 16, 11, night ? "#e0a24a" : "#2a2018");
+  for (let x = wx + 2; x < wx + 16; x += 3) P.rect(x, 50, 1, 11, night ? "#8a5a26" : post);
+  P.rect(wx - 1, 49, 18, 1, post); P.rect(wx - 1, 61, 18, 1, post);
+  // the thatch: thick, layered, ragged at the eave
+  const ridgeY = 6 + variant * 2;
+  for (let y = ridgeY; y < wallTop + 4; y++) {
+    const u = (y - ridgeY) / (wallTop + 4 - ridgeY), half = 10 + u * 46;
+    P.rect(52 - half, y, half * 2, 1, (y - ridgeY) % 4 === 0 ? thatchHi : thatch);
+  }
+  for (let i = 0; i < 160; i++) { const x = 6 + r() * 92, y = ridgeY + 3 + r() * (wallTop - ridgeY); if (P.get(x, y) === thatch) P.set(x, y, r() < 0.5 ? thatchS : thatchHi); }
+  for (let x = 6; x < 99; x += 2) P.rect(x, wallTop + 4, 1, 1 + Math.floor(r() * 3), thatchS); // straw ends at the eave
+  P.rect(42, ridgeY - 1, 20, 3, thatchS); // the ridge
+  if (porch && !broken) { // an eave on two bamboo posts
+    P.tri(92, 40, 118, 48, 92, 50, thatch); P.rect(92, 46, 26, 3, thatchS);
+    P.rect(114, 48, 3, H - 48, post); P.rect(98, 48, 2, H - 48, post);
+  } else if (porch && broken) { // the eave down at an angle, a post snapped (the fallen frame is its own prop)
+    P.line(92, 42, 118, 76, thatchS, 4); P.line(94, 44, 116, 74, thatch, 2);
+    P.rect(98, 56, 2, H - 56, post); P.line(98, 56, 102, 52, post, 2);
+  }
   return P.outline();
 }
 
+/** A village house by day (S2, S4). */
+export function dayHouse(variant: number): Px { return villageHouse(variant, false, variant === 1); }
+
 /**
- * The old tree beside the miếu Mạch, in the afternoon it drops its leaves (Ch1: "Không phải một chiếc. Hàng trăm
- * chiếc."): the canopy is thinning and yellowed, the ground under it gold.
+ * The old tree beside the miếu Mạch: a cây đa (banyan), as old village shrines have. A fluted trunk of merged stems,
+ * buttress roots, wide low limbs, aerial roots hanging from them (a few grown down into pillars), and a broad, uneven
+ * canopy. "green" (S2, morning), "yellow" (S4: it drops its leaves, Ch1), "bare" (S8: "gốc cây cổ thụ đã trụi lá").
  */
 export function greatTree(state: "green" | "yellow" | "bare" = "yellow"): Px {
-  const P = new Px(170, 200), r = rng(303);
-  const bark = "#4a3a2a", hi = "#6a523a";
-  P.rect(74, 80, 22, 120, bark); P.rect(74, 80, 4, 120, hi);
-  P.tri(60, 200, 74, 170, 78, 200, bark); P.tri(92, 200, 96, 170, 112, 200, bark);
-  P.line(84, 100, 40, 60, bark, 4); P.line(86, 96, 132, 56, bark, 4); P.line(84, 90, 86, 40, bark, 3);
-  if (state === "bare") { // after the night (Ch. 2: "gốc cây cổ thụ đã trụi lá"): branches only
-    P.line(40, 60, 20, 30, bark, 2); P.line(132, 56, 150, 24, bark, 2); P.line(86, 40, 70, 8, bark, 2); P.line(86, 40, 104, 6, bark, 2);
-    P.line(60, 78, 44, 58, bark, 2); P.line(112, 74, 128, 50, bark, 2);
-    for (let i = 0; i < 12; i++) P.set(20 + r() * 130, 10 + r() * 60, "#b8902e"); // a last few leaves
+  const W = 200, H = 210, P = new Px(W, H), r = rng(303);
+  const bark = "#4a3a2a", barkHi = "#66523a", barkS = "#352a1e", aerial = "#5a4836";
+  const gy = H - 1, cx = 100;
+  // limbs: [start y on trunk, end x, end y, thickness]
+  const limbs: [number, number, number, number][] = [[112, 18, 86, 6], [98, 52, 58, 6], [92, 100, 30, 5], [100, 150, 52, 6], [114, 186, 84, 6], [124, 34, 110, 4], [120, 168, 108, 4]];
+  const ends: [number, number][] = [];
+  for (const [sy, ex, ey, t] of limbs) {
+    const sx = cx + (ex < cx ? -8 : ex > cx ? 8 : 0), mx = (sx + ex) / 2, my = Math.min(sy, ey) - 8;
+    let px = sx, py = sy;
+    for (let k = 1; k <= 12; k++) { // a gently arched limb, tapering
+      const u = k / 12, x = (1 - u) * (1 - u) * sx + 2 * (1 - u) * u * mx + u * u * ex, y = (1 - u) * (1 - u) * sy + 2 * (1 - u) * u * my + u * u * ey;
+      P.line(px, py, x, y, bark, Math.max(2, Math.round(t * (1 - u * 0.6))));
+      px = x; py = y;
+    }
+    ends.push([ex, ey]);
+    // twigs
+    for (let k = 0; k < 4; k++) { const tx = ex + (r() - 0.5) * 30, ty = ey - 6 - r() * 16; P.line(ex, ey, tx, ty, barkS, 1); ends.push([tx, ty]); }
+  }
+  // the trunk: several merged stems, fluted, wider at the foot
+  for (let y = 80; y <= gy; y++) {
+    const u = (y - 80) / (gy - 80), half = 14 + u * u * 16;
+    P.rect(cx - half, y, half * 2, 1, bark);
+    for (const f of [-0.6, -0.15, 0.35, 0.75]) P.set(cx + f * half, y, barkS);
+    P.set(cx - half + 2, y, barkHi); P.set(cx - half * 0.15 + 1, y, barkHi);
+  }
+  // buttress roots spreading over the ground
+  for (const [ex, lift] of [[44, 10], [66, 6], [138, 6], [160, 10], [82, 3], [120, 3]] as const) {
+    P.line(cx + (ex < cx ? -18 : 18), gy - 18, ex, gy - 1, bark, 3); P.line(ex, gy - 1, ex + (ex < cx ? -8 : 8), gy, barkS, 2);
+    if (lift > 6) P.set(ex, gy - 2, barkHi);
+  }
+  // aerial roots: hanging from the limbs; a few reach the ground and thicken into pillars
+  for (let i = 0; i < 26; i++) {
+    const [lx, ly] = ends[Math.floor(r() * 7)]; const x = Math.round(lx + (cx - lx) * r() * 0.7), y0 = Math.round(ly + 6);
+    const pillar = i % 7 === 0, len = pillar ? gy - y0 : 18 + r() * 60;
+    P.line(x, y0, x + (r() - 0.5) * 3, y0 + len, aerial, pillar ? 2 : 1);
+  }
+  if (state === "bare") {
+    for (const [x, y] of ends) for (let k = 0; k < 3; k++) P.line(x, y, x + (r() - 0.5) * 16, y - 4 - r() * 10, barkS, 1);
+    for (let i = 0; i < 14; i++) P.set(20 + r() * 160, 20 + r() * 90, "#b8902e"); // a last few leaves
     return P.outline();
   }
-  const canopy = state === "green" ? ["#3f6a38", "#4a7a40", "#447038", "#558a48"] : ["#6a7a3a", "#7a7a34", "#727a36", "#7e8a3e"];
-  ([[85, 50, 70, 40], [44, 62, 34, 24], [128, 60, 36, 24], [86, 30, 46, 26]] as const).forEach(([cx, cy, rx, ry], i) => P.ell(cx, cy, rx, ry, canopy[i]));
-  for (let i = 0; i < 260; i++) {
-    const x = 18 + r() * 134, y = 10 + r() * 78;
-    if (P.get(x, y)) P.set(x, y, state === "green" ? (r() < 0.5 ? "#6a9a52" : "#2f5a34") : r() < 0.55 ? "#d4b04a" : r() < 0.5 ? "#b8902e" : "#5a6a2e");
-  }
-  if (state === "yellow") for (let i = 0; i < 40; i++) { const x = 20 + r() * 130, y = 16 + r() * 70; if (P.get(x, y)) P.set(x, y, "#3a3020"); } // bare twigs showing
+  // canopy: uneven clumps over the limb ends, lit from above-left, dappled
+  const pal = state === "green" ? { base: "#3f6a38", hi: "#5a8a48", lo: "#2c5030", dot: ["#6a9a52", "#2a4a2c", "#4f7a40"] }
+    : { base: "#6e7438", hi: "#8a8a40", lo: "#4e5a2c", dot: ["#d4b04a", "#b8902e", "#5a6a2e", "#e0c060"] };
+  const clumps: [number, number, number, number][] = [];
+  for (const [x, y] of ends.slice(0, 7 * 5)) if (r() < 0.75) clumps.push([x, y - 4, 14 + r() * 12, 9 + r() * 7]);
+  clumps.push([cx, 40, 40, 22], [cx - 40, 52, 30, 18], [cx + 42, 46, 32, 18]);
+  // keep every clump inside the canvas, so the crown is round at its edges, never cut flat
+  for (const c of clumps) { c[0] = Math.max(c[2] + 2, Math.min(W - c[2] - 3, c[0])); c[1] = Math.max(c[3] + 2, c[1]); }
+  for (const [x, y, rx, ry] of clumps) P.ell(x, y, rx, ry, pal.lo);
+  for (const [x, y, rx, ry] of clumps) P.ell(x - 2, y - 2, rx - 2, ry - 2, pal.base);
+  for (const [x, y, rx, ry] of clumps) P.ell(x - rx * 0.3, y - ry * 0.35, rx * 0.5, ry * 0.45, pal.hi);
+  for (let i = 0; i < 700; i++) { const x = r() * W, y = r() * 130; if (P.get(x, y) === pal.base || P.get(x, y) === pal.hi || P.get(x, y) === pal.lo) P.set(x, y, pal.dot[Math.floor(r() * pal.dot.length)]); }
+  if (state === "yellow") for (let i = 0; i < 60; i++) { const x = r() * W, y = 10 + r() * 100; if (P.get(x, y)) P.set(x, y, barkS); } // twigs showing through
   return P.outline();
 }
 
@@ -506,10 +569,10 @@ export function lamp(): Px {
  * allows it for Mạch Ấn glow.
  */
 export function machAn(f: number): Px {
-  const P = new Px(10, 10);
-  P.ell(5, 5, 4.4, 4.4, "#1a1614");
-  for (let y = 0; y < 10; y++) for (let x = 6; x < 10; x++) if (x - 6 > (y - 5) * 0.6 + 1) P.d[y * P.w + x] = null; // the broken half
-  P.line(2, 3, 5, 5, f ? "#ff6a3a" : "#3a302a"); P.line(2, 7, 5, 5, f ? "#c84a2a" : "#3a302a"); P.line(5, 1, 5, 5, f ? "#ff8a4a" : "#3a302a");
+  const P = new Px(12, 12);
+  P.ell(6, 6, 5.2, 5.2, "#1a1614");
+  machGrooves(P, 6, 6, 4.4, f ? "#ff6a3a" : "#3a302a", 5, 1.3);
+  for (let y = 0; y < 12; y++) for (let x = 7; x < 12; x++) if (x - 7 > (y - 6) * 0.6 + 1) P.d[y * P.w + x] = null; // the broken half
   return P.outline();
 }
 
@@ -526,21 +589,7 @@ export function woodFloor(under: number): Px {
 /* ---------------- An Mộc at night (S6) ---------------- */
 
 /** Bà Dần's house at night: intact (0), or its porch fallen in (1; the fallen bamboo frame is its own prop). */
-export function danHouse(broken: number): Px {
-  const P = new Px(120, 80), r = rng(707);
-  const wall = "#2e2c34", roof = "#1d1c24";
-  P.rect(10, 34, 80, 46, wall);
-  P.tri(2, 36, 50, 8, 98, 36, roof);
-  for (let x = 4; x < 96; x += 3) P.rect(x, 33 + Math.round(r() * 2), 2, 4, "#25242e");
-  P.rect(26, 48, 14, 12, "#e0a24a"); P.rect(32, 48, 2, 12, "#3a2a20");
-  P.rect(60, 52, 12, 28, "#1a1a20");
-  if (!broken) { // the porch: two posts and an eave
-    P.rect(90, 40, 28, 3, "#3a2e24"); P.rect(114, 40, 3, 40, "#3a2e24"); P.rect(92, 40, 3, 40, "#3a2e24");
-  } else { // the eave down at an angle, a post snapped, the bamboo frame across the step
-    P.line(90, 40, 118, 74, "#3a2e24", 3); P.rect(92, 40, 3, 22, "#3a2e24"); P.line(94, 62, 99, 66, "#3a2e24", 2);
-  }
-  return P.outline();
-}
+export function danHouse(broken: number): Px { return villageHouse(1, true, true, !!broken); }
 
 /** The bamboo porch frame, fallen across the step (separate, so it can be lifted). */
 export function bambooFrame(): Px {
@@ -582,14 +631,44 @@ export function rodOnWell(): Px {
 
 /* ---------------- the root path and the station (S8) ---------------- */
 
-/** A clump of bamboo at the western edge of the village ("cuối bãi tre phía tây", Ch. 2). */
+/**
+ * A clump of bamboo at the western edge of the village ("cuối bãi tre phía tây", Ch. 2): tall jointed culms that lean
+ * out and arch over at the top, a pale ring at every node, and narrow leaves hanging in sprays from the upper nodes.
+ */
 export function bamboo(v: number): Px {
-  const P = new Px(40, 140), r = rng(1010 + v);
-  for (let i = 0; i < 5; i++) {
-    const x = 6 + i * 7 + (v % 2) * 2, lean = (i - 2) * 1.5, c = ["#6a8a3a", "#5a7a32", "#7a9a44"][i % 3];
-    for (let y = 0; y < 140; y++) { const xx = x + lean * (1 - y / 140); P.rect(xx, y, 2, 1, c); if (y % 18 === 0) P.rect(xx - 1, y, 4, 1, shade(c, 0.7)); }
+  const W = 64, H = 160, P = new Px(W, H), r = rng(1010 + v * 7);
+  const culmCols = ["#7a9a3e", "#6a8a36", "#8aa648", "#9aa452"]; // younger green to older yellow-green
+  const leafCols = ["#5f8a3a", "#6f9a44", "#4f7a32", "#86ac52"];
+  const culms = 5 + (v % 2);
+  type Pt = [number, number];
+  const tips: { path: Pt[]; col: string }[] = [];
+  for (let i = 0; i < culms; i++) {
+    const baseX = 18 + i * 5 + Math.round(r() * 3), h = 110 + r() * 46, lean = (i - (culms - 1) / 2) * 7 + (r() - 0.5) * 6;
+    const col = culmCols[Math.floor(r() * culmCols.length)], thick = i === 2 || i === 3 ? 3 : 2;
+    const path: Pt[] = [];
+    for (let y = 0; y <= h; y++) {
+      const u = y / h, x = baseX + lean * u * u + (u > 0.85 ? lean * (u - 0.85) * 3 : 0); // the top arches over
+      path.push([x, H - 1 - y]);
+      P.rect(x, H - 1 - y, u > 0.8 ? thick - 1 : thick, 1, col);
+      if (y > 4 && y % 13 === 0) { P.rect(x - 1, H - 1 - y, thick + 2, 1, shade(col, 1.25)); P.rect(x, H - y, thick, 1, shade(col, 0.7)); }
+    }
+    tips.push({ path, col });
   }
-  for (let i = 0; i < 40; i++) P.line(r() * 40, r() * 60, r() * 40 + (r() - 0.5) * 10, r() * 60 + 4, "#7a9a44");
+  // twigs and leaf sprays from the upper nodes, hanging down and outward
+  for (const { path } of tips) {
+    for (let k = Math.floor(path.length * 0.45); k < path.length; k += 9 + Math.floor(r() * 5)) {
+      const [x, y] = path[k], side = r() < 0.5 ? -1 : 1, tw = 3 + r() * 5;
+      const tx = x + side * tw, ty = y - tw * 0.6;
+      P.line(x, y, tx, ty, "#6a7a3a");
+      for (let l = 0; l < 3 + Math.floor(r() * 3); l++) {
+        const len = 5 + r() * 4, ang = Math.PI / 2 - side * (0.3 + r() * 0.9); // mostly downward, splayed outward
+        const ex = tx + Math.cos(ang) * len * side * 0.9, ey = ty + Math.sin(ang) * len;
+        const lc = leafCols[Math.floor(r() * leafCols.length)];
+        P.line(tx, ty, ex, ey, lc); P.set(ex, ey, shade(lc, 0.75));
+      }
+    }
+  }
+  for (let i = 0; i < 8; i++) P.line(10 + r() * 44, H - 1, 10 + r() * 44 + (r() - 0.5) * 6, H - 3, "#8a7a4a"); // fallen sheaths
   return P.outline();
 }
 
@@ -623,18 +702,31 @@ export function rootedDeer(): Px {
 }
 
 /**
- * The Dẫn Mạch station: a square grey stone, chest-high, cased in tarnished copper, on a low mound in a clearing
- * (Ch. 2). The casing has been prised open along its seams; inside, where something glowed faintly blue, a dark hollow.
+ * The Dẫn Mạch station: a square grey stone, chest-high, cased in tarnished copper, on a low mound inside a ring of flat
+ * paving stones ("vòng đá lát", Ch. 2). Its face bears the Mạch grooves. The front copper plate has been prised open
+ * along its seam and swung out on its hinge, undamaged ("Không phải đập. Cạy. Gọn gàng"); behind it, where something
+ * glowed faintly blue, a dark hollow.
  */
 export function station(): Px {
-  const P = new Px(110, 70), r = rng(1212);
-  P.ell(55, 70, 55, 12, "#4a5a3a"); P.ell(55, 70, 50, 9, "#5a6a44"); // the mound, its moss
-  for (let i = 0; i < 30; i++) P.set(10 + r() * 90, 61 + r() * 8, "#6a7a50");
-  P.rect(35, 24, 40, 36, "#7a7a76"); P.rect(35, 24, 40, 3, "#9a9a94");
-  for (let i = 0; i < 5; i++) P.line(38 + i * 7, 30, 44 + i * 6, 54, "#5a5a56"); // the grooves, converging
-  P.rect(33, 22, 3, 40, "#7a5a3a"); P.rect(74, 22, 3, 40, "#7a5a3a"); // copper casing edges, dull
-  P.line(77, 24, 88, 18, "#8a6a42", 2); P.line(77, 40, 90, 38, "#8a6a42", 2); // a panel prised open, neat, along the seam
-  P.rect(48, 36, 14, 12, "#0e0c0a"); // the hollow
+  const W = 130, H = 78, P = new Px(W, H), r = rng(1212);
+  const stone = "#7c7c76", stoneHi = "#9a9a92", stoneS = "#5e5e58", cu = "#8a5a32", cuHi = "#b07a46", cuS = "#5e3c22";
+  P.ell(65, 80, 64, 16, "#4a5a3a"); P.ell(65, 80, 58, 12, "#56684a"); // the mound, moss
+  for (let i = 0; i < 40; i++) P.set(8 + r() * 114, 66 + r() * 11, r() < 0.5 ? "#6a7a50" : "#3e4c32");
+  for (let i = 0; i < 9; i++) { const x = 14 + i * 12 + (i > 3 ? 2 : 0); P.rect(x, 66 + (i % 2), 10, 3, "#8a8a80"); P.rect(x, 66 + (i % 2), 10, 1, "#a2a298"); } // paving ring
+  // the stone
+  P.rect(44, 22, 42, 44, stone); P.rect(44, 22, 42, 2, stoneHi); P.rect(44, 22, 2, 44, stoneHi); P.rect(84, 22, 2, 44, stoneS);
+  for (let i = 0; i < 16; i++) P.set(46 + r() * 38, 26 + r() * 38, r() < 0.5 ? stoneS : "#6a7a5a");
+  machGrooves(P, 65, 34, 7, stoneS, 6, 1.4);
+  // copper casing: corner bands and a top band, dull with age
+  for (const x of [41, 86]) { P.rect(x, 20, 3, 46, cu); P.rect(x, 20, 1, 46, cuHi); for (let y = 24; y < 64; y += 8) P.set(x + 1, y, cuS); }
+  P.rect(41, 18, 48, 3, cu); P.rect(41, 18, 48, 1, cuHi);
+  // the hollow where the plate was
+  P.rect(52, 42, 26, 20, "#0e0c0a"); P.rect(52, 42, 26, 1, "#26221c"); P.rect(52, 42, 1, 20, "#26221c");
+  // the plate, swung out on its hinge at the right edge: seen edge-on, a narrow parallelogram, rivets intact
+  P.tri(89, 42, 104, 46, 89, 62, cu); P.tri(104, 46, 104, 58, 89, 62, cu);
+  P.line(89, 42, 104, 46, cuHi); P.line(104, 46, 104, 58, cuS); P.line(104, 58, 89, 62, cuS);
+  for (const [x, y] of [[93, 47], [100, 49], [93, 57], [100, 55]]) P.set(x, y, cuHi);
+  P.rect(88, 44, 2, 3, "#3a2a1c"); P.rect(88, 56, 2, 3, "#3a2a1c"); // hinges
   return P.outline();
 }
 
@@ -692,14 +784,15 @@ export function registerVillageTextures(scene: Phaser.Scene): void {
   // villagers: idle (2), walk (4), and a few held poses
   for (const [id, L] of Object.entries(LOOKS) as [LookId, Look][]) {
     const v = (key: string, p: VPose) => add(`v_${id}_${key}`, villager(L, p));
-    [0, 1].forEach((i) => v(`idle${i}`, { bob: i }));
+    // at rest the feet stand a little apart, so two legs read (not one post)
+    [0, 1].forEach((i) => v(`idle${i}`, { bob: i, front: { dx: 2 }, back: { dx: -2 } }));
     for (let i = 0; i < 4; i++) {
       const dx = [5, 0, -5, 0][i], lift = [0, 2, 0, 2][i];
       v(`walk${i}`, { front: { dx, lift: i === 1 ? lift : 0 }, back: { dx: -dx, lift: i === 3 ? lift : 0 }, arm: dx > 0 ? "swingB" : dx < 0 ? "swingF" : "rest", backArm: dx > 0 ? "swingF" : dx < 0 ? "swingB" : "rest" });
     }
     [0, 1].forEach((i) => v(`kneel${i}`, { kneel: true, arm: "pull", backArm: "pull", bob: i }));
-    v("brow", { arm: "brow" });
-    [0, 1].forEach((i) => v(`torch${i}`, { arm: "torch", torch: i, bob: i }));
+    v("brow", { arm: "brow", front: { dx: 2 }, back: { dx: -2 } });
+    [0, 1].forEach((i) => v(`torch${i}`, { arm: "torch", torch: i, bob: i, front: { dx: 2 }, back: { dx: -2 } }));
     add(`v_${id}_lie`, villagerLying(L));
   }
   [0, 1, 2].forEach((v) => add(`day_house${v}`, dayHouse(v)));

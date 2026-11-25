@@ -225,10 +225,11 @@ export class StageScene extends Phaser.Scene {
     const sh = def.shrines[0];
     this.shrine = null; this.shrineAnim = null; this.shrineLit = false;
     if (sh) {
-      this.shrine = this.add.image(sh.x, def.groundY, "shrine_off").setOrigin(0.5, 1).setDepth(5);
+      // a building the hero stands in front of (depth below the hero, above the backdrop props)
+      this.shrine = this.add.image(sh.x, def.groundY + 2, "shrine_off").setOrigin(0.5, 1).setDepth(1);
       this.shrineAnim = new Animator(this.shrine);
-      if (sh.sign) this.sign(sh.x - 40, sh.sign);
-      this.interactables.push({ x: sh.x, range: 30, y: def.groundY - 42, act: () => this.rest(), quiet: () => this.shrineLit });
+      if (sh.sign) this.sign(sh.x - 92, sh.sign); // far enough left that its panel clears the shrine's key prompt
+      this.interactables.push({ x: sh.x, range: 30, y: def.groundY - 66, act: () => this.rest(), quiet: () => this.shrineLit });
       if (cont && sv!.checkpoint === sh.id) {
         this.lightShrine(false);
         this.checkpoint = { x: sh.x + 20, y: def.groundY };
@@ -804,7 +805,7 @@ export class StageScene extends Phaser.Scene {
     this.fx.update(delta);
     this.updateAmbience(time, delta);
     this.shrineAnim?.update(delta);
-    if (this.shrine && this.shrineLit && Math.random() < delta / 260) this.fx.motes(this.shrine.x, this.shrine.y - 30, 1);
+    if (this.shrine && this.shrineLit && Math.random() < delta / 260) this.fx.motes(this.shrine.x, this.shrine.y - 22, 1);
     for (const h of this.herbs) if (!h.taken) { h.anim.update(delta); h.img.y = Math.round(h.baseY - 1.5 - Math.sin(time / 380 + h.phase) * 1.5); }
     this.updateFloat(delta);
 

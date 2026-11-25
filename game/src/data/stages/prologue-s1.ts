@@ -26,7 +26,7 @@ export const PROLOGUE_S1 = {
     // one lesson per boar (cloud playtest: three new actions on one sign was too much at once)
     { x: 790, text: "sign.boar1", kiem: "sign.boar1.kiem" },
     { x: 1105, text: "sign.boar2" },
-    { x: 1380, text: "sign.shrine" },
+    { x: 1336, text: "sign.shrine" }, // clear of the miếu and its key prompt
     { x: 1530, text: "sign.village" },
   ],
   herbs: [
