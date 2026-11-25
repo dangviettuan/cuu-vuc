@@ -1,0 +1,61 @@
+# Type-check, build and smoke-test the greybox on every push and pull request that touches game/.
+# The smoke test (game/playtest/ci-smoke.cjs) drives the real build in headless Chromium and fails on any broken step
+# or console error. It runs for the canon Prologue kit, the Kiếm Khách kit, and the Canvas renderer fallback.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "game/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "game/**"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: game
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game/package-lock.json
+      - run: npm ci
+      - run: npm run build # type-check + production build
+      - run: npx playwright-core install --with-deps chromium-headless-shell
+      - name: Serve the production build
+        run: |
+          npx vite preview --port 4173 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:4173/ > /dev/null && exit 0; sleep 1; done
+          cat preview.log; exit 1
+      - name: Smoke — Prologue kit (WebGL via SwiftShader)
+        run: node playtest/ci-smoke.cjs
+        env:
+          GAME_URL: http://localhost:4173/
+      - name: Smoke — Kiếm Khách kit
+        run: node playtest/ci-smoke.cjs
+        env:
+          GAME_URL: http://localhost:4173/?kit=kiem
+      - name: Smoke — Canvas renderer
+        run: node playtest/ci-smoke.cjs
+        env:
+          GAME_URL: http://localhost:4173/
+          NO_WEBGL: "1"
+      - name: Keep screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-shots
+          path: game/playtest/shots/
