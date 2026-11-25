@@ -9,12 +9,16 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let lastStep = 0;
+/** Mix level at full volume; the player's volume setting (0–1) scales it. */
+const MASTER = 0.4;
+let volume = 0.8;
+export function setVolume(v: number): void { volume = Math.max(0, Math.min(1, v)); if (master) master.gain.value = MASTER * volume; }
 
 export function unlockAudio(): void {
   if (ctx) { if (ctx.state === "suspended") void ctx.resume(); return; }
   try {
     ctx = new AudioContext();
-    master = ctx.createGain(); master.gain.value = 0.32; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = MASTER * volume; master.connect(ctx.destination);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -48,6 +52,9 @@ export const sfx = {
   swing(level: number): void { noise("bandpass", 900 + level * 300, 2600, 0.09 + level * 0.03, 0.22 + level * 0.06, 1.2); },
   hit(strength: number): void { tone("sine", 140, 55, 0.12 + strength * 0.002, 0.55); noise("lowpass", 2400, 400, 0.06, 0.3); },
   parry(): void { tone("triangle", 1850, 1700, 0.32, 0.35); tone("sine", 2780, 2600, 0.26, 0.18); noise("highpass", 4000, 6000, 0.04, 0.25); },
+  /** Menu cursor move, and a menu choice. */
+  ui(): void { tone("triangle", 660, 660, 0.05, 0.12); },
+  uiConfirm(): void { tone("triangle", 880, 1320, 0.09, 0.15); },
   /** Blocked hit: a dull wooden-metal knock, lower and shorter than the parry ring. */
   block(): void { tone("triangle", 620, 480, 0.12, 0.3); noise("bandpass", 1400, 700, 0.07, 0.3, 2); },
   guardBreak(): void { tone("square", 220, 70, 0.22, 0.22); noise("lowpass", 1800, 200, 0.16, 0.35); },

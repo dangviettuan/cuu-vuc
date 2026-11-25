@@ -48,6 +48,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * shrine refill `herbs` to this.
    */
   herbCap = 0;
+  /** Difficulty (src/data/difficulty.ts): added to the parry window and dodge i-frames, and a multiplier on damage taken. */
+  windowBonus = 0;
+  damageScale = 1;
   facing: 1 | -1 = 1;
   state: State = "move";
   readonly anim: Animator;
@@ -233,7 +236,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       case "parry":
         // still holding after the parry window: guard (review D6). Releasing early keeps the whiff recovery.
-        if (t >= PARRY.window && c.parryHeld) { this.enter("block"); this.anim.play(PC.block, true, true); }
+        if (t >= PARRY.window + this.windowBonus && c.parryHeld) { this.enter("block"); this.anim.play(PC.block, true, true); }
         else if (t >= PARRY.window + PARRY.recovery) this.enter("move");
         break;
       case "block":
@@ -332,12 +335,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   receive(hit: EnemyHit): HitResult {
     const now = this.now;
     if (this.state === "dead" || this.hitIds.has(hit.id)) return "ignored";
-    if (this.state === "dodge" && now - this.dodgeAt < DODGE.iframes) {
+    if (this.state === "dodge" && now - this.dodgeAt < DODGE.iframes + this.windowBonus) {
       this.hitIds.add(hit.id);
       if (now - this.dodgeAt < DODGE.perfectWindow) { this.onEvent("perfectDodge"); return "perfectDodge"; }
       return "dodged";
     }
-    if (this.state === "parry" && now - this.parryAt < PARRY.window && hit.parryable) {
+    if (this.state === "parry" && now - this.parryAt < PARRY.window + this.windowBonus && hit.parryable) {
       this.hitIds.add(hit.id);
       // turn to face what was parried, so the riposte goes toward it (fix-pass finding: backwards parries whiffed the riposte)
       const toward = Math.sign(hit.rect.centerX - this.x);
@@ -353,12 +356,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
     if (now < this.invulnUntil) return "ignored";
     this.hitIds.add(hit.id);
-    let damage = hit.damage;
+    let damage = Math.max(1, Math.round(hit.damage * this.damageScale));
     // Block (review D6): only parryable hits, only from the front. Chip damage plus a stamina drain; a drain that
     // would empty stamina breaks the guard and the rest of the hit lands.
     const front = Math.sign(hit.rect.centerX - this.x) !== -this.facing;
     if (this.state === "block" && hit.parryable && front) {
-      const chip = Math.round(hit.damage * BLOCK.chip), cost = hit.damage * BLOCK.staminaPerDamage;
+      const chip = Math.round(damage * BLOCK.chip), cost = damage * BLOCK.staminaPerDamage;
       if (this.stamina > cost) {
         this.stamina -= cost; this.staminaRegenAt = now + PLAYER.staminaRegenDelay;
         this.hp = Math.max(1, this.hp - chip);
@@ -367,7 +370,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.onEvent("block", chip);
         return "blocked";
       }
-      this.stamina = 0; damage = hit.damage - chip;
+      this.stamina = 0; damage -= chip;
       this.onEvent("guardBreak");
     }
     this.hp = Math.max(0, this.hp - damage);

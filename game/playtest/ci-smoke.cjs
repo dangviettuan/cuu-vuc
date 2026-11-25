@@ -30,25 +30,25 @@ const { launch } = require("./harness.cjs");
   step("jumps", !s.p.grounded || s.p.vy < 0, { vy: s.p.vy });
 
   // Brush chore: stand at the bush and swing until it clears.
-  await scene(() => { const p = window.__cuuVuc.scene.getScene("Prologue").player; p.x = 440; p.facing = 1; });
+  await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.x = 440; p.facing = 1; });
   await h.wait(300);
   for (let i = 0; i < 6; i++) { await h.tap("j", 40); await h.wait(260); }
-  const brush = await scene(() => window.__cuuVuc.scene.getScene("Prologue").bush.hp);
+  const brush = await scene(() => window.__cuuVuc.scene.getScene("Stage").bush.hp);
   step("light attacks clear the brush", brush <= 0, { brushHp: brush });
 
   // Herb pickup fills the pouch.
-  await scene(() => { const p = window.__cuuVuc.scene.getScene("Prologue").player; p.x = 552; });
+  await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.x = 552; });
   s = await until((x) => x.p.herbs >= 1, 2000);
   step("herb pickup adds to the pouch", s.p.herbs === 1, { herbs: s.p.herbs });
 
   // Shrine: light it, then a death respawns there with the pouch refilled.
-  await scene(() => { const sc = window.__cuuVuc.scene.getScene("Prologue"); sc.boars.forEach((b) => b.destroy()); const p = sc.player; p.x = 1425; p.herbs = 0; });
+  await scene(() => { const sc = window.__cuuVuc.scene.getScene("Stage"); sc.boars.forEach((b) => b.destroy()); const p = sc.player; p.x = 1425; p.herbs = 0; });
   await h.wait(300); await h.tap("e", 60); await h.wait(300);
   s = await h.snap();
   step("shrine lights and refills the pouch", s.shrineLit && s.p.herbs === 1, { lit: s.shrineLit, herbs: s.p.herbs });
 
   // Arena: walking in locks it and wakes the boss.
-  await scene(() => { const p = window.__cuuVuc.scene.getScene("Prologue").player; p.x = 1600; });
+  await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.x = 1600; });
   s = await until((x) => x.engaged && x.boss.state !== "dormant", 3000);
   step("arena locks and the boss wakes", s.engaged && s.boss.state !== "dormant", { engaged: s.engaged, boss: s.boss.state });
 
@@ -59,20 +59,20 @@ const { launch } = require("./harness.cjs");
   await h.up("i"); await h.wait(250);
 
   // Death in the arena: respawn at the shrine, boss reset, pouch refilled.
-  await scene(() => { const p = window.__cuuVuc.scene.getScene("Prologue").player; p.herbs = 0; p.receive({ id: "ci-kill", rect: p.hurtbox(), damage: 999, knockback: 0, parryable: false }); });
+  await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.herbs = 0; p.receive({ id: "ci-kill", rect: p.hurtbox(), damage: 999, knockback: 0, parryable: false }); });
   s = await until((x) => x.p.hp === 100 && !x.engaged, 4000);
   step("death respawns at the shrine with the boss reset", Math.abs(s.p.x - 1440) < 30 && !s.engaged && s.boss.hp === s.boss.maxHp && s.p.herbs === 1,
     { x: s.p.x, engaged: s.engaged, bossHp: s.boss.hp, herbs: s.p.herbs });
 
   // Boss down → choice C2 → flag stored.
-  await scene(() => { const p = window.__cuuVuc.scene.getScene("Prologue").player; p.x = 1600; });
+  await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.x = 1600; });
   await until((x) => x.engaged, 3000);
-  await scene(() => { const sc = window.__cuuVuc.scene.getScene("Prologue"); sc.boss.takeHit({ id: 99999, rect: null, damage: 9999, guardBreak: false, poise: 0, direction: 1 }); });
+  await scene(() => { const sc = window.__cuuVuc.scene.getScene("Stage"); sc.boss.takeHit({ id: 99999, rect: null, damage: 9999, guardBreak: false, poise: 0, direction: 1 }); });
   s = await until((x) => x.choosing, 3000);
   step("boss down opens the C2 choice", !!s.choosing, { boss: s.boss.state });
   await h.tap("1", 60); await h.wait(400);
-  const flag = await scene(() => JSON.parse(localStorage.getItem("cuu-vuc-flags") || "{}").PRO_SOW_SPARED);
-  step("choice 1 stores PRO_SOW_SPARED = true", flag === true, { flag });
+  const flag = await scene(() => window.__cuuVucSave().flags.PRO_SOW_SPARED);
+  step("choice 1 saves PRO_SOW_SPARED = true", flag === true, { flag });
 
   await h.wait(3400); await h.tap("r", 60);
   s = await until((x) => x.p.x < 100 && !x.finished, 4000);

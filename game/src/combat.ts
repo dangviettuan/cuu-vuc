@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { canTint } from "./render";
+import { settings } from "./core/settings";
 
 /** A damaging area produced by an enemy this frame. */
 export interface EnemyHit {
@@ -36,9 +37,15 @@ export function overlaps(a: Phaser.Geom.Rectangle, b: Phaser.Geom.Rectangle): bo
   return Phaser.Geom.Intersects.RectangleToRectangle(a, b);
 }
 
-/** White hit-flash using the v4 tint API (ADR-0008). On Canvas (no tints) the sprite is drawn additively instead. */
+/**
+ * White hit-flash using the v4 tint API (ADR-0008). On Canvas (no tints) the sprite is drawn additively instead.
+ * With "reduce flashes" (Settings), a hit darkens the sprite briefly instead of flashing it white, and Canvas skips
+ * the additive blend: the hit still reads (sparks, shake, sound), without a bright full-body flash.
+ */
 export function flash(sprite: Phaser.GameObjects.Sprite, on: boolean, color = 0xffffff): void {
-  if (!canTint(sprite)) { sprite.setBlendMode(on ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL); return; }
-  if (on) sprite.setTint(color).setTintMode(Phaser.TintModes.FILL);
+  const reduced = settings().reduceFlashes;
+  if (!canTint(sprite)) { sprite.setBlendMode(on && !reduced ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL); return; }
+  if (on && reduced) sprite.setTint(0x8a8a8a).setTintMode(Phaser.TintModes.MULTIPLY);
+  else if (on) sprite.setTint(color).setTintMode(Phaser.TintModes.FILL);
   else sprite.clearTint().setTintMode(Phaser.TintModes.MULTIPLY);
 }

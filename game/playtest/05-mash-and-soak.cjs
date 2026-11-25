@@ -29,7 +29,7 @@ const { makeBot } = require("./bot.cjs");
     await bot.moveTo(780); await bot.fightBoar(930, "dodge"); await bot.moveTo(1120); await bot.fightBoar(1240, "parry");
     await bot.moveTo(1420); await h.tap("e", 50); await h.wait(300);
     await h.resetFrameTimes();
-    const sampler = setInterval(async () => { try { const m = await h.memory(); const o = await h.objects(); const c = await h.page.evaluate(() => window.__cuuVuc.scene.getScene("Prologue").updateCostMs); samples.push({ s: Math.round((Date.now() - t0) / 1000), heapMB: m && +(m.used / 1048576).toFixed(1), objects: o, updateMs: +c.toFixed(3) }); } catch {} }, 10000);
+    const sampler = setInterval(async () => { try { const m = await h.memory(); const o = await h.objects(); const c = await h.page.evaluate(() => window.__cuuVuc.scene.getScene("Stage").updateCostMs); samples.push({ s: Math.round((Date.now() - t0) / 1000), heapMB: m && +(m.used / 1048576).toFixed(1), objects: o, updateMs: +c.toFixed(3) }); } catch {} }, 10000);
     const tEnd = Date.now() + 120000; let fights = 0;
     while (Date.now() < tEnd) {
       await bot.moveTo(1600, 8);

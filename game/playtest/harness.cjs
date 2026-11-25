@@ -14,7 +14,17 @@ let chromium;
 try { ({ chromium } = require("playwright-core")); }
 catch { ({ chromium } = require(process.env.PW_CORE || "playwright-core")); }
 
-const URL = process.env.GAME_URL || "http://localhost:5173/";
+/**
+ * The game URL. Quick mode (`quick=1`: straight into the stage with a throwaway save) is added unless TITLE=1, which
+ * keeps the real boot flow (title, name entry) for tests of the shell itself.
+ */
+function withQuick(u) {
+  if (process.env.TITLE) return u;
+  const url = new globalThis.URL(u);
+  url.searchParams.set("quick", "1");
+  return url.toString();
+}
+const URL = withQuick(process.env.GAME_URL || "http://localhost:5173/");
 const SHOTS = path.join(__dirname, "shots");
 fs.mkdirSync(SHOTS, { recursive: true });
 
@@ -50,7 +60,7 @@ async function launch({ width = 960, height = 540 } = {}) {
     window.addEventListener("keydown", (e) => { if (!e.repeat) window.__keys.push({ code: e.code, t: performance.now() }); }, true);
     window.__snap = () => {
       const g = window.__cuuVuc; if (!g) return null;
-      const s = g.scene.getScene("Prologue"); if (!s || !s.player) return null;
+      const s = g.scene.getScene("Stage"); if (!s || !s.player) return null;
       const p = s.player, b = p.body;
       const en = (e) => ({ x: Math.round(e.x), state: e.state, hp: e.hp, maxHp: e.maxHp, facing: e.facing, anim: e.anim ? e.anim.name : "", alive: e.hp > 0 });
       return {
@@ -66,7 +76,9 @@ async function launch({ width = 960, height = 540 } = {}) {
     window.__rec = (ms) => new Promise((res) => { const out = []; const t0 = performance.now(); const f = () => { const s = window.__snap(); if (s) out.push(s); if (performance.now() - t0 < ms) requestAnimationFrame(f); else res(out); }; requestAnimationFrame(f); });
   });
   await page.goto(URL, { waitUntil: "load" });
-  await page.waitForFunction(() => window.__snap && window.__snap() !== null, null, { timeout: 15000 });
+  // Quick mode boots into the stage; with TITLE=1 the page stops at the title screen, so only wait for the game.
+  if (process.env.TITLE) await page.waitForFunction(() => window.__cuuVuc && window.__cuuVuc.scene.isActive("Title"), null, { timeout: 15000 });
+  else await page.waitForFunction(() => window.__snap && window.__snap() !== null, null, { timeout: 15000 });
   await page.waitForTimeout(600);
   const h = {
     browser, page, log,
@@ -89,10 +101,10 @@ async function launch({ width = 960, height = 540 } = {}) {
     frameTimes: () => page.evaluate(() => window.__ft.slice()),
     resetFrameTimes: () => page.evaluate(() => { window.__ft = []; }),
     memory: () => page.evaluate(() => (performance.memory ? { used: performance.memory.usedJSHeapSize, total: performance.memory.totalJSHeapSize } : null)),
-    objects: () => page.evaluate(() => window.__cuuVuc.scene.getScene("Prologue").children.length),
+    objects: () => page.evaluate(() => window.__cuuVuc.scene.getScene("Stage").children.length),
     keyTimes: () => page.evaluate(() => window.__keys.slice()),
     /** DEBUG-ASSISTED: teleport (used only to set up isolated measurements; labelled in the report). */
-    debugTeleport: (x) => page.evaluate((xx) => { const s = window.__cuuVuc.scene.getScene("Prologue"); s.player.setPosition(xx, 300); s.player.body.reset(xx, 300 - 72); }, x),
+    debugTeleport: (x) => page.evaluate((xx) => { const s = window.__cuuVuc.scene.getScene("Stage"); s.player.setPosition(xx, 300); s.player.body.reset(xx, 300 - 72); }, x),
   };
   return h;
 }
@@ -125,4 +137,4 @@ function save(name, data) {
   fs.writeFileSync(path.join(__dirname, "shots", name + ".json"), JSON.stringify(data, null, 1));
 }
 
-module.exports = { launch, filmstrip, stats, save };
+module.exports = { launch, filmstrip, stats, save, withQuick };

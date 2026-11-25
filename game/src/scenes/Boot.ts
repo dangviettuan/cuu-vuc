@@ -1,12 +1,20 @@
 import Phaser from "phaser";
+import { registerTextures } from "../art";
+import { buildOutlines } from "../outline";
+import { loadSave, migrateLegacy, newSave } from "../core/save";
+import { isQuick } from "../core/mode";
+import { loadFont } from "../ui/text";
 
 /**
- * Boot: loads authored pixel art before the generated greybox art fills the gaps (ADR-0011).
- *
- * `public/art/manifest.json` lists atlases exported from Aseprite: `{ "atlases": ["hero"] }` loads
- * `art/hero.png` + `art/hero.json` (Aseprite "Hash" JSON). Every frame becomes its own texture, named by its frame
- * name, which must be a clip key such as `p_run3` or `nanh_rear0` (src/clips.ts). `registerTextures()` skips keys that
- * already exist, so an authored frame replaces its generated one and anything not yet drawn stays generated.
+ * Boot: everything the session needs once, before the first screen.
+ * 1. **Authored art** (ADR-0011): `public/art/manifest.json` lists atlases exported from Aseprite. Each frame becomes
+ *    its own texture under its frame name (a clip key such as `p_run3`); `registerTextures()` skips keys that already
+ *    exist, so an authored frame replaces its generated one and anything not yet drawn stays generated.
+ * 2. **Generated greybox art** and the hero's outline textures.
+ * 3. **The pixel font** (VT323, Vietnamese glyphs), so no text is drawn in a fallback font.
+ * 4. **The save** (and the one-time import of pre-save flags).
+ * Then it launches the UI layer and opens the title screen, or the stage directly in quick mode (`?quick=1`, used by
+ * the playtest tools: a throwaway save, no title).
  */
 export class BootScene extends Phaser.Scene {
   constructor() { super("Boot"); }
@@ -16,13 +24,22 @@ export class BootScene extends Phaser.Scene {
   create(): void {
     const manifest = this.cache.json.get("artManifest") as { atlases?: string[] } | undefined;
     const atlases = manifest?.atlases ?? [];
-    if (!atlases.length) { this.scene.start("Prologue"); return; }
+    const go = () => void this.finish();
+    if (!atlases.length) { go(); return; }
     for (const a of atlases) this.load.atlas(`atlas:${a}`, `art/${a}.png`, `art/${a}.json`);
-    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
-      for (const a of atlases) this.split(`atlas:${a}`);
-      this.scene.start("Prologue");
-    });
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => { for (const a of atlases) this.split(`atlas:${a}`); go(); });
     this.load.start();
+  }
+
+  private async finish(): Promise<void> {
+    registerTextures(this);
+    buildOutlines(this, "p_");
+    await loadFont();
+    if (isQuick()) newSave("Thử nghiệm", "prologue-s1");
+    else { loadSave(); migrateLegacy(); }
+    this.scene.launch("UI");
+    if (isQuick()) this.scene.start("Stage", { mode: "quick" });
+    else this.scene.start("Title");
   }
 
   /** One canvas texture per atlas frame, restoring Aseprite's trim so the feet stay at the cell's anchor. */

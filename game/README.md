@@ -31,10 +31,31 @@ npm run build      # type-check + production build into dist/
 | Riposte (Kiếm Khách kit only: J right after a parry) | J |
 | **Phá Thế** (Kiếm Khách kit only: from a held guard, costs 2 Thế) | hold I + K |
 | Use herb (heals 35; the pouch refills at the shrine and on respawn) | Q |
-| Light the shrine (checkpoint, full heal, refills the herb pouch) | E |
-| Choice after the boss | 1 (spare) / 2 (finish her) |
-| Restart after the ending | R |
-| Show hitboxes | F1 |
+| Rest at the shrine (checkpoint and save; full heal; refills the herb pouch; boars respawn) | E |
+| Choice after the boss | ↑/↓ + Enter, or 1 (spare) / 2 (finish her) |
+| Pause (resume, options, back to title) | Esc or P |
+| Return to the title after the ending | Enter |
+| Show hitboxes, seed and timing | F1 |
+
+**Gamepad:** A jump · X light · Y heavy · B dodge · RB parry/block · LB herb · RT interact · Start pause. Every gameplay action can be rebound on keyboard and gamepad (Options → Phím điều khiển), and prompts show the device used last.
+
+## Shell and foundations (Phase 1, ADR-0012)
+
+| Piece | Where |
+|---|---|
+| Boot → **title** (Continue / New game / Options) → **name entry** (an HTML text field, so Vietnamese IME input works) → stage | `src/scenes/Boot.ts`, `Title.ts`, `NameEntry.ts` |
+| **Stage** built from data: ledges, signs, herbs, brush, boars, shrines, arena, boss | `src/scenes/Stage.ts`, `src/data/stages/` |
+| **UI layer** on top of every scene: HUD, toasts, boss bar, controls strip, dialogue/choice box, end card, pause and options | `src/scenes/UI.ts`, `src/ui/` |
+| **Input:** actions (not keys), keyboard + gamepad, rebinding, presses that survive sub-frame taps and hit-stop | `src/core/input.ts` |
+| **Save:** one slot, written at shrines, on choices and on stage completion; typed flags | `src/core/save.ts`, `src/core/flags.ts` |
+| **Settings:** volume, shake, reduced flashes, difficulty, pixel-perfect scaling, controls strip, bindings | `src/core/settings.ts`, `src/ui/options.ts` |
+| **Strings:** every on-screen string is keyed; `{light}`-style placeholders show the current key or button | `src/data/strings.vi.ts`, `src/core/i18n.ts` |
+| **Dialogue and choices:** scripts with options that set flags (C2 runs through it) | `src/data/dialogue.ts` |
+| **Enemy tuning tables** and **difficulty modes** (Story / Standard / Hard) | `src/data/enemies.ts`, `src/data/difficulty.ts` |
+| **Seeded AI randomness:** `?seed=N` replays the boss's choices; the seed shows under F1 | `src/core/rng.ts` |
+| **Pixel font:** VT323 (OFL), full Vietnamese coverage | `public/fonts/`, `src/ui/text.ts` |
+
+URL options: `?quick=1` (straight into the stage with a throwaway save: used by the playtest tools), `?kit=kiem`, `?seed=N`, `?renderer=canvas|webgl`.
 
 ## Kits (ADR-0010)
 
@@ -121,7 +142,7 @@ Clip timings, tags and events are already in place, so authored frames can repla
 
 ## Testing
 
-**CI smoke test.** `.github/workflows/ci.yml` builds the game and runs `playtest/ci-smoke.cjs` on every push and pull request that touches `game/`. It runs for the Prologue kit, the Kiếm Khách kit and the Canvas renderer. The test is DEBUG-ASSISTED (teleports, one forced boss defeat), which keeps it deterministic. It checks the slice's spine: boot, move, the brush chore, the herb pouch, the shrine, the arena lock, block, death and respawn, the C2 choice and its flag, and R restart. Any console error fails it. To run it locally:
+**CI.** `.github/workflows/ci.yml` builds the game on every push and pull request that touches `game/`, then runs two tests. `playtest/ci-shell.cjs` walks the real boot flow: title, name entry with a Vietnamese name, pause, options (difficulty, rebinding) and Continue from a shrine save. `playtest/ci-smoke.cjs` is described below. It runs for the Prologue kit, the Kiếm Khách kit and the Canvas renderer. The test is DEBUG-ASSISTED (teleports, one forced boss defeat), which keeps it deterministic. It checks the slice's spine: boot, move, the brush chore, the herb pouch, the shrine, the arena lock, block, death and respawn, the C2 choice and its flag, and R restart. Any console error fails it. To run it locally:
 
 ```bash
 npm ci && npx playwright-core install chromium-headless-shell
