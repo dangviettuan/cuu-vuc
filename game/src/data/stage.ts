@@ -79,6 +79,8 @@ export interface StageDef {
   blocks?: { id: string; x: number; until?: string }[];
   /** Panicked animals running through (S6): while the hero is between `min` and `max`, until mark `until` is set. */
   stampede?: { min: number; max: number; until?: string };
+  /** Diệp fights beside him here (Ch. I–IV ally, DB N6). `x` is where she starts (default: just behind him). */
+  ally?: { x?: number };
   /** Floor texture: grass and dirt outdoors, boards indoors. */
   floor?: "ground" | "wood";
   /** A cutscene that runs when the stage starts. */

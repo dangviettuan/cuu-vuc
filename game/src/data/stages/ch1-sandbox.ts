@@ -29,4 +29,5 @@ export const CH1_SANDBOX = {
   ],
   shrines: [{ id: "sb-shrine", x: 820 }],
   grants: ["reGiu"],
+  ally: {},
 } satisfies StageDef;

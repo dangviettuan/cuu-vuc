@@ -51,6 +51,8 @@ const { launch, withQuick } = require("./harness.cjs");
   await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; p.x = 440; p.facing = 1; });
   await h.wait(300);
   for (let i = 0; i < 6; i++) { await h.tap("j", 40); await h.wait(260); }
+  // under heavy machine load an open-loop tap can be dropped: a few more presses, stopping once it is down
+  for (let i = 0; i < 6 && (await scene(() => window.__cuuVuc.scene.getScene("Stage").bush.hp)) > 0; i++) { await h.tap("j", 40); await h.wait(300); }
   const brush = await scene(() => window.__cuuVuc.scene.getScene("Stage").bush.hp);
   step("S1: light attacks clear the brush", brush <= 0, { brushHp: brush });
 
@@ -284,6 +286,24 @@ const { launch, withQuick } = require("./harness.cjs");
   }, anh);
   await h.up(anh ? "Shift" : "i");
   step("Ch. I: a perfect defence with Rễ Giữ binds the enemy beside him", rg && bound.bound, bound);
+
+  // Diệp: she follows him into a fight and her spear lands; knocked down, she goes down (and does not die)
+  await openAt("ch1-sandbox");
+  await tp(240); await h.wait(200);
+  // the boar held by roots (as Rễ Giữ would): an opening she should take
+  await scene(() => { const st = window.__cuuVuc.scene.getScene("Stage"), b = st.boars[0]; b.bind(8000, st.sim); });
+  const seen = new Set(); let boarHp0 = null, boarHp = null;
+  for (let i = 0; i < 70; i++) {
+    const x = await h.snap();
+    if (x.ally) seen.add(x.ally.state);
+    const b = x.boars.find((bb) => Math.abs(bb.x - 330) < 160);
+    if (b) { if (boarHp0 === null) boarHp0 = b.maxHp; boarHp = b.hp; }
+    if (seen.has("thrust") && boarHp !== null && boarHp < boarHp0) break;
+    await h.wait(100);
+  }
+  step("Ch. I: Diệp joins the fight and her spear lands", seen.has("thrust") && boarHp < boarHp0, { states: [...seen], boarHp, boarHp0 });
+  const down = await scene(() => { const a = window.__cuuVuc.scene.getScene("Stage").ally; a.receive({ id: "ci-ko", rect: a.hurtbox(), damage: 999, knockback: 0, parryable: false }); return { state: a.state, hp: a.hp, active: a.active }; });
+  step("Ch. I: Diệp knocked down goes down, not dead", down.state === "down" && down.active, down);
 
   /* ---------------- Ch. I: the class from the save sets the kit (no ?kit= override) ---------------- */
   if (!/[?&]kit=/.test(process.env.GAME_URL || "")) {

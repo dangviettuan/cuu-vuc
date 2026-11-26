@@ -22,6 +22,8 @@ import { RE_GIU, STAMPEDE } from "../data/enemies";
 import { SCRIPTS } from "../data/dialogue";
 import { CUTSCENES, CutSfx, Step } from "../data/cutscenes";
 import { Npc } from "../npc";
+import { Ally } from "../ally";
+import type { DiepClip } from "../clips";
 import { text } from "../ui/text";
 import type { UIScene } from "./UI";
 
@@ -79,6 +81,8 @@ export class StageScene extends Phaser.Scene {
   private shrine: Phaser.GameObjects.Image | null = null;
   private shrineAnim: Animator | null = null;
   npcs = new Map<string, Npc>();
+  /** Diệp, when she fights beside him (Ch. I). */
+  ally: Ally | null = null;
   private props = new Map<string, Phaser.GameObjects.Image>();
   private interactables: Interactable[] = [];
   /** Story marks set in this visit to the stage (cutscenes, things used): they open `after` gates in the stage data. */
@@ -148,7 +152,7 @@ export class StageScene extends Phaser.Scene {
     this.boars = []; this.bushes = []; this.roots = []; this.herbs = []; this.signs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     this.gone = false;
     this.npcs = new Map(); this.props = new Map(); this.interactables = []; this.cutscene = null; this.skipping = false; this.heroWalk = null; this.leaving = false; this.boss = null;
-    this.mists = []; this.reGiuReady = 0;
+    this.mists = []; this.reGiuReady = 0; this.ally = null;
     this.marks = new Set(); this.played = new Set(); this.propAnims = []; this.blocks = []; this.runners = []; this.birds = []; this.stampedeAt = 0; this.stampedeCue = 0; this.inChoice = false;
     // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
     this.taken = new Set(sv?.taken ?? []);
@@ -255,6 +259,18 @@ export class StageScene extends Phaser.Scene {
     this.player.antidoteCap = sv?.antidoteCap ?? 0;
     this.player.refillHerbs();
 
+    // Diệp, fighting beside him (Ch. I–IV).
+    if (def.ally) {
+      const a = new Ally(this, def.ally.x ?? this.player.x - 30, def.groundY);
+      this.physics.add.collider(a, this.solids);
+      a.onEvent = (e) => {
+        if (e === "down") { this.ui.toast(t("toast.diepDown"), 1600); sfx.hurt(); }
+        else if (e === "up") this.ui.toast(t("toast.diepUp"), 1200);
+        else if (e === "swing") sfx.swing(0);
+      };
+      this.ally = a;
+    }
+
     // People, and things to look at or use.
     for (const n of def.npcs ?? []) {
       if (!this.ok(n.when)) continue;
@@ -303,6 +319,7 @@ export class StageScene extends Phaser.Scene {
       this.physics.add.collider(boss, this.solids);
       // Registered once: the walls group is filled on engage and emptied on reset (review B1).
       this.physics.add.collider(this.player, this.walls);
+      if (this.ally) this.physics.add.collider(this.ally, this.walls);
       this.physics.add.collider(boss, this.walls);
       boss.onRoots = (xs, warn, dmg) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, this.sim, warn + i * 40, dmg)));
       boss.onDown = () => this.bossDown();
@@ -591,6 +608,7 @@ export class StageScene extends Phaser.Scene {
     this.skipping = true;
     this.ui.closeLine();
     for (const n of this.npcs.values()) n.finishWalk();
+    this.ally?.finishWalk();
     if (this.heroWalk) this.finishHeroWalk();
     for (const f of [...this.waits]) f();
   }
@@ -630,12 +648,22 @@ export class StageScene extends Phaser.Scene {
     if ("say" in st) return fast ? done : new Promise((res) => this.ui.line(st.who ?? null, st.say, res));
     if ("walk" in st) {
       if (st.walk === "player") return this.walkHero(st.to);
+      if (st.walk === "diep" && this.ally) {
+        if (fast) { this.ally.reset(st.to, this.def.groundY); this.ally.scripted = true; return done; }
+        const w = this.ally.walkTo(st.to);
+        return st.nowait ? done : w;
+      }
       const n = this.npcs.get(st.walk); if (!n) return done;
       if (fast) { n.x = st.to; n.pose("idle"); return done; }
       return n.walkTo(st.to);
     }
-    if ("face" in st) { if (st.face === "player") this.player.facing = st.dir; else { const n = this.npcs.get(st.face); if (n) n.facing = st.dir; } return done; }
-    if ("pose" in st) { this.npcs.get(st.pose)?.pose(st.clip); return done; }
+    if ("face" in st) {
+      if (st.face === "player") this.player.facing = st.dir;
+      else if (st.face === "diep" && this.ally) { this.ally.facing = st.dir; this.ally.setFlipX(st.dir < 0); }
+      else { const n = this.npcs.get(st.face); if (n) n.facing = st.dir; }
+      return done;
+    }
+    if ("pose" in st) { if (st.pose === "diep") this.ally?.pose(st.clip as unknown as DiepClip); else this.npcs.get(st.pose)?.pose(st.clip); return done; }
     if ("wait" in st) return fast ? done : this.delay(st.wait);
     if ("leaf" in st) return this.leafFall(st.leaf);
     if ("hideProp" in st) { (this.props.get(st.hideProp) ?? this.npcs.get(st.hideProp))?.setVisible(false); return done; }
@@ -791,6 +819,7 @@ export class StageScene extends Phaser.Scene {
     this.cameras.main.fadeOut(250, 0, 0, 0);
     this.time.delayedCall(260, () => {
       this.player.respawn(this.checkpoint.x, this.checkpoint.y);
+      this.ally?.reset(this.checkpoint.x - 30, this.checkpoint.y);
       this.player.clearHitMemory();
       this.roots.forEach((r) => r.destroy()); this.roots = [];
       const ar = this.def.arena;
@@ -811,6 +840,8 @@ export class StageScene extends Phaser.Scene {
     this.engaged = true;
     for (const x of [ar.min + ARENA_WALL / 2, ar.max - ARENA_WALL / 2]) this.walls.add(this.add.rectangle(x, this.def.groundY / 2, 16, this.def.groundY + 200).setVisible(false));
     this.cameras.main.setBounds(ar.min, this.def.height - VIEW.height, ar.max - ar.min, VIEW.height);
+    // she comes in with him, never shut outside the arena
+    if (this.ally && this.ally.x < ar.min + ARENA_WALL + 8) this.ally.reset(ar.min + ARENA_WALL + 20, this.def.groundY);
     this.ui.showBoss(t(ar.boss.name));
     music.play("boss", 1);
     this.ui.toast(t(ar.boss.intro), 2000);
@@ -897,6 +928,10 @@ export class StageScene extends Phaser.Scene {
     }
     this.player.update(now, dt, c);
     for (const n of this.npcs.values()) n.tick(dt);
+    if (this.ally) {
+      this.ally.scripted = !!this.cutscene || this.leaving || this.choosing || this.finished;
+      this.ally.tick(now, dt, this.player.x, this.player.facing, this.boss && this.engaged ? [...this.boars, this.boss] : this.boars);
+    }
     const exit = this.def.exit;
     if (exit && !this.leaving && !locked && this.player.x > exit.x) this.leave(exit.to, exit.card);
     this.updateStory(time, delta, locked);
@@ -960,6 +995,16 @@ export class StageScene extends Phaser.Scene {
         if (tg.hp !== before) this.onLanded(ph, tg);
       }
     }
+    // Diệp → enemies (never the brush: the chores are his).
+    const ah = this.ally?.currentHit();
+    if (ah) {
+      const foes: Hittable[] = [...this.boars, ...(this.boss && this.engaged ? [this.boss] : [])];
+      for (const tg of foes) {
+        if (!tg.isAlive() || !overlaps(ah.rect, tg.hurtbox())) continue;
+        const before = tg.hp; tg.takeHit(ah);
+        if (tg.hp !== before) { const r = tg.hurtbox(); this.fx.sparks(ah.direction > 0 ? r.x + 2 : r.right - 2, ah.rect.centerY, ah.direction, 4, 0.7); sfx.hit(ah.damage * 0.6); }
+      }
+    }
     // Enemies → player.
     const inc = this.incoming; inc.length = 0;
     for (const b of this.boars) for (const h of b.hits()) inc.push(h);
@@ -968,6 +1013,7 @@ export class StageScene extends Phaser.Scene {
     for (const r of this.roots) { const h = r.hitbox(now); if (h) inc.push(h); }
     const hb = this.player.hurtbox();
     for (const h of inc) if (overlaps(h.rect, hb)) this.player.receive(h);
+    if (this.ally) { const abx = this.ally.hurtbox(); for (const h of inc) if (overlaps(h.rect, abx)) this.ally.receive(h); }
 
     this.syncOutline();
     const rip = this.player.riposteReady(now) && !locked;

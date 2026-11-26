@@ -81,6 +81,13 @@ The mirror is the point. He envies her for being trusted. She envies him for bei
 
 - **Ch. I–IV ally:** she fights beside the protagonist as a story-driven NPC ally, AI-controlled in scripted segments, not player-controlled. **[new; NB "at first they fight together"]**
 - **Ch. I:** she brings him to the four mentors at Mộc Thành and makes the introductions. This ties into L9. **[new; PB L9]**
+- **As an ally in the greybox** *(2026-11-26, Phase 3)*:
+  - **Movement:** she follows a little behind him, and closes to spear's reach when an enemy comes near him.
+  - **Moves:** two, a **long thrust** and a **wide, controlled sweep**. These are the moves her Ch. VIII duel will echo.
+  - **She never takes the fight from him:** light hits (7 and 6 damage, against his 10) on a slow cadence (about 1.5 s apart).
+  - **She reads tells:** she backs out of every windup, except an enemy held by roots, which is an opening.
+  - **She cannot die:** knocked down, she is out for 6 s and gets up at half health.
+  - **Enemies target him.**
 - **Weapon:** a **warden's spear**. Its long reach and sweeping, controlled style contrast with every player class and with the brush-knife he starts with. **[new]**
 - **Ch. VIII duel:** a mechanically credible boss fight. Her warden spear technique is amplified by the bonded fragment (N5). Some patterns echo moves she used as an ally, so the player recognizes them. **[new]**
 

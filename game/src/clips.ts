@@ -129,6 +129,29 @@ export type VillagerClip = keyof ReturnType<typeof villagerClips>;
 /** Any NPC pose a stage or cutscene can name. An NPC without that clip holds its idle. */
 export type NpcClip = FatherClip | VillagerClip;
 
+/** Diệp (Ch. I ally): her thrust and sweep are timed in src/data/ally.ts; the clips carry the frame tags. */
+export function diepClips(t: { thrust: [number, number, number]; sweep: [number, number, number] }) {
+  return {
+    idle: loop("idle", ["d_idle0", "d_idle1"], 420),
+    run: loop("run", ["d_run0", "d_run1", "d_run2", "d_run3"], 95, PRI.LOCO, { 0: "step", 2: "step" }),
+    walk: loop("walk", ["d_walk0", "d_walk1", "d_walk2", "d_walk3"], 150, PRI.LOCO, { 0: "step", 2: "step" }),
+    guard: loop("guard", ["d_guard"], 99999),
+    thrust: clip("thrust", [
+      ...phase(t.thrust[0], "windup", [["d_thrustW", 1]]),
+      ...phase(t.thrust[1], "active", [["d_thrustA", 1, "swing"]]),
+      ...phase(t.thrust[2], "recovery", [["d_thrustR", 0.6], ["d_guard", 0.4]]),
+    ], PRI.ACTION),
+    sweep: clip("sweep", [
+      ...phase(t.sweep[0], "windup", [["d_sweepW", 1]]),
+      ...phase(t.sweep[1], "active", [["d_sweepA", 1, "swing"]]),
+      ...phase(t.sweep[2], "recovery", [["d_thrustR", 0.5], ["d_guard", 0.5]]),
+    ], PRI.ACTION),
+    hurt: clip("hurt", [{ key: "d_hurt", ms: 260 }], PRI.HURT),
+    down: clip("down", [{ key: "d_hurt", ms: 160 }, { key: "d_down", ms: 99999 }], PRI.DEAD),
+  };
+}
+export type DiepClip = keyof ReturnType<typeof diepClips>;
+
 export const ROOT = ["root0", "root1", "root2"] as const;
 export const SHRINE_LIT = loop("lit", ["shrine_on0", "shrine_on1", "shrine_on2", "shrine_on1"], 110);
 export const HERB_GLINT = clip("glint", [{ key: "herb0", ms: 1400 }, { key: "herb1", ms: 90 }, { key: "herb2", ms: 90 }, { key: "herb0", ms: 600 }], 0, true);

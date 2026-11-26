@@ -74,6 +74,7 @@ async function launch({ width = 960, height = 540 } = {}) {
         hitstop: s.hitstopLeft > 0, camX: Math.round(s.cameras.main.scrollX), fps: g.loop.actualFps,
         marks: s.marks ? [...s.marks] : [], menu: !!(g.scene.getScene("UI").dialogue && g.scene.getScene("UI").dialogue.menu),
         runners: s.runners ? s.runners.map((r) => Math.round(r.x)) : [],
+        ally: s.ally ? { x: Math.round(s.ally.x), state: s.ally.state, hp: s.ally.hp } : null,
       };
     };
     window.__rec = (ms) => new Promise((res) => { const out = []; const t0 = performance.now(); const f = () => { const s = window.__snap(); if (s) out.push(s); if (performance.now() - t0 < ms) requestAnimationFrame(f); else res(out); }; requestAnimationFrame(f); });

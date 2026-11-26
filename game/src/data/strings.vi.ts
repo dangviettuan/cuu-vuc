@@ -94,6 +94,8 @@ export const vi = {
   "toast.poisoned": "Trúng độc! {herb}: dùng thuốc giải",
   "toast.cured": "Đã giải độc.",
   "toast.reGiu": "Rễ Giữ!",
+  "toast.diepDown": "Diệp ngã!",
+  "toast.diepUp": "Diệp đứng dậy.",
   "toast.reGiu.none": "Rễ Giữ: rễ trồi lên, không bắt được gì.",
   "hud.antidotes": "Thuốc giải {n}/{cap}",
   "sign.mist": "Sương độc.\nĐứng trong đó sẽ trúng độc.\nKhi trúng độc, {herb}: dùng thuốc giải",
