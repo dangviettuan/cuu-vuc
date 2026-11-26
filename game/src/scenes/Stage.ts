@@ -7,7 +7,9 @@ import { HERB_GLINT, SHRINE_LIT } from "../clips";
 import { Fx } from "../fx";
 import { sfx } from "../sfx";
 import { music } from "../music";
-import { KIT, PLAYER, VIEW, WORLD } from "../tuning";
+import { KIT, KitId, PLAYER, VIEW, WORLD, kitOverride, setKit } from "../tuning";
+import { rebuildHero } from "../art";
+import { buildOutlines } from "../outline";
 import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
 import { Rng, runSeed } from "../core/rng";
@@ -144,6 +146,10 @@ export class StageScene extends Phaser.Scene {
     this.marks = new Set(); this.played = new Set(); this.propAnims = []; this.blocks = []; this.runners = []; this.birds = []; this.stampedeAt = 0; this.stampedeCue = 0; this.inChoice = false;
     // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
     this.taken = new Set(sv?.taken ?? []);
+    // The class chosen in Ch. I (CH1_CLASS) sets the kit, and with it the weapon the hero is drawn with.
+    const cls = getFlag("CH1_CLASS");
+    setKit(kitOverride() ?? (cls === "kiem" || cls === "anh" ? (cls as KitId) : "prologue"));
+    if (rebuildHero(this, KIT.weapon)) buildOutlines(this, "p_");
     this.checkpoint = { x: def.start.x, y: def.groundY };
     this.seed = runSeed();
     configureEnemies(new Rng(this.seed), DIFFICULTY[settings().difficulty]);
@@ -705,7 +711,13 @@ export class StageScene extends Phaser.Scene {
       }
       case "guardBreak": sfx.guardBreak(); this.ui.toast(t("toast.guardBreak"), 800); break;
       case "phaThe": sfx.phaThe(); this.ui.toast(t("toast.phaThe"), 700); this.fx.sparkle(p.x + f * 10, p.y - 34, 8, 0xffc860); break;
-      case "perfectDodge": if (KIT.classKit) { this.ui.toast(t("toast.perfectDodge"), 700); this.fx.sparkle(p.x, p.y - 24, 6, 0x9fd0c0); } break;
+      case "perfectDodge":
+        if (KIT.id === "anh") { this.ui.toast(t("toast.perfectDodge.anh"), 800); this.fx.sparkle(p.x, p.y - 24, 8, 0xb8a0f0); sfx.parry(); this.hitstop(60); }
+        else if (KIT.classKit) { this.ui.toast(t("toast.perfectDodge"), 700); this.fx.sparkle(p.x, p.y - 24, 6, 0x9fd0c0); }
+        break;
+      case "blink": sfx.dodge(); sfx.swing(2); this.ui.toast(t("toast.anhKich"), 600); this.fx.dust(p.x, p.y, 4, -f, 1.2); break;
+      case "anh": this.float(p.x, p.y - 52, t("toast.anhGain")); this.fx.sparkle(p.x, p.y - 30, 5, 0xb8a0f0); break;
+      case "crit": this.float(p.x, p.y - 58, t("toast.crit")); break;
       case "riposte": this.ui.toast(t("toast.riposte"), 600); break;
       case "heal": sfx.heal(); this.float(p.x, p.y - 50, `+${PLAYER.herbHeal}`); this.fx.sparkle(p.x, p.y - 30, 8, 0x9cf0a4); break;
       case "hurt": sfx.hurt(); this.shake(16); this.hitstop(70); this.fx.sparks(p.x, p.y - 26, -f as 1 | -1, 6, 0.8); break;
@@ -1018,6 +1030,7 @@ export class StageScene extends Phaser.Scene {
     const x = ph.direction > 0 ? Math.max(r.x, ph.rect.x) + 2 : Math.min(r.right, ph.rect.right) - 2;
     const y = Math.max(r.y + 6, Math.min(r.bottom - 6, ph.rect.centerY));
     if (tg instanceof Bush) { this.fx.sparks(x, y, ph.direction, 3, 0.6); this.hitstop(30); sfx.roots(); return; }
+    this.player.landed();
     const big = ph.guardBreak;
     sfx.hit(ph.damage);
     this.fx.sparks(x, y, ph.direction, big ? 12 : 6, big ? 1.3 : 1);

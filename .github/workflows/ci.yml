@@ -1,6 +1,6 @@
 # Type-check, build and smoke-test the greybox on every push and pull request that touches game/.
 # The smoke test (game/playtest/ci-smoke.cjs) drives the real build in headless Chromium and fails on any broken step
-# or console error. It runs for the canon Prologue kit, the Kiếm Khách kit, and the Canvas renderer fallback.
+# or console error. It runs for the canon Prologue kit, the Kiếm Khách and Ảnh Vệ kits, and the Canvas renderer fallback.
 # The shell test (game/playtest/ci-shell.cjs) walks the real boot flow: title, name entry, pause, options, Continue.
 name: CI
 
@@ -22,7 +22,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: game
@@ -49,6 +49,10 @@ jobs:
         run: node playtest/ci-smoke.cjs
         env:
           GAME_URL: http://localhost:4173/?kit=kiem
+      - name: Smoke — Ảnh Vệ kit
+        run: node playtest/ci-smoke.cjs
+        env:
+          GAME_URL: http://localhost:4173/?kit=anh
       - name: Smoke — Canvas renderer
         run: node playtest/ci-smoke.cjs
         env:

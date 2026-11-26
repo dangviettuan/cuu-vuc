@@ -20,28 +20,45 @@ export const WORLD = {
 } as const;
 
 /**
- * Combat kits (ADR-0010, review D2). Canon: the Prologue has no class; he fights with the brush-knife and the
- * universal kit (8-frame parry, block). Kiếm Khách (12-frame parry, Thế, Riposte, Phá Thế) arrives in Ch. I.
- * The greybox defaults to the canon Prologue kit; `?kit=kiem` loads the Kiếm Khách kit for testing that loop.
+ * Combat kits (ADR-0010, review D2; Phase 3). Canon: the Prologue has no class; he fights with the brush-knife and the
+ * universal kit (8-frame parry, 4-frame perfect dodge, block). The class is chosen in Ch. I (I-2, `CH1_CLASS`):
+ * - **Kiếm Khách** (Lão Trụ): straight sword, 12-frame parry, Thế from parries, the Riposte and Phá Thế.
+ * - **Ảnh Vệ** (Én): twin short blades, a quicker string, a 6-frame perfect dodge that builds Ảnh and opens a crit
+ *   window, and Ảnh Kích (the Bible's Blink Strike): J during a dodge cuts through and turns behind, for 1 Ảnh.
+ * Ngự Linh and Cơ Sư are not in the greybox yet (Phase 3 scope: two classes test build identity).
+ *
+ * `KIT` is one mutable object: the stage applies the save's class with `setKit` (src/scenes/Stage.ts). `?kit=kiem` or
+ * `?kit=anh` overrides it for testing.
  */
+export type KitId = "prologue" | "kiem" | "anh";
 export interface Kit {
-  id: "prologue" | "kiem";
-  weapon: "knife" | "sword";
+  id: KitId;
+  weapon: "knife" | "sword" | "twin";
   parryWindow: number;
-  /** Added to every attack's reach (px): the brush-knife is shorter than the sword. */
+  /** A dodge whose first frames meet a hit is perfect (Bible §2: 4 frames; Ảnh Vệ 6). */
+  perfectDodge: number;
+  /** Added to every attack's reach (px): the brush-knife and the twin blades are shorter than the sword. */
   reachDelta: number;
-  /** Kiếm Khách only: Thế pips from parries, the Riposte, and Phá Thế. */
+  /** Kiếm Khách: Thế pips from parries, the Riposte, and Phá Thế. */
   classKit: boolean;
 }
-export const KITS: Record<Kit["id"], Kit> = {
-  prologue: { id: "prologue", weapon: "knife", parryWindow: f(8), reachDelta: -8, classKit: false },
-  kiem: { id: "kiem", weapon: "sword", parryWindow: f(12), reachDelta: 0, classKit: true },
+export const KITS: Record<KitId, Kit> = {
+  prologue: { id: "prologue", weapon: "knife", parryWindow: f(8), perfectDodge: f(4), reachDelta: -8, classKit: false },
+  kiem: { id: "kiem", weapon: "sword", parryWindow: f(12), perfectDodge: f(4), reachDelta: 0, classKit: true },
+  anh: { id: "anh", weapon: "twin", parryWindow: f(8), perfectDodge: f(6), reachDelta: -6, classKit: false },
 };
-function resolveKit(): Kit {
+/** A test override from the URL (`?kit=kiem|anh|prologue`), or null. */
+export function kitOverride(): KitId | null {
   const q = typeof location === "undefined" ? null : new URLSearchParams(location.search).get("kit");
-  return q === "kiem" ? KITS.kiem : KITS.prologue;
+  return q === "kiem" || q === "anh" || q === "prologue" ? q : null;
 }
-export const KIT: Kit = resolveKit();
+export const KIT: Kit = { ...KITS[kitOverride() ?? "prologue"] };
+/** Switch the kit in place (everything holds this one object). Returns true if it changed. */
+export function setKit(id: KitId): boolean {
+  if (KIT.id === id) return false;
+  Object.assign(KIT, KITS[id]);
+  return true;
+}
 
 export const PLAYER = {
   maxHp: 100,
@@ -83,19 +100,39 @@ export interface AttackDef {
   poise?: number;
 }
 
-const R = KIT.reachDelta;
+/** Reach below is for the sword; the kit's `reachDelta` is added when a hit is made (Player.currentHit). */
 export const LIGHT: AttackDef[] = [
-  { name: "light1", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 36 + R, height: 20, guardBreak: false, lunge: 30 },
-  { name: "light2", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 36 + R, height: 20, guardBreak: false, lunge: 30 },
-  { name: "light3", startup: f(7), active: f(5), recovery: f(16), damage: 16, stamina: 8, reach: 40 + R, height: 24, guardBreak: false, lunge: 60 },
+  { name: "light1", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 36, height: 20, guardBreak: false, lunge: 30 },
+  { name: "light2", startup: f(5), active: f(4), recovery: f(10), damage: 10, stamina: 6, reach: 36, height: 20, guardBreak: false, lunge: 30 },
+  { name: "light3", startup: f(7), active: f(5), recovery: f(16), damage: 16, stamina: 8, reach: 40, height: 24, guardBreak: false, lunge: 60 },
 ];
+
+/** Ảnh Vệ's string (twin blades): quicker in and out, lighter hits; the third hit lands builds Ảnh. */
+export const LIGHT_ANH: AttackDef[] = [
+  { name: "anh1", startup: f(4), active: f(3), recovery: f(8), damage: 8, stamina: 5, reach: 36, height: 20, guardBreak: false, lunge: 40 },
+  { name: "anh2", startup: f(4), active: f(3), recovery: f(8), damage: 8, stamina: 5, reach: 36, height: 20, guardBreak: false, lunge: 40 },
+  { name: "anh3", startup: f(5), active: f(4), recovery: f(12), damage: 12, stamina: 6, reach: 38, height: 24, guardBreak: false, lunge: 70 },
+];
+
+/**
+ * Ảnh Vệ (Bible §3). Ảnh: up to 3, from perfect dodges and from a full string that lands. A perfect dodge also opens a
+ * short crit window. Ảnh Kích (Blink Strike): J during a dodge dashes on through, cutting everything on the way, and
+ * turns to face back; i-frames throughout.
+ */
+export const ANH = {
+  max: 3,
+  critWindow: 900,
+  critMultiplier: 1.5,
+  blink: { name: "blink", startup: 0, active: 160, recovery: 140, damage: 26, stamina: 0, reach: 70, height: 28, guardBreak: false, lunge: 0, poise: 20 } as AttackDef,
+  blinkSpeed: 460,
+} as const;
 
 /** Heavy attack: chargeable, 2 levels (Bible §2). */
 export const HEAVY = {
   levelTimes: [0, 300, 600], // hold time to reach level 0/1/2 (was 400/900: too slow for any opening, playtest I-09)
   damage: [22, 32, 44],
   stamina: [18, 24, 30],
-  def: { name: "heavy", startup: f(10), active: f(5), recovery: f(18), damage: 0, stamina: 0, reach: 44 + R, height: 28, guardBreak: true, lunge: 80 } as AttackDef,
+  def: { name: "heavy", startup: f(10), active: f(5), recovery: f(18), damage: 0, stamina: 0, reach: 44, height: 28, guardBreak: true, lunge: 80 } as AttackDef,
   chargeMoveFactor: 0.25,
 } as const;
 
@@ -103,7 +140,7 @@ export const HEAVY = {
  * Air slash (Phase 2; playtest I-10 / review A5): one overhead chop per jump, aimed forward and down. It keeps the
  * jump's momentum (no lunge) and resets on landing, so jumping a charge can end in a hit without becoming a juggle.
  */
-export const AIR_SLASH: AttackDef = { name: "air", startup: f(4), active: f(5), recovery: f(12), damage: 10, stamina: 8, reach: 30 + R, height: 34, guardBreak: false, lunge: 0 };
+export const AIR_SLASH: AttackDef = { name: "air", startup: f(4), active: f(5), recovery: f(12), damage: 10, stamina: 8, reach: 30, height: 34, guardBreak: false, lunge: 0 };
 
 /** Riposte: Kiếm Khách signature (parry → heavy counter). Free after a parry (review D5): it costs no Thế. */
 export const RIPOSTE: AttackDef = { name: "riposte", startup: f(4), active: f(5), recovery: f(14), damage: 40, stamina: 0, reach: 44, height: 28, guardBreak: true, lunge: 120 };
@@ -126,9 +163,8 @@ export const DODGE = {
   recoveryLock: 80,
 } as const;
 
-/** Parry: the universal window is 8 frames; Kiếm Khách's is 12 (Bible §2–3). Set by the kit. */
+/** Parry: the window is the kit's (8 frames universal; Kiếm Khách 12, Bible §2–3), read when the parry is judged. */
 export const PARRY = {
-  window: KIT.parryWindow,
   recovery: 260,
   stamina: 8,
 } as const;

@@ -86,6 +86,15 @@
   - S7: the shrine, Nanh Rễ and choice C2;
   - **S8 "Lối rễ"**: the aftermath (shaped by C1 and C2), the keeper's hint (optional), the spare satchel and red thread, the roots parting, the station and its clues; the end card.
 
+**Phase 3 is in progress on the `phase-3` branch: Chapter I "Thanh Mộc"** (review §10). Milestones:
+1. **Class system and Ảnh Vệ** (done): the class comes from the save (`CH1_CLASS`) and redraws the hero's weapon. Ảnh Vệ is the second class, which tests build identity against Kiếm Khách.
+2. **Poison and Rễ Giữ**: poison buildup, antidotes; the first Mạch Ấn, where a perfect defence (parry or perfect dodge) binds nearby enemies with roots.
+3. **Diệp as an AI ally** with her spear.
+4. **Thanh Mộc enemies and bosses**: root-corrupted beasts, spore pods, vines, regrowing roots, Cương's operatives; Độc Đằng, Hùng, Mộc Giác.
+5. **The stages I-1 to I-7** from prose Chương 3–6, with C1 (Sẻ) and the Prologue flags paid off.
+
+Scope: the class choice shows all four mentors; **Kiếm Khách and Ảnh Vệ are playable**, Ngự Linh and Cơ Sư are present but not yet open.
+
 Next:
 - **a 3–5 person human playtest** (review §8; in progress, `game/playtest/HUMAN_PLAYTESTS.md`), then tune Nanh Rễ from it on the branch;
 - a human pass on the whole Prologue's pacing (it is now about 20–30 minutes, much of it reading);

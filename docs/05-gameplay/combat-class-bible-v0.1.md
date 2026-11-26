@@ -161,4 +161,11 @@ This maps the Gameplay README's prototype target **[GB]** to actual content:
 | One boss pattern | **Nanh Rễ**: charge, root-burst, desperate phase |
 | **Stretch goal** | Rễ Giữ (the first Mạch Ấn) + Độc Đằng (poison) as a second slice |
 
-**Greybox kits** *(amended, [ADR-0010](../decisions/ADR-0010-prologue-kit-and-class-kits.md))*: the greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class ability. `?kit=kiem` loads the Kiếm Khách kit (12-frame parry, Thế, Riposte and Phá Thế) for testing.
+**Ảnh Vệ in the greybox** *(2026-11-26, Phase 3)*:
+- **Kit:** twin short blades (~13 px) and the universal 8-frame parry. A **quicker string**: startup 4 frames, recovery 8 frames, 8/8/12 damage, against 10/10/16 for the sword.
+- **Perfect dodge:** a 6-frame window. Each perfect dodge gives **+1 Ảnh** (max 3) and opens a **0.9 s crit window** in which hits deal ×1.5.
+- **More Ảnh:** a full string that lands its third hit gives **+1 Ảnh**.
+- **Ảnh Kích** (the Blink Strike): **J during a dodge** spends 1 Ảnh. He dashes on through, cutting everything along an ~80 px path (26 damage), and turns to face back. He cannot be hit during it.
+- **Not yet built:** Ảnh Phân and Cửu Liên.
+
+**Greybox kits** *(amended, [ADR-0010](../decisions/ADR-0010-prologue-kit-and-class-kits.md))*: the greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class ability. `?kit=kiem` loads the Kiếm Khách kit (12-frame parry, Thế, Riposte and Phá Thế) for testing, and `?kit=anh` loads Ảnh Vệ. In play, the kit comes from the save's `CH1_CLASS`, chosen in Ch. I.

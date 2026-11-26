@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { AIR_SLASH, AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, PARRY, PHA_THE, PHA_THE_COST, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
+import { AIR_SLASH, ANH, AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, LIGHT_ANH, PARRY, PHA_THE, PHA_THE_COST, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
 import { EnemyHit, HitResult, PlayerHit, flash } from "./combat";
 import { Animator } from "./anim";
 import { PC, lightClip } from "./clips";
@@ -18,12 +18,12 @@ export interface Controls {
   herbPressed: boolean;
 }
 
-type State = "move" | "light" | "air" | "charge" | "heavy" | "riposte" | "phaThe" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
+type State = "move" | "light" | "air" | "charge" | "heavy" | "riposte" | "phaThe" | "blink" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
 export type PlayerEvent =
-  | "parry" | "block" | "guardBreak" | "perfectDodge" | "hurt" | "riposte" | "phaThe" | "heal" | "dead"
+  | "parry" | "block" | "guardBreak" | "perfectDodge" | "hurt" | "riposte" | "phaThe" | "blink" | "anh" | "crit" | "heal" | "dead"
   | "jump" | "land" | "dodge" | "step" | "skid" | "swing" | "slam" | "ghost" | "thud";
 
-const ATTACKING: ReadonlySet<State> = new Set(["light", "air", "heavy", "riposte", "phaThe"]);
+const ATTACKING: ReadonlySet<State> = new Set(["light", "air", "heavy", "riposte", "phaThe", "blink"]);
 /** States in which stamina does not regenerate. */
 const NO_REGEN: ReadonlySet<State> = new Set(["dead", "charge", "dodge", "block"]);
 const clamp = Phaser.Math.Clamp;
@@ -32,8 +32,9 @@ const BUFFER_MS = 150;
 const NEVER = -1e9;
 
 /**
- * The protagonist. The kit (tuning.ts `KIT`, ADR-0010) is the canon Prologue kit by default: brush-knife, universal
- * 8-frame parry, block. `?kit=kiem` adds the Kiếm Khách class kit: 12-frame parry, Thế, Riposte, Phá Thế.
+ * The protagonist. The kit (tuning.ts `KIT`, ADR-0010) is the canon Prologue kit until the class is chosen in Ch. I:
+ * brush-knife, universal 8-frame parry, block. Kiếm Khách adds the 12-frame parry, Thế, Riposte and Phá Thế; Ảnh Vệ the
+ * quicker twin-blade string, the 6-frame perfect dodge, Ảnh and its crit window, and Ảnh Kích.
  * Gameplay state (`state`) and presentation (`present()` → Animator clips) are separate:
  * gameplay decides what is happening, presentation decides which frames show it.
  * Attack hit windows are read from the animation's frame tags (src/clips.ts).
@@ -42,6 +43,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   hp: number = PLAYER.maxHp;
   stamina: number = PLAYER.maxStamina;
   the = 0; // Thế: Kiếm Khách stance charge
+  /** Ảnh: Ảnh Vệ's charge (perfect dodges, a full string landed), spent on Ảnh Kích. */
+  anh = 0;
+  /** Ảnh Vệ: hits until this time crit (opened by a perfect dodge). */
+  critUntil = 0;
   herbs = 0;
   /**
    * Herb pouch capacity (review D4): each herb found adds a slot, up to PLAYER.herbCapMax. Respawning and resting at a
@@ -119,7 +124,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   respawn(x: number, y: number): void {
-    this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0; this.herbs = this.herbCap;
+    this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0; this.anh = 0; this.critUntil = 0; this.herbs = this.herbCap;
     this.setPosition(x, y); this.body2.setVelocity(0, 0);
     this.setAlpha(1); flash(this, false);
     this.attack = null;
@@ -140,7 +145,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private startAttack(def: AttackDef, damage: number, s: State, slashLevel: number): void {
     this.attack = def; this.attackDamage = damage; this.swingId++; this.slashLevel = slashLevel;
     this.enter(s);
-    const c = s === "heavy" ? PC.heavy : s === "riposte" ? PC.riposte : s === "phaThe" ? PC.phaThe : s === "air" ? PC.air : lightClip(this.combo);
+    const c = s === "heavy" ? PC.heavy : s === "riposte" ? PC.riposte : s === "phaThe" ? PC.phaThe : s === "air" ? PC.air : s === "blink" ? PC.anhKich : lightClip(this.combo);
     this.anim.play(c, true, true);
   }
 
@@ -179,9 +184,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         } else if (light && !grounded && !this.airSlashUsed && this.spend(AIR_SLASH.stamina)) { // the air slash (Phase 2)
           this.bufLight = NEVER; this.airSlashUsed = true;
           this.startAttack(AIR_SLASH, AIR_SLASH.damage, "air", 1);
-        } else if (light && grounded && this.spend(LIGHT[0].stamina)) {
+        } else if (light && grounded && this.spend(this.string[0].stamina)) {
           this.bufLight = NEVER;
-          this.combo = 0; this.comboQueued = false; this.startAttack(LIGHT[0], LIGHT[0].damage, "light", 0);
+          this.combo = 0; this.comboQueued = false; this.startAttack(this.string[0], this.string[0].damage, "light", 0);
         } else if (c.heavyHeld && grounded && this.stamina > HEAVY.stamina[0] * 0.5) {
           this.chargeAt = now; this.enter("charge"); this.anim.play(PC.charge, true, true);
         } else if (dodge && this.spend(DODGE.stamina)) {
@@ -218,9 +223,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         if (tag === "recovery" && dodge && this.spend(DODGE.stamina)) { this.bufDodge = NEVER; this.attack = null; this.startDodge(dir); break; }
         const rp = this.anim.tagProgress();
         if (this.state === "light" && this.comboQueued && this.combo < 2 && tag === "recovery" && rp.t >= rp.len * 0.35) {
-          if (this.spend(LIGHT[this.combo + 1].stamina)) {
+          if (this.spend(this.string[this.combo + 1].stamina)) {
             this.combo++; this.comboQueued = false;
-            const next = LIGHT[this.combo];
+            const next = this.string[this.combo];
             this.startAttack(next, next.damage, "light", this.combo === 2 ? 1 : 0);
             break;
           }
@@ -239,7 +244,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         }
         break;
       }
+      case "blink": { // Ảnh Kích: on through at speed, cutting; then a turn to face what was passed
+        const a = this.anim.tag;
+        body.setVelocityX(a === "active" ? this.facing * ANH.blinkSpeed : 0);
+        this.setAlpha(a === "active" ? 0.55 : 1);
+        if (a === "active" && now - this.ghostAt > 30) { this.ghostAt = now; this.onEvent("ghost"); }
+        if (this.anim.finished) { this.setAlpha(1); this.attack = null; this.facing = this.facing > 0 ? -1 : 1; this.enter("move"); }
+        break;
+      }
       case "dodge": {
+        // Ảnh Vệ: J during a dodge, with Ảnh to spend, turns it into Ảnh Kích
+        if (KIT.id === "anh" && light && this.anh >= 1) {
+          this.bufLight = NEVER; this.anh--; this.setAlpha(1);
+          this.startAttack(ANH.blink, this.critical(ANH.blink.damage), "blink", 1); this.onEvent("blink");
+          break;
+        }
         body.setVelocityX(this.facing * DODGE.speed * (t < DODGE.duration * 0.7 ? 1 : 0.4));
         this.setAlpha(t < DODGE.iframes ? 0.6 : 1);
         if (now - this.ghostAt > 38 && t < DODGE.duration * 0.75) { this.ghostAt = now; this.onEvent("ghost"); }
@@ -248,8 +267,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       case "parry":
         // still holding after the parry window: guard (review D6). Releasing early keeps the whiff recovery.
-        if (t >= PARRY.window + this.windowBonus && c.parryHeld) { this.enter("block"); this.anim.play(PC.block, true, true); }
-        else if (t >= PARRY.window + PARRY.recovery) this.enter("move");
+        if (t >= KIT.parryWindow + this.windowBonus && c.parryHeld) { this.enter("block"); this.anim.play(PC.block, true, true); }
+        else if (t >= KIT.parryWindow + PARRY.recovery) this.enter("move");
         break;
       case "block":
         this.horizontal(0, sec, 0.3);
@@ -313,6 +332,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setFlipX(a.name === "skid" ? b.velocity.x < 0 : this.facing < 0);
   }
 
+  /** The kit's light string. */
+  private get string(): AttackDef[] { return KIT.id === "anh" ? LIGHT_ANH : LIGHT; }
+
+  /** Ảnh Vệ's crit window: damage this hit would deal, raised while it is open. */
+  private critical(dmg: number): number { return this.now < this.critUntil ? Math.round(dmg * ANH.critMultiplier) : dmg; }
+
+  /**
+   * A hit of ours just dealt damage (the stage calls this). Ảnh Vệ: the third hit of the string builds Ảnh; a hit in
+   * the crit window is reported for its feedback.
+   */
+  landed(): void {
+    if (KIT.id !== "anh") return;
+    if (this.state === "light" && this.combo === 2 && this.anh < ANH.max) { this.anh++; this.onEvent("anh"); }
+    if (this.now < this.critUntil) this.onEvent("crit");
+  }
+
   private startDodge(dir: number): void {
     if (dir !== 0) this.facing = dir > 0 ? 1 : -1;
     this.dodgeAt = this.now; this.enter("dodge");
@@ -334,14 +369,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const a = this.attack;
     if (!a || !ATTACKING.has(this.state) || this.anim.tag !== "active") return null;
     const b = this.body2;
-    const x = this.facing > 0 ? b.right : b.x - a.reach;
+    const reach = a.reach + (this.state === "blink" ? 0 : KIT.reachDelta);
+    const x = this.state === "blink" ? (this.facing > 0 ? b.x - 30 : b.right - reach + 30) : this.facing > 0 ? b.right : b.x - reach; // the blink cuts along its own path
     const h = this.hit;
-    h.id = this.swingId; h.damage = this.attackDamage; h.guardBreak = a.guardBreak; h.direction = this.facing;
+    h.id = this.swingId; h.damage = this.state === "blink" || this.state === "light" ? this.critical(this.attackDamage) : this.attackDamage; h.guardBreak = a.guardBreak; h.direction = this.facing;
     h.poise = a.poise ?? (a.guardBreak ? this.attackDamage : 0);
     // Cover chest to shins so low targets (brush, boars) are hittable; a.height sets a minimum.
     // The air slash reaches below the feet instead, so it can hit what the jump is clearing.
-    if (this.state === "air") h.rect.setTo(x, b.y + 8, a.reach, b.height + 4);
-    else h.rect.setTo(x, b.y + 8, a.reach, Math.max(a.height, b.height - 10));
+    if (this.state === "air") h.rect.setTo(x, b.y + 8, reach, b.height + 4);
+    else h.rect.setTo(x, b.y + 8, reach, Math.max(a.height, b.height - 10));
     return h;
   }
 
@@ -349,12 +385,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   receive(hit: EnemyHit): HitResult {
     const now = this.now;
     if (this.state === "dead" || this.hitIds.has(hit.id)) return "ignored";
+    if (this.state === "blink") { this.hitIds.add(hit.id); return "dodged"; } // Ảnh Kích is untouchable
     if (this.state === "dodge" && now - this.dodgeAt < DODGE.iframes + this.windowBonus) {
       this.hitIds.add(hit.id);
-      if (now - this.dodgeAt < DODGE.perfectWindow) { this.onEvent("perfectDodge"); return "perfectDodge"; }
+      if (now - this.dodgeAt < KIT.perfectDodge + this.windowBonus * 0.5) {
+        if (KIT.id === "anh") { this.anh = Math.min(ANH.max, this.anh + 1); this.critUntil = now + ANH.critWindow; }
+        this.onEvent("perfectDodge"); return "perfectDodge";
+      }
       return "dodged";
     }
-    if (this.state === "parry" && now - this.parryAt < PARRY.window + this.windowBonus && hit.parryable) {
+    if (this.state === "parry" && now - this.parryAt < KIT.parryWindow + this.windowBonus && hit.parryable) {
       this.hitIds.add(hit.id);
       // turn to face what was parried, so the riposte goes toward it (fix-pass finding: backwards parries whiffed the riposte)
       const toward = Math.sign(hit.rect.centerX - this.x);

@@ -3,7 +3,7 @@
  * Attack clips are *built from tuning.ts*: the windup/active/recovery frame runs sum exactly to the
  * AttackDef timings, and gameplay reads the frame tag to open the hitbox (animation-driven hitboxes).
  */
-import { AIR_SLASH, AttackDef, DODGE, HEAVY, LIGHT, PARRY, PHA_THE, PLAYER, RIPOSTE } from "./tuning";
+import { AIR_SLASH, ANH, AttackDef, DODGE, HEAVY, KIT, LIGHT, LIGHT_ANH, PARRY, PHA_THE, PLAYER, RIPOSTE, f } from "./tuning";
 import { Clip, PRI, clip, loop, phase } from "./anim";
 
 type Set3 = { w: [string, number][]; a: [string, number, string?][]; r: [string, number][] };
@@ -38,13 +38,20 @@ export const PC = {
   fall: loop("fall", ["p_fall0", "p_fall1"], 90),
   land: clip("land", [{ key: "p_land0", ms: 60 }, { key: "p_land1", ms: 70 }], PRI.SETTLE),
   light: [attack("light1", LIGHT[0], SWING_A), attack("light2", LIGHT[1], SWING_B), attack("light3", LIGHT[2], OVERHEAD)],
+  /** Ảnh Vệ's quicker string (twin blades), same drawings, shorter holds. */
+  lightAnh: [attack("anh1", LIGHT_ANH[0], SWING_A), attack("anh2", LIGHT_ANH[1], SWING_B), attack("anh3", LIGHT_ANH[2], OVERHEAD)],
+  /** Ảnh Kích: the dodge carries on into a cut through, then a turn. */
+  anhKich: clip("anhKich", [
+    ...phase(ANH.blink.active, "active", [["p_d1", 0.3], ["p_aS", 0.35, "swing"], ["p_aH", 0.35]]),
+    ...phase(ANH.blink.recovery, "recovery", [["p_aF", 0.6], ["p_aR", 0.4]]),
+  ], PRI.ACTION),
   heavy: attack("heavy", HEAVY.def, HEAVY_REL),
   riposte: attack("riposte", RIPOSTE, OVERHEAD),
   phaThe: attack("phaThe", PHA_THE, HEAVY_REL),
   air: attack("air", AIR_SLASH, AIR),
   charge: loop("charge", ["p_charge0", "p_charge1"], 70, PRI.ACTION),
   dodge: clip("dodge", phase(DODGE.duration, "dodge", [["p_d0", 0.14], ["p_d1", 0.3], ["p_d2", 0.3], ["p_d3", 0.26]]), PRI.ACTION),
-  guard: clip("guard", phase(PARRY.window + PARRY.recovery, "guard", [["p_g0", 0.1], ["p_g1", 0.9]]), PRI.ACTION),
+  guard: clip("guard", phase(f(12) + PARRY.recovery, "guard", [["p_g0", 0.1], ["p_g1", 0.9]]), PRI.ACTION),
   parry: clip("parry", [{ key: "p_parry", ms: 100 }, { key: "p_g1", ms: 110 }], PRI.ACTION),
   /** Held guard (review D6). SETTLE, so a blocked hit's brace (the ACTION `parry` clip) plays over it, then it resumes. */
   block: loop("block", ["p_g1"], 1000, PRI.SETTLE),
@@ -55,7 +62,7 @@ export const PC = {
 };
 
 /** Light string: 1 down-diagonal, 2 rising, 3 overhead slam. */
-export const lightClip = (combo: number): Clip => PC.light[Math.min(combo, 2)];
+export const lightClip = (combo: number): Clip => (KIT.id === "anh" ? PC.lightAnh : PC.light)[Math.min(combo, 2)];
 
 /** Boar clips by texture prefix: "boar" (the startled boars) or "rboar" (the rooted boar in S6). */
 function boarClips(k: string) {

@@ -63,6 +63,7 @@ export const vi = {
   "hud.herbs": "Thảo dược {n}/{cap}",
   "hud.strip1": "{left}/{right} chạy · {jump} nhảy · {light} chém · {heavy} giữ: chém mạnh · {dodge} né",
   "hud.strip2": "{parry} đỡ · giữ {parry}: chặn · {herb} thảo dược · {interact} tương tác · {pause} tạm dừng",
+  "hud.strip2.anh": "{parry} đỡ · giữ {parry}: chặn · đang né, {light}: Ảnh Kích · {herb} thảo dược · {pause} tạm dừng",
   "hud.strip2.kiem": "{parry} đỡ · giữ {parry}: chặn · giữ {parry} + {heavy}: Phá Thế · {herb} thảo dược · {pause} tạm dừng",
 
   // ---- Prologue S1: signs and toasts
@@ -85,6 +86,10 @@ export const vi = {
   "toast.guardBreak": "Thủ bị phá!",
   "toast.phaThe": "Phá Thế!",
   "toast.perfectDodge": "Né hoàn hảo!",
+  "toast.perfectDodge.anh": "Né hoàn hảo! +1 Ảnh · đòn kế chí mạng",
+  "toast.anhKich": "Ảnh Kích!",
+  "toast.anhGain": "+1 Ảnh",
+  "toast.crit": "Chí mạng!",
   "toast.riposte": "Phản đòn!",
   "toast.saved": "Đã lưu.",
   "toast.item": "Nhận được: {item}",

@@ -179,11 +179,15 @@ const PRO = {
  * Weapon drawn in the hand (ADR-0010):
  * - **Kiếm Khách straight sword:** a ~24 px blade (the Art Bible's one-hand sword is about 22 px) plus a crossguard.
  * - **Brush-knife (dao phát):** the Prologue's tool (PB L2). A 15 px broad, hooked blade on a long wooden grip, no guard.
- * Set once before `registerTextures` (main.ts reads the kit).
+ * - **Ảnh Vệ twin short blades:** about 12 px each (Art Bible), one in each hand; the back hand holds its blade
+ *   reverse-grip along the forearm. Sheathed crossed at the small of the back.
+ * `heroWeapon()` tells which weapon the hero frames are drawn with; `rebuildHero` redraws them for another.
  */
-let WEAPON: "knife" | "sword" = "sword";
+export type Weapon = "knife" | "sword" | "twin";
+let WEAPON: Weapon = "sword";
 let BLADE = 24;
-export function setWeapon(w: "knife" | "sword"): void { WEAPON = w; BLADE = w === "sword" ? 24 : 15; }
+export function setWeapon(w: Weapon): void { WEAPON = w; BLADE = w === "sword" ? 24 : w === "twin" ? 13 : 15; }
+export function heroWeapon(): Weapon { return WEAPON; }
 
 export function protagonist(p: Pose): Px {
   // 72×76 frame so a full sword fits in every pose (windup behind, overhead above, thrust ahead)
@@ -210,7 +214,12 @@ export function protagonist(p: Pose): Px {
       // ARMS give the blade *direction*; length is fixed so the sword reads the same in every pose
       const dx0 = a.blade[0] - a.h[0], dy0 = a.blade[1] - a.h[1], L = Math.hypot(dx0, dy0) || 1;
       const ux = dx0 / L, uy = dy0 / L, bx = hx2 + ux * BLADE, by = hy + uy * BLADE;
-      if (WEAPON === "sword") {
+      if (WEAPON === "twin") { // a short straight blade, small guard
+        P.line(hx2 - ux * 2, hy - uy * 2, hx2, hy, PRO.grip, 1);
+        P.set(hx2 + ux - uy, hy + uy + ux, PRO.guard); P.set(hx2 + ux + uy, hy + uy - ux, PRO.guard);
+        P.line(hx2 + ux * 2, hy + uy * 2, bx, by, PRO.blade, 1);
+        P.set(bx, by, PRO.bladeHi); P.set(hx2 + ux * BLADE * 0.6, hy + uy * BLADE * 0.6, PRO.bladeHi);
+      } else if (WEAPON === "sword") {
         P.line(hx2 - ux * 3, hy - uy * 3, hx2, hy, PRO.grip, 1); // grip + pommel
         P.line(hx2 + ux - uy * 2, hy + uy + ux * 2, hx2 + ux + uy * 2, hy + uy - ux * 2, PRO.guard, 1); // crossguard
         P.line(hx2 + ux * 2, hy + uy * 2, bx, by, PRO.blade, 1);
@@ -236,7 +245,9 @@ export function protagonist(p: Pose): Px {
   };
 
   leg(back.dx - 1, back.lift ?? 0, shade(PRO.pants, 0.78), shade(PRO.boot, 0.8), 3);
-  drawArm(ARMS[p.backArm ?? "rest"], shade(PRO.sleeve, 0.72), skinS, false);
+  const backA = ARMS[p.backArm ?? "rest"] as ArmPose;
+  drawArm(backA, shade(PRO.sleeve, 0.72), skinS, false);
+
 
   // coat: knee length; hem flutter is secondary motion
   const flutter = p.coat ?? 0;
@@ -253,6 +264,14 @@ export function protagonist(p: Pose): Px {
   P.rect(X(-4) + ln, Y(22) + b, 9, 1, PRO.belt);
 
   leg(front.dx, front.lift ?? 0, PRO.pants, PRO.boot, 4);
+
+  // Ảnh Vệ's second blade, held reverse-grip in the back hand: drawn over the coat so the pair reads at 48 px
+  if (WEAPON === "twin" && (ARMS[p.arm ?? "rest"] as ArmPose).blade) {
+    const hx2 = sx + backA.h[0], hy = sy + backA.h[1];
+    const tipX = hx2 + 9 + ln, tipY = hy - 7; // angled forward and up from the hand, along the body
+    P.line(hx2, hy, tipX, tipY, PRO.blade, 1); P.set(tipX, tipY, PRO.bladeHi);
+    P.rect(hx2 - 1, hy, 2, 2, PRO.grip);
+  }
 
   // satchel strap + bag (silhouette anchor)
   P.line(X(3) + ln, Y(11) + b, X(-4) + ln, Y(21) + b, PRO.strap);
@@ -275,7 +294,10 @@ export function protagonist(p: Pose): Px {
   else P.set(X(2) + hx0, Y(5) + b, "#1b1714");
 
   const arm = ARMS[p.arm ?? "rest"] as ArmPose;
-  if (!arm.blade && WEAPON === "sword") { // sheathed sword at the hip: grip forward-up, scabbard trailing back-down
+  if (!arm.blade && WEAPON === "twin") { // two short sheaths crossed at the small of the back
+    P.line(X(-2) + ln, Y(18) + b, X(-9) + ln, Y(27) + b, PRO.sheath, 2); P.line(X(-8) + ln, Y(18) + b, X(-1) + ln, Y(26) + b, shade(PRO.sheath, 0.85), 2);
+    P.set(X(-2) + ln, Y(17) + b, PRO.grip); P.set(X(-8) + ln, Y(17) + b, PRO.grip);
+  } else if (!arm.blade && WEAPON === "sword") { // sheathed sword at the hip: grip forward-up, scabbard trailing back-down
     P.line(X(4) + ln, Y(19) + b, X(2) + ln, Y(22) + b, PRO.grip, 1);
     P.line(X(1) + ln, Y(21) + b, X(4) + ln, Y(23) + b, PRO.guard, 1);
     P.line(X(2) + ln, Y(23) + b, X(-9) + ln, Y(37) + b, PRO.sheath, 2);
@@ -641,8 +663,12 @@ export function thanhMocBackground(): Px {
 /* =====================================================================================
  * Registration: every frame becomes its own texture key. Clips (src/clips.ts) reference keys.
  * ===================================================================================== */
-export function registerTextures(scene: Phaser.Scene): void {
-  const add = (key: string, px: Px) => { if (!scene.textures.exists(key)) scene.textures.addCanvas(key, px.toCanvas()); };
+/** Hero frame keys drawn by the generator (authored frames that replaced one are not in here, ADR-0011). */
+const generatedHero = new Set<string>();
+
+/** The hero's frames, drawn with the current weapon. Keys that already exist (authored art) are left alone. */
+function registerHero(scene: Phaser.Scene): void {
+  const add = (key: string, px: Px) => { if (!scene.textures.exists(key)) { scene.textures.addCanvas(key, px.toCanvas()); generatedHero.add(key); } };
   const pose = (key: string, p: Pose) => add(key, protagonist(p));
 
   // idle: breathing (bob), coat and hair settle; plus a blink frame
@@ -721,6 +747,24 @@ export function registerTextures(scene: Phaser.Scene): void {
   pose("p_heal0", { bob: 4, front: { dx: 3, lift: 1 }, back: { dx: -4 }, arm: "reach", backArm: "tuck" });
   pose("p_heal1", { bob: 4, front: { dx: 3, lift: 1 }, back: { dx: -4 }, arm: "mouth", backArm: "tuck", eyes: "closed" });
 
+}
+
+/**
+ * Redraw the hero for another weapon (the class chosen in Ch. I changes what he carries). Only generated frames are
+ * redrawn; their outlines are rebuilt by the caller. Call while no sprite shows a hero frame (the stage's create).
+ */
+export function rebuildHero(scene: Phaser.Scene, weapon: Weapon): boolean {
+  if (weapon === WEAPON && generatedHero.size) return false;
+  setWeapon(weapon);
+  for (const key of generatedHero) { scene.textures.remove(key); if (scene.textures.exists(key + "_ol")) scene.textures.remove(key + "_ol"); }
+  generatedHero.clear();
+  registerHero(scene);
+  return true;
+}
+
+export function registerTextures(scene: Phaser.Scene): void {
+  const add = (key: string, px: Px) => { if (!scene.textures.exists(key)) scene.textures.addCanvas(key, px.toCanvas()); };
+  registerHero(scene);
   // boar
   for (let i = 0; i < 2; i++) add(`boar_idle${i}`, boar({ bodyDy: i }));
   for (let i = 0; i < 4; i++) add(`boar_walk${i}`, boar({ legs: i }));

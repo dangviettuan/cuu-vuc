@@ -80,9 +80,16 @@ URL options: `?quick=1` (straight into the stage with a throwaway save: used by 
 
 `?quick=1&stage=prologue-s4` (or `-s2` … `-s8`, `-s8-station`) starts a test run at that stage. Starting at S6 without having made C1 plays the prose branch (kept the Father's word).
 
+## Phase 3 (branch `phase-3`): Chapter I
+
+| Piece | Where |
+|---|---|
+| **Class from the save:** `CH1_CLASS` (Ch. I I-2) sets the kit when a stage starts; the hero is redrawn with that class's weapon | `setKit` in `src/tuning.ts`, `rebuildHero` in `src/art.ts`, `Stage.create` |
+| **Ảnh Vệ:** twin blades, a quicker string, 6-frame perfect dodge → +1 Ảnh and a crit window, a landed string → +1 Ảnh, **Ảnh Kích** (J during a dodge) | `LIGHT_ANH`, `ANH` in `src/tuning.ts`; `src/player.ts` |
+
 ## Kits (ADR-0010)
 
-The greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class abilities. Add **`?kit=kiem`** to the URL to load the **Kiếm Khách** kit, which adds the 12-frame parry, Thế, Riposte, Phá Thế and the straight sword.
+The greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class abilities. Add **`?kit=kiem`** to the URL to load the **Kiếm Khách** kit, which adds the 12-frame parry, Thế, Riposte, Phá Thế and the straight sword. **`?kit=anh`** loads **Ảnh Vệ**: twin blades, the quicker string, the 6-frame perfect dodge, Ảnh, and Ảnh Kích. Without an override, the kit comes from the save's class (`CH1_CLASS`).
 
 ## What is implemented
 

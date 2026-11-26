@@ -260,6 +260,21 @@ const { launch, withQuick } = require("./harness.cjs");
   const unread = await scene(() => window.__cuuVucSave().flags.PRO_STATION_READ);
   step("S8: taking the rod without reading the ground leaves PRO_STATION_READ unset", unread === undefined, { unread });
 
+  /* ---------------- Ch. I: the class from the save sets the kit (no ?kit= override) ---------------- */
+  if (!/[?&]kit=/.test(process.env.GAME_URL || "")) {
+    await openAt("prologue-s1");
+    const cls = await scene(async () => {
+      const g = window.__cuuVuc, st = g.scene.getScene("Stage");
+      window.__cuuVucSave().flags.CH1_CLASS = "anh";
+      const before = g.textures.get("p_aS").getSourceImage().toDataURL();
+      st.scene.restart({ mode: "quick" });
+      await new Promise((r) => setTimeout(r, 900));
+      const after = g.textures.get("p_aS").getSourceImage().toDataURL();
+      return { strip: g.scene.getScene("UI").stripLines[1].text, redrawn: before !== after, outline: g.textures.exists("p_aS_ol") };
+    });
+    step("Ch. I: CH1_CLASS = anh switches the kit and redraws the hero with twin blades", /Ảnh Kích/.test(cls.strip) && cls.redrawn && cls.outline, cls);
+  }
+
   step("no console errors", h.log.errors.length === 0, { errors: h.log.errors.slice(0, 5) });
   await h.browser.close();
   console.log(fails.length ? `\n${fails.length} step(s) failed` : "\nall steps passed");

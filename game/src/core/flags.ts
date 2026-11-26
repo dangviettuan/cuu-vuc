@@ -12,6 +12,8 @@ export const FLAG_TYPES = {
   PRO_KEEPER_HINT: "bool",
   /** Prologue S8: examined every clue at the station. Owner: prologue-an-moc §12. */
   PRO_STATION_READ: "bool",
+  /** Ch. I I-2: the class chosen from the four mentors ("kiem" | "anh" | "linh" | "co"). Owner: chapter-01-thanh-moc §14. */
+  CH1_CLASS: "enum",
 } as const;
 
 export type FlagName = keyof typeof FLAG_TYPES;

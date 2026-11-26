@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { KIT, PHA_THE_COST, PLAYER, VIEW } from "../tuning";
+import { ANH, KIT, PHA_THE_COST, PLAYER, VIEW } from "../tuning";
 import { input } from "../core/input";
 import { music } from "../music";
 import { t, StringKey } from "../core/i18n";
@@ -84,7 +84,7 @@ export class UIScene extends Phaser.Scene {
   private refreshStrip(): void {
     if (!this.stripLines.length) return;
     this.stripLines[0].setText(t("hud.strip1"));
-    this.stripLines[1].setText(t(KIT.classKit ? "hud.strip2.kiem" : "hud.strip2"));
+    this.stripLines[1].setText(t(KIT.id === "kiem" ? "hud.strip2.kiem" : KIT.id === "anh" ? "hud.strip2.anh" : "hud.strip2"));
   }
 
   toast(s: string, ms = 1800): void { this.toastText.setText(s).setVisible(true); this.toastUntil = this.time.now + ms; }
@@ -199,6 +199,11 @@ export class UIScene extends Phaser.Scene {
     if (KIT.classKit) {
       for (let i = 0; i < PLAYER.maxThe; i++) g.fillStyle(i < p.the ? 0xf6e7a0 : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
       g.fillStyle(p.the >= PHA_THE_COST ? 0xffc860 : 0x3a3f48, 1).fillRect(136 + PHA_THE_COST * 8 - 2, 17, 1, 3);
+    }
+    // Ảnh pips (Ảnh Vệ): violet; they pulse while the crit window is open
+    if (KIT.id === "anh") {
+      const crit = st.sim < p.critUntil && Math.floor(st.sim / 90) % 2 === 0;
+      for (let i = 0; i < ANH.max; i++) g.fillStyle(i < p.anh ? (crit ? 0xffffff : 0xb8a0f0) : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
     }
     this.hudText.setText(p.herbCap > 0 ? t("hud.herbs", { n: p.herbs, cap: p.herbCap }) : ""); // the pouch appears with the first herb
     const boss = st.boss;
