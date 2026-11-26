@@ -85,6 +85,21 @@ export const PLAYER = {
   herbCapMax: 2,
 } as const;
 
+/**
+ * Poison (Combat Bible §6, Thanh Mộc): exposure builds a meter; full, he is poisoned and loses health over time. Poison
+ * never kills by itself (it stops at 1 HP): it weakens, the fight is what kills (Phase 3 decision). Antidote herbs
+ * cure it; Q takes an antidote first while poisoned. The meter drains once exposure stops.
+ */
+export const POISON = {
+  max: 100,
+  durationMs: 8000,
+  dps: 3,
+  drainDelay: 1200,
+  drainPerSec: 14,
+  antidoteHeal: 10,
+  antidoteCapMax: 2,
+} as const;
+
 export interface AttackDef {
   name: string;
   startup: number;

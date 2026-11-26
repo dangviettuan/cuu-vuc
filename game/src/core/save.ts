@@ -28,6 +28,10 @@ export interface SaveData {
   done: string[];
   /** Key items (Prologue: the half Mạch Ấn, S5). */
   items: string[];
+  /** Antidote slots found (Ch. I), refilled at checkpoints like the herb pouch. */
+  antidoteCap?: number;
+  /** Mạch Ấn absorbed (Ch. I: Rễ Giữ, from Mộc Giác). Combat Bible §5. */
+  machAn?: string[];
 }
 
 /** Quick mode (playtest tools) keeps its throwaway save apart from the player's. */
@@ -83,18 +87,27 @@ export function setFlag(name: FlagName, value: FlagValue): void {
 export function getFlag(name: FlagName): FlagValue | undefined { return current?.flags[name]; }
 
 /** Rest at a checkpoint: record where, the pouch and what has been used up. */
-export function saveAtCheckpoint(stage: string, checkpoint: string, herbCap: number, taken: Iterable<string>): void {
+export function saveAtCheckpoint(stage: string, checkpoint: string, herbCap: number, taken: Iterable<string>, antidoteCap = 0): void {
   if (!current) return;
-  current.stage = stage; current.checkpoint = checkpoint; current.herbCap = herbCap; current.taken = [...new Set(taken)];
+  current.stage = stage; current.checkpoint = checkpoint; current.herbCap = herbCap; current.taken = [...new Set(taken)]; current.antidoteCap = antidoteCap;
   write();
 }
 
 /** Moving on to the next stage: it starts from its beginning; the pouch and the used-up things carry over. */
-export function enterStage(stage: string, herbCap: number, taken: Iterable<string>): void {
+export function enterStage(stage: string, herbCap: number, taken: Iterable<string>, antidoteCap = 0): void {
   if (!current) return;
-  current.stage = stage; current.checkpoint = null; current.herbCap = herbCap; current.taken = [...new Set(taken)];
+  current.stage = stage; current.checkpoint = null; current.herbCap = herbCap; current.taken = [...new Set(taken)]; current.antidoteCap = antidoteCap;
   write();
 }
+
+/** A Mạch Ấn absorbed (saved at once, like a choice's flags). */
+export function addMachAn(id: string): void {
+  if (!current) return;
+  current.machAn = current.machAn ?? [];
+  if (!current.machAn.includes(id)) current.machAn.push(id);
+  write();
+}
+export function hasMachAn(id: string): boolean { return !!current?.machAn?.includes(id); }
 
 export function addItem(id: string): void {
   if (!current) return;

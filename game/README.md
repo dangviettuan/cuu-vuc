@@ -85,6 +85,9 @@ URL options: `?quick=1` (straight into the stage with a throwaway save: used by 
 | Piece | Where |
 |---|---|
 | **Class from the save:** `CH1_CLASS` (Ch. I I-2) sets the kit when a stage starts; the hero is redrawn with that class's weapon | `setKit` in `src/tuning.ts`, `rebuildHero` in `src/art.ts`, `Stage.create` |
+| **Poison:** a meter fills in poison mist; full, he is poisoned (≈3 HP/s for 8 s, never below 1 HP). **Antidote herbs** (found, refilled at shrines); Q takes one first while poisoned | `POISON` in `src/tuning.ts`; `addPoison` in `src/player.ts`; `mists` in stage data |
+| **Rễ Giữ** (first Mạch Ấn): a perfect defence (Kiếm Khách parry, Ảnh Vệ perfect dodge) binds enemies within 90 px; saved as an absorbed Mạch Ấn | `rootsBind` in `Stage.ts`; `bind` in `src/enemies.ts`; `RE_GIU` in `src/data/enemies.ts`; `addMachAn` in `src/core/save.ts` |
+| **Test stage** for Ch. I systems: `?quick=1&stage=ch1-sandbox` (grants Rễ Giữ; boars, a rooted boar, poison mist, antidotes) | `src/data/stages/ch1-sandbox.ts` |
 | **Ảnh Vệ:** twin blades, a quicker string, 6-frame perfect dodge → +1 Ảnh and a crit window, a landed string → +1 Ảnh, **Ảnh Kích** (J during a dodge) | `LIGHT_ANH`, `ANH` in `src/tuning.ts`; `src/player.ts` |
 
 ## Kits (ADR-0010)

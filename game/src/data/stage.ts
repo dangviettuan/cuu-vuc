@@ -27,8 +27,12 @@ export interface StageDef {
   ledges: { x: number; y: number; w: number }[];
   /** Tutorial signs. `kiem` replaces the text when the Kiếm Khách kit is loaded. */
   signs: { x: number; text: StringKey; kiem?: StringKey }[];
-  /** One-time pickups: herbs add a pouch slot. `id` is saved once taken. */
-  herbs: { id: string; x: number; y?: number }[];
+  /** One-time pickups: herbs add a pouch slot, antidotes an antidote slot (Ch. I). `id` is saved once taken. */
+  herbs: { id: string; x: number; y?: number; kind?: "herb" | "antidote" }[];
+  /** Poison mist (Thanh Mộc độc thảo): standing in it builds poison, `rate` per second (default 40). */
+  mists?: { x: number; w: number; rate?: number }[];
+  /** Test stages only: Mạch Ấn the hero is given here (the sandbox, so Rễ Giữ can be tried before Mộc Giác exists). */
+  grants?: string[];
   /** Brush that blocks the path until cut (3 hits). `id` is saved once cleared. */
   brush: { id: string; x: number }[];
   /**

@@ -73,6 +73,22 @@ abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
     this.anim.update(dt);
   }
   protected enterAt(): void { this.stateAt = this.now; }
+
+  /** Rễ Giữ (Ch. I Mạch Ấn): roots hold it in place until then. */
+  boundUntil = 0;
+  bind(ms: number, now: number): void { if (this.isAlive()) this.boundUntil = Math.max(this.boundUntil, now + ms); }
+  get bound(): boolean { return this.now < this.boundUntil && this.isAlive(); }
+  /**
+   * While bound: no movement, no attack, the pose frozen, and the AI's state clock paused (it moves on with time), so a
+   * windup resumes where it was rather than finishing under the roots.
+   */
+  protected holdIfBound(dt: number): boolean {
+    if (!this.bound) return false;
+    this.stateAt += dt; this.kb = 0;
+    if (this.flashUntil > 0 && this.now > this.flashUntil) { flash(this, false); this.flashUntil = 0; }
+    if (this.b.enable) this.b.setVelocityX(0);
+    return true;
+  }
   /**
    * Telegraph: an additive warm glow that *ramps up* over the windup (slow in, builds to the strike).
    * The pose stays fully readable; localised cues (glint, dust, cracks) and a sound mark the attack type.
@@ -130,6 +146,7 @@ export class Boar extends Enemy {
 
   tick(now: number, dt: number, playerX: number): void {
     this.now = now;
+    if (this.holdIfBound(dt)) return;
     const t = now - this.stateAt, dx = playerX - this.x;
     const lo = this.minX - BOAR.leash, hi = this.maxX + BOAR.leash;
     let vx = 0;
@@ -189,7 +206,7 @@ export class Boar extends Enemy {
   }
 
   hits(): EnemyHit[] {
-    if (this.state !== "charge") return NONE;
+    if (this.state !== "charge" || this.bound) return NONE;
     this.hit.id = this.swing; this.hit.rect.setTo(this.b.x, this.b.y, this.b.width, this.b.height);
     this.hit.knockback = this.facing * BOAR.knockback;
     return this.hitList;
@@ -346,6 +363,7 @@ export class NanhRe extends Enemy {
 
   tick(now: number, dt: number, playerX: number): void {
     this.now = now;
+    if (this.holdIfBound(dt)) return;
     if (this.phase !== this.lastPhase && this.isAlive()) { this.lastPhase = this.phase; this.onPhase(this.phase); }
     const t = now - this.stateAt, dx = playerX - this.x, dist = Math.abs(dx);
     const k = this.speedK(), C = NANH_RE.charge, S = NANH_RE.swipe, T = NANH_RE.stomp;
@@ -455,6 +473,7 @@ export class NanhRe extends Enemy {
   }
 
   hits(): EnemyHit[] {
+    if (this.bound) return NONE;
     const h = this.hit;
     if (this.state === "charge") {
       h.id = this.swing; h.damage = NANH_RE.charge.damage; h.knockback = this.facing * NANH_RE.charge.knockback; h.parryable = false; h.onParried = undefined;

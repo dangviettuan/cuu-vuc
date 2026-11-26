@@ -260,6 +260,31 @@ const { launch, withQuick } = require("./harness.cjs");
   const unread = await scene(() => window.__cuuVucSave().flags.PRO_STATION_READ);
   step("S8: taking the rod without reading the ground leaves PRO_STATION_READ unset", unread === undefined, { unread });
 
+  /* ---------------- Ch. I systems (the sandbox stage): poison, antidote, Rễ Giữ ---------------- */
+  await openAt("ch1-sandbox");
+  await tp(520); await h.wait(300); await tp(545); await h.wait(300);
+  await tp(680); await h.wait(3500);
+  const pz = await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; return { poisoned: p.poisoned, hp: p.hp, anti: p.antidotes }; });
+  step("Ch. I: standing in poison mist poisons him (and he picked up antidotes)", pz.poisoned && pz.anti === 2, pz);
+  await tp(560); await h.wait(400); await h.tap("q", 60); await h.wait(800);
+  const cu = await scene(() => { const p = window.__cuuVuc.scene.getScene("Stage").player; return { poisoned: p.poisoned, anti: p.antidotes }; });
+  step("Ch. I: Q while poisoned takes an antidote and cures it", !cu.poisoned && cu.anti === 1, cu);
+  const rg = await scene(() => {
+    const st = window.__cuuVuc.scene.getScene("Stage"), p = st.player, b = st.boars[0];
+    p.x = b.x - 40; p.body.reset(p.x, p.y - p.body.height - 4); p.facing = 1;
+    return true;
+  });
+  await h.wait(100);
+  const anh = /[?&]kit=anh/.test(process.env.GAME_URL || "");
+  await h.down(anh ? "Shift" : "i"); await h.wait(20);
+  const bound = await scene((isAnh) => {
+    const st = window.__cuuVuc.scene.getScene("Stage"), p = st.player, b = st.boars[0];
+    p.receive({ id: "ci-def", rect: p.hurtbox(), damage: 10, knockback: 0, parryable: true });
+    return { bound: b.bound, state: p.state, reGiu: st.reGiu, kit: isAnh };
+  }, anh);
+  await h.up(anh ? "Shift" : "i");
+  step("Ch. I: a perfect defence with Rễ Giữ binds the enemy beside him", rg && bound.bound, bound);
+
   /* ---------------- Ch. I: the class from the save sets the kit (no ?kit= override) ---------------- */
   if (!/[?&]kit=/.test(process.env.GAME_URL || "")) {
     await openAt("prologue-s1");

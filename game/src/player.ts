@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { AIR_SLASH, ANH, AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, LIGHT_ANH, PARRY, PHA_THE, PHA_THE_COST, PLAYER, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
+import { AIR_SLASH, ANH, AttackDef, BLOCK, DODGE, HEAVY, KIT, LIGHT, LIGHT_ANH, PARRY, PHA_THE, PHA_THE_COST, PLAYER, POISON, RIPOSTE, RIPOSTE_WINDOW } from "./tuning";
 import { EnemyHit, HitResult, PlayerHit, flash } from "./combat";
 import { Animator } from "./anim";
 import { PC, lightClip } from "./clips";
@@ -21,6 +21,7 @@ export interface Controls {
 type State = "move" | "light" | "air" | "charge" | "heavy" | "riposte" | "phaThe" | "blink" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
 export type PlayerEvent =
   | "parry" | "block" | "guardBreak" | "perfectDodge" | "hurt" | "riposte" | "phaThe" | "blink" | "anh" | "crit" | "heal" | "dead"
+  | "poisoned" | "cured"
   | "jump" | "land" | "dodge" | "step" | "skid" | "swing" | "slam" | "ghost" | "thud";
 
 const ATTACKING: ReadonlySet<State> = new Set(["light", "air", "heavy", "riposte", "phaThe", "blink"]);
@@ -47,6 +48,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   anh = 0;
   /** Ảnh Vệ: hits until this time crit (opened by a perfect dodge). */
   critUntil = 0;
+  /** Poison buildup (0–POISON.max); full, he is poisoned until `poisonedUntil`. */
+  poison = 0;
+  poisonedUntil = 0;
+  private poisonAt = -1e9;
+  private poisonCarry = 0;
+  /** Antidote herbs carried, and the pouch's antidote slots (found like herbs, refilled at shrines). */
+  antidotes = 0;
+  antidoteCap = 0;
+  private usingAntidote = false;
   herbs = 0;
   /**
    * Herb pouch capacity (review D4): each herb found adds a slot, up to PLAYER.herbCapMax. Respawning and resting at a
@@ -111,7 +121,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   riposteReady(now: number): boolean { return now < this.riposteUntil && !this.isDead(); }
   /** Picking up a field herb: a new pouch slot (up to the cap), filled. */
   addHerb(): void { if (this.herbCap < PLAYER.herbCapMax) this.herbCap++; this.herbs = Math.min(this.herbCap, this.herbs + 1); }
-  refillHerbs(): void { this.herbs = this.herbCap; }
+  refillHerbs(): void { this.herbs = this.herbCap; this.antidotes = this.antidoteCap; }
+  addAntidote(): void { if (this.antidoteCap < POISON.antidoteCapMax) this.antidoteCap++; this.antidotes = Math.min(this.antidoteCap, this.antidotes + 1); }
+  get poisoned(): boolean { return this.now < this.poisonedUntil && !this.isDead(); }
+  /** Poison exposure (a spore cloud, a vine): builds the meter; full, he is poisoned (a fresh dose restarts the clock). */
+  addPoison(amount: number): void {
+    if (this.isDead() || amount <= 0) return;
+    this.poisonAt = this.now;
+    if (this.poisoned) { this.poisonedUntil = Math.max(this.poisonedUntil, this.now + POISON.durationMs * 0.5); return; }
+    this.poison = Math.min(POISON.max, this.poison + amount);
+    if (this.poison >= POISON.max) { this.poison = 0; this.poisonedUntil = this.now + POISON.durationMs; this.onEvent("poisoned"); }
+  }
   get body2(): Phaser.Physics.Arcade.Body { return this.body as Phaser.Physics.Arcade.Body; }
   get grounded(): boolean { return this.body2.blocked.down || this.body2.touching.down; }
   isDead(): boolean { return this.state === "dead"; }
@@ -125,6 +145,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   respawn(x: number, y: number): void {
     this.hp = PLAYER.maxHp; this.stamina = PLAYER.maxStamina; this.the = 0; this.anh = 0; this.critUntil = 0; this.herbs = this.herbCap;
+    this.poison = 0; this.poisonedUntil = 0; this.antidotes = this.antidoteCap;
     this.setPosition(x, y); this.body2.setVelocity(0, 0);
     this.setAlpha(1); flash(this, false);
     this.attack = null;
@@ -168,6 +189,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (now > this.flashUntil) flash(this, false);
     const t = now - this.stateAt;
     const dir = (c.right ? 1 : 0) - (c.left ? 1 : 0);
+    // poison: the meter drains when exposure stops; poisoned, health ebbs (never below 1)
+    if (now - this.poisonAt > POISON.drainDelay) this.poison = Math.max(0, this.poison - POISON.drainPerSec * sec);
+    if (this.poisoned && this.hp > 1) {
+      this.poisonCarry += POISON.dps * sec;
+      const d = Math.floor(this.poisonCarry);
+      if (d > 0) { this.poisonCarry -= d; this.hp = Math.max(1, this.hp - d); }
+    }
 
     switch (this.state) {
       case "move": {
@@ -195,7 +223,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         } else if (parry && this.spend(PARRY.stamina)) {
           this.bufParry = NEVER;
           this.parryAt = now; this.enter("parry"); body.setVelocityX(0); this.anim.play(PC.guard, true, true);
-        } else if (c.herbPressed && this.herbs > 0 && this.hp < PLAYER.maxHp && grounded) {
+        } else if (c.herbPressed && grounded && ((this.poisoned && this.antidotes > 0) || (this.herbs > 0 && this.hp < PLAYER.maxHp))) {
+          // while poisoned, the pouch gives an antidote first
+          this.usingAntidote = this.poisoned && this.antidotes > 0;
           this.enter("heal"); body.setVelocityX(0); this.anim.play(PC.heal, true, true);
         }
         break;
@@ -283,8 +313,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         break;
       case "heal":
         if (t >= PLAYER.herbUseTime) {
-          this.herbs--; this.hp = Math.min(PLAYER.maxHp, this.hp + PLAYER.herbHeal);
-          this.onEvent("heal"); this.enter("move");
+          if (this.usingAntidote) {
+            this.antidotes--; this.poisonedUntil = 0; this.poison = 0; this.hp = Math.min(PLAYER.maxHp, this.hp + POISON.antidoteHeal);
+            this.onEvent("cured");
+          } else { this.herbs--; this.hp = Math.min(PLAYER.maxHp, this.hp + PLAYER.herbHeal); this.onEvent("heal"); }
+          this.usingAntidote = false; this.enter("move");
         }
         break;
       case "hurt":

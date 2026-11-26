@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { ANH, KIT, PHA_THE_COST, PLAYER, VIEW } from "../tuning";
+import { ANH, KIT, PHA_THE_COST, PLAYER, POISON, VIEW } from "../tuning";
+import { RE_GIU } from "../data/enemies";
 import { input } from "../core/input";
 import { music } from "../music";
 import { t, StringKey } from "../core/i18n";
@@ -26,6 +27,8 @@ export class UIScene extends Phaser.Scene {
   private stage: StageScene | null = null;
   private hud!: Phaser.GameObjects.Graphics;
   private hudText!: Phaser.GameObjects.Text;
+  /** The carried Mạch Ấn (Rễ Giữ): bright when ready, dim while it recovers. */
+  private maIcon!: Phaser.GameObjects.Image;
   private toastText!: Phaser.GameObjects.Text;
   private toastUntil = 0;
   private bossName!: Phaser.GameObjects.Text;
@@ -49,6 +52,7 @@ export class UIScene extends Phaser.Scene {
   create(): void {
     this.hud = this.add.graphics().setDepth(100);
     this.hudText = text(this, 10, 30, "", { depth: 101 });
+    this.maIcon = this.add.image(170, 16, "ma_reGiu").setDepth(101).setVisible(false);
     this.toastText = text(this, VIEW.width / 2, 44, "", { color: PALETTE.gold, bg: "#0b0d11cc", pad: 5, ox: 0.5, depth: 101, wrap: 420, align: "center" }).setVisible(false);
     this.bossName = text(this, VIEW.width / 2, 0, "", { ox: 0.5, depth: 101 }).setVisible(false);
     this.strip.push(this.add.rectangle(0, VIEW.height - STRIP_H, VIEW.width, STRIP_H, PALETTE.panel, 0.86).setOrigin(0).setDepth(100));
@@ -73,7 +77,7 @@ export class UIScene extends Phaser.Scene {
   detach(): void { this.stage = null; this.closeAll(); this.setHudVisible(false); this.toastText.setVisible(false); this.hideBoss(); }
 
   private hudOn = false;
-  private setHudVisible(v: boolean): void { this.hudOn = v; this.hud.setVisible(v); this.hudText.setVisible(v); this.updateStrip(); }
+  private setHudVisible(v: boolean): void { this.hudOn = v; this.hud.setVisible(v); this.hudText.setVisible(v); if (!v) this.maIcon?.setVisible(false); this.updateStrip(); }
   /** Bottom space the strip takes right now (0 when hidden), so the boss bar sits just above whatever is there. */
   private get stripH(): number { return this.stripShown ? STRIP_H : 0; }
   /** The combat controls strip is noise in a quiet scene (S3): only stages with fighting show it. */
@@ -185,7 +189,7 @@ export class UIScene extends Phaser.Scene {
   private drawHud(dtMs: number): void {
     const g = this.hud, st = this.stage!, p = st.player;
     if (!p) return;
-    if (!this.combatStage) { g.clear(); this.hudText.setText(""); return; } // a quiet scene shows no combat HUD
+    if (!this.combatStage) { g.clear(); this.hudText.setText(""); this.maIcon.setVisible(false); return; } // a quiet scene shows no combat HUD
     // damage trail: the white part of the bar drains after a short delay so the size of a hit is readable
     this.hpTrail = this.hpTrail > p.hp ? Math.max(p.hp, this.hpTrail - (dtMs / 1000) * 60) : p.hp;
     g.clear();
@@ -205,7 +209,17 @@ export class UIScene extends Phaser.Scene {
       const crit = st.sim < p.critUntil && Math.floor(st.sim / 90) % 2 === 0;
       for (let i = 0; i < ANH.max; i++) g.fillStyle(i < p.anh ? (crit ? 0xffffff : 0xb8a0f0) : 0x3a3f48, 1).fillRect(136 + i * 8, 10, 6, 6);
     }
-    this.hudText.setText(p.herbCap > 0 ? t("hud.herbs", { n: p.herbs, cap: p.herbCap }) : ""); // the pouch appears with the first herb
+    // poison: the meter fills under the stamina bar; poisoned, the health bar's colour turns sickly
+    if (p.poison > 0 && !p.poisoned) { g.fillStyle(0x2a3a20, 1).fillRect(10, 24, 120, 2); g.fillStyle(0x9ab84a, 1).fillRect(10, 24, Math.round(120 * p.poison / POISON.max), 2); }
+    if (p.poisoned) g.fillStyle(0x8aa040, 1).fillRect(10, 10, Math.round(120 * (p.hp / PLAYER.maxHp)), 6);
+    const pouch = [p.herbCap > 0 ? t("hud.herbs", { n: p.herbs, cap: p.herbCap }) : "", p.antidoteCap > 0 ? t("hud.antidotes", { n: p.antidotes, cap: p.antidoteCap }) : ""].filter(Boolean);
+    this.hudText.setText(pouch.join(" · ")); // the pouch appears with the first herb
+    this.maIcon.setVisible(st.reGiu && this.hudOn);
+    if (st.reGiu) {
+      const left = Math.max(0, st.reGiuReady - st.sim);
+      this.maIcon.setAlpha(left > 0 ? 0.3 : 1).setX(KIT.id === "prologue" ? 142 : 170);
+      if (left > 0) g.fillStyle(0x7ee08a, 1).fillRect(this.maIcon.x - 6, 23, Math.round(12 * (1 - left / RE_GIU.cooldownMs)), 1);
+    }
     const boss = st.boss;
     if (this.bossShown && boss && boss.isAlive()) {
       const ratio = boss.hp / boss.maxHp;

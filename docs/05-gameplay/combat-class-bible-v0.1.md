@@ -168,4 +168,20 @@ This maps the Gameplay README's prototype target **[GB]** to actual content:
 - **Ảnh Kích** (the Blink Strike): **J during a dodge** spends 1 Ảnh. He dashes on through, cutting everything along an ~80 px path (26 damage), and turns to face back. He cannot be hit during it.
 - **Not yet built:** Ảnh Phân and Cửu Liên.
 
+**Poison and Rễ Giữ in the greybox** *(2026-11-26, Phase 3)*:
+- **Poison:**
+  - Exposure (poison mist; later spores, vines and Độc Đằng) fills a 100-point meter, which drains once exposure stops.
+  - Full means poisoned: about 3 HP per second for 8 s.
+  - **Poison never kills by itself.** It stops at 1 HP: it weakens, and the fight is what kills.
+  - While poisoned, the HP bar turns sickly green.
+- **Antidote herbs:**
+  - Found like field herbs, with up to 2 slots, refilled at checkpoints.
+  - **Q while poisoned takes an antidote first:** it cures and heals 10. There is no extra key.
+- **Rễ Giữ** (Mạch Ấn #1):
+  - A perfect defence makes roots erupt and bind every enemy within 90 px: 1.2 s for beasts, 0.6 s for bosses.
+  - A bound enemy is frozen mid-pose. Its attack clock pauses, so a windup resumes where it stopped rather than landing under the roots.
+  - 4 s cooldown.
+  - **The trigger follows the class's own defence:** a parry for Kiếm Khách (and the classless kit), a perfect dodge for Ảnh Vệ.
+  - Its HUD icon dims while it recharges.
+
 **Greybox kits** *(amended, [ADR-0010](../decisions/ADR-0010-prologue-kit-and-class-kits.md))*: the greybox defaults to the canon **Prologue kit**: brush-knife, 8-frame parry, block and herb pouch, with no class ability. `?kit=kiem` loads the Kiếm Khách kit (12-frame parry, Thế, Riposte and Phá Thế) for testing, and `?kit=anh` loads Ảnh Vệ. In play, the kit comes from the save's `CH1_CLASS`, chosen in Ch. I.

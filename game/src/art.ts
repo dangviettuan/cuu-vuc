@@ -498,6 +498,33 @@ export function bush(shake: number): Px {
   return P.outline();
 }
 
+/** An antidote herb (Ch. I): pale violet flowers on a low stem, so it never reads as the healing herb. */
+export function antidote(glint: number): Px {
+  const P = new Px(11, 12);
+  P.line(5, 11, 5, 5, "#4f7f45"); P.ell(3, 7, 2, 1.2, "#6a9a52"); P.ell(7, 6, 2, 1.2, "#6a9a52");
+  P.ell(5, 3, 2, 1.6, "#b8a0e0"); P.set(5, 3, "#f2ecff"); P.set(3, 2, "#9a80c8"); P.set(7, 2, "#9a80c8");
+  P.outline();
+  if (glint === 1) { P.set(8, 0, "#fffbe6"); P.set(9, 1, "#f2ecff"); }
+  if (glint === 2) { P.set(1, 1, "#fffbe6"); }
+  return P;
+}
+
+/** A puff of poison spores (độc thảo mist, Ch. I): sickly yellow-green, two sizes. */
+export function sporePuff(big: number): Px {
+  const P = new Px(10, 10), r = rng(77 + big);
+  P.ell(5, 5, big ? 4.5 : 3, big ? 4 : 2.6, "#9ab84a");
+  for (let i = 0; i < 8; i++) P.set(1 + r() * 8, 1 + r() * 8, r() < 0.5 ? "#c8d870" : "#6a8a3a");
+  return P;
+}
+
+/** The HUD icon of an absorbed Mạch Ấn: a disc with the converging grooves, in the source realm's accent (Thanh Mộc green). */
+export function machAnIcon(accent: string): Px {
+  const P = new Px(12, 12);
+  P.ell(6, 6, 5.4, 5.4, "#1c2a20");
+  machGrooves(P, 6, 6, 4.6, accent, 5, 1.3);
+  return P.outline();
+}
+
 export function herb(glint: number): Px {
   const P = new Px(11, 12);
   P.line(5, 11, 5, 4, "#4f7f45"); P.ell(3, 5, 2, 1.4, "#7aa45c"); P.ell(7, 4, 2, 1.4, "#7aa45c"); P.set(5, 2, "#d4b04a");
@@ -803,6 +830,9 @@ export function registerTextures(scene: Phaser.Scene): void {
   for (let i = 0; i < 3; i++) add(`root${i}`, rootSpike(i));
   for (let i = 0; i < 3; i++) add(`bush${i}`, bush([0, 1, -1][i]));
   for (let i = 0; i < 3; i++) add(`herb${i}`, herb(i));
+  for (let i = 0; i < 3; i++) add(`antidote${i}`, antidote(i));
+  add("spore0", sporePuff(0)); add("spore1", sporePuff(1));
+  add("ma_reGiu", machAnIcon("#7ee08a"));
   add("shrine_off", shrine(false));
   for (let i = 0; i < 3; i++) add(`shrine_on${i}`, shrine(true, i));
   add("sign", sign());

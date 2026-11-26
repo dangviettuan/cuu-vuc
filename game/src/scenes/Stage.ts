@@ -3,7 +3,7 @@ import { Player, Controls, PlayerEvent } from "../player";
 import { Boar, Bush, EnemyEvent, NanhRe, RootSpike, Runner, configureEnemies, setEnemyDifficulty } from "../enemies";
 import { EnemyHit, Hittable, PlayerHit, overlaps } from "../combat";
 import { Animator } from "../anim";
-import { HERB_GLINT, SHRINE_LIT } from "../clips";
+import { ANTIDOTE_GLINT, HERB_GLINT, SHRINE_LIT } from "../clips";
 import { Fx } from "../fx";
 import { sfx } from "../sfx";
 import { music } from "../music";
@@ -14,11 +14,11 @@ import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
 import { Rng, runSeed } from "../core/rng";
 import { onSettings, settings } from "../core/settings";
-import { addItem, enterStage, getFlag, markDone, save, saveAtCheckpoint, setFlag } from "../core/save";
+import { addItem, addMachAn, enterStage, getFlag, hasMachAn, markDone, save, saveAtCheckpoint, setFlag } from "../core/save";
 import { DIFFICULTY } from "../data/difficulty";
 import { FIRST_STAGE, STAGES } from "../data/stages";
 import type { StageDef, When } from "../data/stage";
-import { STAMPEDE } from "../data/enemies";
+import { RE_GIU, STAMPEDE } from "../data/enemies";
 import { SCRIPTS } from "../data/dialogue";
 import { CUTSCENES, CutSfx, Step } from "../data/cutscenes";
 import { Npc } from "../npc";
@@ -34,7 +34,8 @@ const EDGE = 12;
 export type StageMode = "new" | "continue" | "enter" | "quick";
 export interface StageInit { mode: StageMode }
 
-interface Herb { id: string; img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; }
+interface Herb { id: string; img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; kind: "herb" | "antidote"; }
+interface Mist { x: number; w: number; rate: number; puffs: { img: Phaser.GameObjects.Image; x: number; y: number; phase: number }[] }
 interface Drift { img: Phaser.GameObjects.Image; x: number; y: number; vx: number; vy: number; phase: number; }
 interface Sign { x: number; key: StringKey; label: Phaser.GameObjects.Text; }
 /** Something the interact key does when the hero stands near it: rest at a shrine, look at a thing, talk to someone. */
@@ -91,6 +92,10 @@ export class StageScene extends Phaser.Scene {
   private stampedeCue = 0;
   private birds: Bird[] = [];
   private stageRng = new Rng(1);
+  private mists: Mist[] = [];
+  /** Rễ Giữ: the hero carries it, and when it can fire again (sim time). */
+  reGiu = false;
+  reGiuReady = 0;
   /** The cutscene playing, if any (gameplay input is locked; the pause menu can skip it). */
   cutscene: string | null = null;
   private skipping = false;
@@ -143,6 +148,7 @@ export class StageScene extends Phaser.Scene {
     this.boars = []; this.bushes = []; this.roots = []; this.herbs = []; this.signs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     this.gone = false;
     this.npcs = new Map(); this.props = new Map(); this.interactables = []; this.cutscene = null; this.skipping = false; this.heroWalk = null; this.leaving = false; this.boss = null;
+    this.mists = []; this.reGiuReady = 0;
     this.marks = new Set(); this.played = new Set(); this.propAnims = []; this.blocks = []; this.runners = []; this.birds = []; this.stampedeAt = 0; this.stampedeCue = 0; this.inChoice = false;
     // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
     this.taken = new Set(sv?.taken ?? []);
@@ -224,7 +230,10 @@ export class StageScene extends Phaser.Scene {
       if (this.taken.has(b.id)) bush.clear(false);
       this.bushes.push(bush);
     }
-    for (const h of def.herbs) if (!this.taken.has(h.id)) this.addHerb(h.id, h.x, h.y ?? def.groundY - 6);
+    for (const h of def.herbs) if (!this.taken.has(h.id)) this.addHerb(h.id, h.x, h.y ?? def.groundY - 6, h.kind ?? "herb");
+    for (const m of def.mists ?? []) this.addMist(m.x, m.w, m.rate ?? 40);
+    for (const id of def.grants ?? []) addMachAn(id);
+    this.reGiu = hasMachAn("reGiu") || (typeof location !== "undefined" && new URLSearchParams(location.search).get("ma") === "regiu");
     this.spawnBoars();
 
     // Shrine checkpoint (ADR-0006).
@@ -243,6 +252,7 @@ export class StageScene extends Phaser.Scene {
       }
     }
     this.player.herbCap = sv?.herbCap ?? 0;
+    this.player.antidoteCap = sv?.antidoteCap ?? 0;
     this.player.refillHerbs();
 
     // People, and things to look at or use.
@@ -437,10 +447,44 @@ export class StageScene extends Phaser.Scene {
     this.jHint.setText(input.label("light"));
   }
 
-  private addHerb(id: string, x: number, y: number): void {
-    const img = this.add.image(x, y, "herb0").setOrigin(0.5, 1).setDepth(6);
-    const anim = new Animator(img); anim.play(HERB_GLINT); anim.update(Math.random() * 1500);
-    this.herbs.push({ id, img, anim, baseY: y, phase: Math.random() * 6, taken: false });
+  private addHerb(id: string, x: number, y: number, kind: "herb" | "antidote"): void {
+    const img = this.add.image(x, y, kind === "antidote" ? "antidote0" : "herb0").setOrigin(0.5, 1).setDepth(6);
+    const anim = new Animator(img); anim.play(kind === "antidote" ? ANTIDOTE_GLINT : HERB_GLINT); anim.update(Math.random() * 1500);
+    this.herbs.push({ id, img, anim, baseY: y, phase: Math.random() * 6, taken: false, kind });
+  }
+
+  /** Poison mist over ground (độc thảo): a low haze and drifting spore puffs, so the danger is visible before it is felt. */
+  private addMist(x: number, w: number, rate: number): void {
+    const gy = this.def.groundY;
+    for (let i = 0; i < 4; i++) this.add.rectangle(x + w / 2, gy - 6 - i * 7, w - i * 10, 8, 0x9ab84a, 0.17 - i * 0.035).setDepth(7);
+    const puffs: Mist["puffs"] = [];
+    for (let i = 0; i < Math.max(4, Math.round(w / 14)); i++) {
+      const img = this.add.image(0, 0, i % 3 ? "spore0" : "spore1").setDepth(7).setAlpha(0.7);
+      puffs.push({ img, x: x + Math.random() * w, y: gy - 4 - Math.random() * 30, phase: Math.random() * 6 });
+    }
+    this.mists.push({ x, w, rate, puffs });
+  }
+
+  /**
+   * Rễ Giữ (Ch. I Mạch Ấn, Bible §5.2 #1): a perfect defence makes roots erupt and bind the enemies near him. Each class
+   * triggers it with its own defence: Kiếm Khách (and the classless kit) a parry, Ảnh Vệ a perfect dodge.
+   */
+  private rootsBind(): void {
+    const p = this.player;
+    if (!this.reGiu || this.sim < this.reGiuReady) return;
+    this.reGiuReady = this.sim + RE_GIU.cooldownMs;
+    const near: (Boar | NanhRe)[] = [...this.boars, ...(this.boss ? [this.boss] : [])].filter((e) => e.active && e.isAlive() && Math.abs(e.x - p.x) < RE_GIU.radius);
+    for (const e of near) {
+      e.bind(e instanceof NanhRe ? RE_GIU.bossMs : RE_GIU.bindMs, this.sim);
+      for (let i = -1; i <= 1; i++) {
+        const r = this.add.image(e.x + i * 10, this.def.groundY + 2, i ? "root0" : "root1").setOrigin(0.5, 1).setDepth(9).setScale(1, 0.1);
+        this.tweens.add({ targets: r, scaleY: i ? 0.6 : 0.9, duration: 120, ease: "Back.easeOut" });
+        this.time.delayedCall((e instanceof NanhRe ? RE_GIU.bossMs : RE_GIU.bindMs) - 150, () => this.tweens.add({ targets: r, scaleY: 0, alpha: 0, duration: 200, onComplete: () => r.destroy() }));
+      }
+      this.fx.sparkle(e.x, e.y - 14, 6, 0x7ee08a);
+    }
+    sfx.roots(); this.fx.ring(p.x, p.y - 20);
+    this.ui.toast(t(near.length ? "toast.reGiu" : "toast.reGiu.none"), 700);
   }
 
   private float(x: number, y: number, s: string): void {
@@ -478,7 +522,7 @@ export class StageScene extends Phaser.Scene {
     if (!this.shrineLit) this.lightShrine(true);
     const missing = this.def.boars.filter((b) => this.boarDue(b) && !b.after).length - this.boars.filter((b) => b.active && b.isAlive()).length;
     if (missing > 0) { this.boars.forEach((b) => b.destroy()); this.boars = []; this.spawnBoars(); }
-    saveAtCheckpoint(this.def.id, sh.id, this.player.herbCap, this.taken);
+    saveAtCheckpoint(this.def.id, sh.id, this.player.herbCap, this.taken, this.player.antidoteCap);
     this.ui.toast(t("toast.shrine"));
   }
 
@@ -491,7 +535,7 @@ export class StageScene extends Phaser.Scene {
   private leave(to: string, card?: StringKey[]): void {
     if (this.leaving) return;
     this.leaving = true;
-    enterStage(to, this.player.herbCap, this.taken);
+    enterStage(to, this.player.herbCap, this.taken, this.player.antidoteCap);
     music.stop(1.2);
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.time.delayedCall(650, () => this.ui.narrate(card ?? [], () => this.scene.restart({ mode: this.mode === "quick" ? "quick" : "enter" })));
@@ -695,6 +739,7 @@ export class StageScene extends Phaser.Scene {
       case "slam": this.fx.dust(p.x + f * 18, p.y, 3, f, 0.8); break;
       case "thud": this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
       case "parry": {
+        if (KIT.id !== "anh") this.rootsBind();
         sfx.parry();
         this.ui.toast(t(KIT.classKit ? "toast.parry.kiem" : "toast.parry"), 900);
         // Compact, warm burst at the blade (cloud playtest: pale flashes were lost against the light shafts).
@@ -712,12 +757,15 @@ export class StageScene extends Phaser.Scene {
       case "guardBreak": sfx.guardBreak(); this.ui.toast(t("toast.guardBreak"), 800); break;
       case "phaThe": sfx.phaThe(); this.ui.toast(t("toast.phaThe"), 700); this.fx.sparkle(p.x + f * 10, p.y - 34, 8, 0xffc860); break;
       case "perfectDodge":
+        if (KIT.id === "anh") this.rootsBind();
         if (KIT.id === "anh") { this.ui.toast(t("toast.perfectDodge.anh"), 800); this.fx.sparkle(p.x, p.y - 24, 8, 0xb8a0f0); sfx.parry(); this.hitstop(60); }
         else if (KIT.classKit) { this.ui.toast(t("toast.perfectDodge"), 700); this.fx.sparkle(p.x, p.y - 24, 6, 0x9fd0c0); }
         break;
       case "blink": sfx.dodge(); sfx.swing(2); this.ui.toast(t("toast.anhKich"), 600); this.fx.dust(p.x, p.y, 4, -f, 1.2); break;
       case "anh": this.float(p.x, p.y - 52, t("toast.anhGain")); this.fx.sparkle(p.x, p.y - 30, 5, 0xb8a0f0); break;
       case "crit": this.float(p.x, p.y - 58, t("toast.crit")); break;
+      case "poisoned": sfx.hurt(); this.ui.toast(t("toast.poisoned"), 1600); this.fx.sparkle(p.x, p.y - 30, 8, 0x9ab84a); break;
+      case "cured": sfx.heal(); this.ui.toast(t("toast.cured"), 1200); this.fx.sparkle(p.x, p.y - 30, 8, 0xb8a0f0); break;
       case "riposte": this.ui.toast(t("toast.riposte"), 600); break;
       case "heal": sfx.heal(); this.float(p.x, p.y - 50, `+${PLAYER.herbHeal}`); this.fx.sparkle(p.x, p.y - 30, 8, 0x9cf0a4); break;
       case "hurt": sfx.hurt(); this.shake(16); this.hitstop(70); this.fx.sparks(p.x, p.y - 26, -f as 1 | -1, 6, 0.8); break;
@@ -861,8 +909,9 @@ export class StageScene extends Phaser.Scene {
     // Pickups and interactions (with feedback).
     for (const h of this.herbs) {
       if (!h.taken && Math.abs(h.img.x - this.player.x) < 12 && Math.abs(h.img.y - this.player.y) < 30) {
-        h.taken = true; this.taken.add(h.id); h.img.destroy(); this.player.addHerb(); sfx.pickup();
-        this.fx.sparkle(h.img.x, h.baseY - 6, 8); this.float(h.img.x, h.baseY - 14, t("toast.herb"));
+        h.taken = true; this.taken.add(h.id); h.img.destroy(); sfx.pickup();
+        if (h.kind === "antidote") this.player.addAntidote(); else this.player.addHerb();
+        this.fx.sparkle(h.img.x, h.baseY - 6, 8); this.float(h.img.x, h.baseY - 14, t(h.kind === "antidote" ? "toast.antidote" : "toast.herb"));
       }
     }
     // The interact key acts on the nearest thing in reach: rest at a shrine, look at something, talk to someone.
@@ -977,6 +1026,17 @@ export class StageScene extends Phaser.Scene {
         this.stampedeAt = sec + STAMPEDE.every[0] + this.stageRng.next() * (STAMPEDE.every[1] - STAMPEDE.every[0]);
       }
     }
+    // poison mist: the puffs drift; standing in it builds poison (gameplay time, and not while dodging through)
+    const p = this.player;
+    for (const m of this.mists) {
+      for (const pf of m.puffs) {
+        pf.x += Math.sin(time / 800 + pf.phase) * 0.15; pf.y -= delta * 0.006;
+        if (pf.y < this.def.groundY - 40) { pf.y = this.def.groundY - 3; pf.x = m.x + Math.random() * m.w; }
+        pf.img.setPosition(pf.x, pf.y).setAlpha(0.35 + 0.35 * Math.sin(time / 600 + pf.phase));
+      }
+      if (!locked && p.x > m.x && p.x < m.x + m.w && p.state !== "dodge") p.addPoison(m.rate * delta / 1000);
+    }
+    if (p.poisoned && Math.random() < delta / 300) this.fx.motes(p.x, p.y - 24, 1);
     for (const r of this.runners) r.tick(delta, cam.scrollX, cam.scrollX + VIEW.width);
     this.runners = this.runners.filter((r) => !r.done);
   }

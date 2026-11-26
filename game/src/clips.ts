@@ -132,3 +132,4 @@ export type NpcClip = FatherClip | VillagerClip;
 export const ROOT = ["root0", "root1", "root2"] as const;
 export const SHRINE_LIT = loop("lit", ["shrine_on0", "shrine_on1", "shrine_on2", "shrine_on1"], 110);
 export const HERB_GLINT = clip("glint", [{ key: "herb0", ms: 1400 }, { key: "herb1", ms: 90 }, { key: "herb2", ms: 90 }, { key: "herb0", ms: 600 }], 0, true);
+export const ANTIDOTE_GLINT = clip("glint", [{ key: "antidote0", ms: 1400 }, { key: "antidote1", ms: 90 }, { key: "antidote2", ms: 90 }, { key: "antidote0", ms: 600 }], 0, true);

@@ -9,8 +9,9 @@ import { PROLOGUE_S6 } from "./prologue-s6";
 import { PROLOGUE_S7 } from "./prologue-s7";
 import { PROLOGUE_S8 } from "./prologue-s8";
 import { PROLOGUE_S8_STATION } from "./prologue-s8-station";
+import { CH1_SANDBOX } from "./ch1-sandbox";
 
 export const STAGES: Record<string, StageDef> = Object.fromEntries(
-  [PROLOGUE_S1, PROLOGUE_S2, PROLOGUE_S3, PROLOGUE_S4, PROLOGUE_S5, PROLOGUE_S6, PROLOGUE_S7, PROLOGUE_S8, PROLOGUE_S8_STATION].map((s) => [s.id, s as StageDef]),
+  [PROLOGUE_S1, PROLOGUE_S2, PROLOGUE_S3, PROLOGUE_S4, PROLOGUE_S5, PROLOGUE_S6, PROLOGUE_S7, PROLOGUE_S8, PROLOGUE_S8_STATION, CH1_SANDBOX].map((s) => [s.id, s as StageDef]),
 );
 export const FIRST_STAGE = PROLOGUE_S1.id;

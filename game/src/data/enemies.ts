@@ -30,6 +30,14 @@ export const BOAR = {
   hurtStunMs: 400,
 } as const;
 
+/** Rễ Giữ (Ch. I Mạch Ấn): roots bind enemies within `radius` px of a perfect defence; bosses shake free sooner. */
+export const RE_GIU = {
+  radius: 90,
+  bindMs: 1200,
+  bossMs: 600,
+  cooldownMs: 4000,
+} as const;
+
 /** Prologue S6: the boar with roots through its shoulder (prose Ch. 2). Tougher than the startled boars; it bolts when beaten. */
 export const ROOTED_BOAR = {
   hp: 64, // about an S1 boar: the beat is the roots and the bolt, not a long fight (probe: 90 took nine parry cycles)
