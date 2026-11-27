@@ -270,7 +270,7 @@ class DialogueBox {
       const opts = this.script.options;
       const top = DLG_TOP;
       // the options sit under the question, however many lines it wraps to
-      this.menu = new Menu(this.scene, opts.map((o, k) => ({ label: () => `${k + 1}. ${t(o.text)}`, onConfirm: () => this.finish(o) })),
+      this.menu = new Menu(this.scene, opts.map((o, k) => ({ label: () => `${k + 1}. ${t(o.text)}${o.locked ? t("dlg.locked") : ""}`, onConfirm: () => this.finish(o), disabled: () => !!o.locked })),
         { x: 40, y: Math.max(top + 44, Math.ceil(this.body.y + this.body.height + 4)), step: 16, depth: 221 });
     } else this.more.setText(t("dlg.next"));
   }
@@ -281,7 +281,7 @@ class DialogueBox {
     // A script that ends in a choice opens right after a fight (C2) or mid-scene: the attack key is also confirm, so a
     // player still mashing it must not read past the question or pick an option unseen (bot full run, 2026-11-25).
     // Number keys are a deliberate pick (nobody mashes them in a fight), so they are honoured at once.
-    for (let k = 0; k < opts.length; k++) if (input.rawPresses.has(`Digit${k + 1}`) || input.rawPresses.has(`Numpad${k + 1}`)) { this.finish(opts[k]); return; }
+    for (let k = 0; k < opts.length; k++) if (!opts[k].locked && (input.rawPresses.has(`Digit${k + 1}`) || input.rawPresses.has(`Numpad${k + 1}`))) { this.finish(opts[k]); return; }
     const guard = opts.length ? CHOICE_GUARD_MS : 150;
     if (this.scene.time.now - this.shownAt < guard) { input.consume("confirm"); return; }
     if (this.menu) { this.menu.update(); return; }

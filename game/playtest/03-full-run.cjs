@@ -160,9 +160,10 @@ const { makeBot } = require("./bot.cjs");
     s = await advance((x) => x.stage === "prologue-s8-station" && !x.cut && !x.dlg && !x.narr);
     for (const x of [800, 732, 850, 900]) s = await useAt(x);
     await h.wait(400);
-    const fin = await h.page.evaluate(() => ({ flags: window.__cuuVucSave().flags, items: window.__cuuVucSave().items, card: !!window.__cuuVuc.scene.getScene("UI").card }));
+    s = await advance((x) => x.stage === "ch1-road" && !x.narr, 20000);
+    const fin = await h.page.evaluate(() => ({ flags: window.__cuuVucSave().flags, items: window.__cuuVucSave().items, stage: window.__cuuVucSave().stage }));
     R.shots.push(await h.shot("f08-end"));
-    step("S8: the station read, the rod taken, the Prologue's end card", fin.card && fin.flags.PRO_STATION_READ === true && fin.flags.PRO_KEEPER_HINT === true, fin);
+    step("S8: the station read, the rod taken, on into Chapter I", fin.stage === "ch1-road" && fin.flags.PRO_STATION_READ === true && fin.flags.PRO_KEEPER_HINT === true, fin);
   } else step("reached ending choice", false, { bossHp: s.boss.hp });
 
   R.minutes = +((Date.now() - t0) / 60000).toFixed(1);

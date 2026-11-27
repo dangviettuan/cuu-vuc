@@ -82,7 +82,8 @@ export class Ally extends Phaser.Physics.Arcade.Sprite {
     this.x = this.walkTarget; this.b.reset(this.x, this.y - 46); this.walkTarget = null;
     const f = this.walkDone; this.walkDone = null; f?.();
   }
-  pose(c: DiepClip): void { this.show(c, true); }
+  /** A pose a scene asks for: her own clips, `kneel` as her one-knee down pose, anything else her idle. */
+  pose(c: string): void { this.show(c === "kneel" ? "down" : (c in this.clips ? c : "idle") as DiepClip, true); }
 
   /* ------------------------------------------------------------ the fight */
 

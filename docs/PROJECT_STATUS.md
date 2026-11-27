@@ -91,7 +91,7 @@
 2. **Poison and Rễ Giữ** (done): poison buildup, antidotes; the first Mạch Ấn, where a perfect defence (parry or perfect dodge) binds nearby enemies with roots.
 3. **Diệp as an AI ally** (done): she follows him, fights with the thrust and sweep her Ch. VIII duel will echo, gives way to tells, and gets up when knocked down.
 4. **Thanh Mộc enemies and bosses** (done; greybox balance, not yet tuned by play): root-corrupted beasts, spore pods, vines, regrowing roots, Cương's operatives; Độc Đằng, Hùng, Mộc Giác.
-5. **The stages I-1 to I-7** from prose Chương 3–6, with C1 (Sẻ) and the Prologue flags paid off.
+5. **The stages I-1 to I-7** (done, greybox): from prose Chương 3–6, with the class choice, C1 (Sẻ), Làng Khê (optional) and every Prologue flag paid off. The Prologue now runs on into Chapter I, which ends on its own end card.
 
 Scope: the class choice shows all four mentors; **Kiếm Khách and Ảnh Vệ are playable**, Ngự Linh and Cơ Sư are present but not yet open.
 

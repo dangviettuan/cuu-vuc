@@ -8,7 +8,12 @@
  * - **Anything else** is passed in by the caller.
  * A missing key shows the key itself, so gaps are visible rather than blank.
  */
-export const vi = {
+import { STRINGS as CH1_I1 } from "./ch1/text-i1";
+import { STRINGS as CH1_I2I3 } from "./ch1/text-i2i3";
+import { STRINGS as CH1_I4I5 } from "./ch1/text-i4i5";
+import { STRINGS as CH1_I6I7 } from "./ch1/text-i6i7";
+
+const base = {
   // ---- title, onboarding
   "title.game": "CỬU VỰC",
   "title.sub": "Bản thử nghiệm: Mở đầu · An Mộc",
@@ -96,6 +101,27 @@ export const vi = {
   "toast.reGiu": "Rễ Giữ!",
   "toast.diepDown": "Diệp ngã!",
   "toast.snared": "Dính lưới!",
+  "toast.trained": "{n}/{of}",
+  "toast.antidotes": "Túi giữ được {n} thuốc giải.",
+
+  // ---- Chapter I: cards, hints, staging choices
+  "card.ch1": "Chương I\nThanh Mộc",
+  "card.ch1.mt": "Mộc Thành.",
+  "card.ch1.trail": "Sáng hôm sau, họ quay lại con suối thứ ba.",
+  "card.ch1.deep": "Rừng Sâu.",
+  "card.ch1.grove": "Lõi rừng.",
+  "card.ch1.cut": "Đường thẳng chết dẫn về phía đông.",
+  "card.ch1.return": "Về Mộc Thành.",
+  "ch1.road.hint": "Đi về phía đông ▸",
+  "ch1.mt.hint": "Tìm Diệp ▸",
+  "ch1.mentors.hint": "Bốn người thầy ở tầng dưới, phía tây. {interact}: nói chuyện",
+  "ch1.train.hint.kiem": "Đỡ đúng lúc ba đòn đâm của Diệp. {parry}: đỡ",
+  "ch1.train.hint.anh": "Né hoàn hảo ba lần: lướt vào ngay lúc đòn tới. {dodge}: né",
+  "ch1.khe.ask": "Xuống Làng Khê?",
+  "ch1.khe.visit": "Xuống làng",
+  "ch1.khe.skip": "Đi tiếp. Tìm cha trước.",
+  "item.mocCau": "Móc Câu",
+  "end.ch1": "Chương I · Thanh Mộc\nĐi về phía Thiên Kinh.",
   "toast.diepUp": "Diệp đứng dậy.",
   "toast.reGiu.none": "Rễ Giữ: rễ trồi lên, không bắt được gì.",
   "hud.antidotes": "Thuốc giải {n}/{cap}",
@@ -135,6 +161,9 @@ export const vi = {
   "c2.killed.end": "Làng an toàn. Trong bụi rậm, bầy con nằm im.",
   "end.card": "{epilogue}\n\n— Hết bản thử nghiệm —\n{confirm}: về màn hình chính",
   "dlg.next": "{confirm} ▸",
+  "dlg.locked": " (chưa mở trong bản này)",
+  "toast.machAn": "Mạch Ấn: {item}",
+  "ma.reGiu": "Rễ Giữ. Đỡ hoàn hảo, rễ trồi lên giữ chân kẻ địch gần anh.",
 
   // ---- Prologue: stage bridges (S2 is not built yet; S8 follows the boss. Cards carry the story across, from the prose)
   "sign.village": "An Mộc ▸",
@@ -497,6 +526,21 @@ export const vi = {
   "who.villager": "Một người",
   "who.villager2": "Người khác",
   "who.keeper": "Cụ trông miếu",
+  "who.diep": "Diệp",
+  "who.ngan": "Lâm Trưởng Ngàn",
+  "who.laoTru": "Lão Trụ",
+  "who.en": "Én",
+  "who.baReu": "Bà Rêu",
+  "who.toan": "Toản",
+  "who.cuong": "Người đàn ông",
+  "who.hung": "Hùng",
+  "who.se": "Sẻ",
+  "who.warden": "Người Hộ Lâm",
+  "who.operative": "Người áo đất",
+  "who.tuWife": "Vợ ông Tư",
 } as const;
+
+/** The whole table: the Prologue and shell above, and Chapter I's scenes (src/data/ch1, one file per prose chapter). */
+export const vi = { ...base, ...CH1_I1, ...CH1_I2I3, ...CH1_I4I5, ...CH1_I6I7 } as const;
 
 export type StringKey = keyof typeof vi;

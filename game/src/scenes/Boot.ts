@@ -3,6 +3,7 @@ import { registerTextures } from "../art";
 import { registerVillageTextures } from "../artVillage";
 import { registerDiepTextures } from "../artDiep";
 import { registerFoeTextures } from "../artFoes";
+import { registerCh1Textures } from "../artCh1";
 import { buildOutlines } from "../outline";
 import { loadSave, migrateLegacy, newSave } from "../core/save";
 import { isQuick, quickStage } from "../core/mode";
@@ -40,6 +41,7 @@ export class BootScene extends Phaser.Scene {
     registerVillageTextures(this);
     registerDiepTextures(this);
     registerFoeTextures(this);
+    registerCh1Textures(this);
     buildOutlines(this, "p_");
     buildOutlines(this, "d_", [10, 14, 12, 220]); // Diệp keeps a silhouette over any ground, like him
     await loadFont();

@@ -166,6 +166,22 @@ Sẻ is wounded, frightened and silent about his organization.
 
 **Weighting:** low to medium. This is the first choice with a human life at stake.
 
+**As built** *(2026-11-27, greybox)*:
+- **Scenes:** written from prose Chương 3–6, following it line for line where it has the beat. Branches the prose does not follow are new writing, in its voice:
+  - Prologue C1 told, and C2 killed;
+  - the Ảnh Vệ class;
+  - Sẻ released or forced;
+  - Làng Khê skipped.
+- **Decisions:**
+  - **The spared sow fled south**, as the Prologue and prose Ch. 2 have it; prose Ch. 3's "bắc" is changed in the game text, and the prose draft should be amended to match.
+  - **If Nanh Rễ was finished,** the warden on the trail was hurt by a rooted stag. If she was spared, the herd gored him, as in the prose.
+  - **Làng Khê is offered as a choice** at the overlook: go down, or walk on.
+  - **The class choice lists all four mentors,** but only Kiếm Khách and Ảnh Vệ can be taken in this build. Ngự Linh and Cơ Sư show as "not yet open".
+  - **Training** counts the chosen class's own defence: three parries for Kiếm Khách, three perfect dodges for Ảnh Vệ.
+  - **Rừng Sâu:** Diệp's antidote leaves after Độc Đằng give two antidote slots.
+  - **The absorption** grants Rễ Giữ and removes the half Mạch Ấn.
+  - **Hùng** escapes during Cương's scene, after "Hùng biết đường về", as in the prose.
+
 ## 14. Branch flags
 
 | Flag | Written | Consumed |

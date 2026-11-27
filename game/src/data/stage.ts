@@ -50,7 +50,7 @@ export interface StageDef {
    */
   leaves?: "green" | "yellow" | "none" | "storm";
   /** Time of day: night darkens the backdrop (the world and characters stay readable); indoor hides the forest. */
-  time?: "morning" | "noon" | "afternoon" | "night" | "dawn" | "indoor";
+  time?: "morning" | "noon" | "afternoon" | "night" | "dawn" | "indoor" | "deep";
   /** "storm" (S4): hundreds of yellow leaves falling straight down, with no wind (Ch1). */
   leafCount?: number;
   /** Walking right past `x` leaves for stage `to`, after its cards. */
@@ -62,15 +62,22 @@ export interface StageDef {
    */
   props?: { key: string; x: number; y?: number; depth?: number; id?: string; left?: boolean; frames?: string[]; ms?: number; hidden?: boolean; when?: When }[];
   /** Characters the stage places: the Father (S3) or a villager by look (src/artVillage.ts LOOKS). */
-  npcs?: { id: string; kind: "father" | "villager"; look?: LookId; x: number; clip: NpcClip; rest?: NpcClip; facing?: 1 | -1; when?: When; bag?: boolean; hidden?: boolean }[];
+  npcs?: { id: string; kind: "father" | "villager"; look?: LookId; x: number; clip: NpcClip; rest?: NpcClip; facing?: 1 | -1; when?: When; bag?: boolean; hidden?: boolean;
+    /** above the ground: on a deck or a branch (Én on her perch) */
+    y?: number }[];
   /**
    * Things to look at or use: interact nearby shows a line, or runs a cutscene. Using one sets the mark `<id>`.
    * `while`: only while that prop is visible · `after`: only once these marks are set · `unless`: gone once any of
    * these marks is set · `once`: gone after use.
    */
   examine?: { id: string; x: number; text?: StringKey; cutscene?: string; while?: string; after?: string[]; unless?: string[]; once?: boolean; range?: number; when?: When }[];
-  /** Interacting near an NPC runs a cutscene (src/data/cutscenes.ts). `once`: only the first time (sets mark `talk.<npc>`). */
-  talk?: { npc: string; cutscene: string; hint?: StringKey; once?: boolean; after?: string[]; when?: When }[];
+  /**
+   * Interacting near an NPC runs a cutscene (src/data/cutscenes.ts). `once`: only the first time. `after` / `unless`:
+   * only once these marks are set / gone once any is. `npc: "diep"` talks to Diệp when she is the ally.
+   */
+  talk?: { npc: string; cutscene: string; hint?: StringKey; once?: boolean; after?: string[]; unless?: string[]; when?: When }[];
+  /** A scene that plays once, the first time this happens in the fight (Ch. I: the first Rễ Giữ bind, the first net). */
+  cues?: { on: "reGiu" | "snared" | "poisoned"; cutscene: string }[];
   /** Cutscenes that start by themselves: when the hero passes `x`, or once every mark in `after` is set. Each runs once. */
   triggers?: { id: string; cutscene: string; x?: number; after?: string[]; when?: When }[];
   /**
@@ -85,8 +92,15 @@ export interface StageDef {
    * `id`, `after`, `when` as for boars.
    */
   foes?: { kind: FoeId; x: number; min?: number; max?: number; id?: string; after?: string; when?: When }[];
+  /**
+   * A training ground (Ch. I I-2): count the chosen class's own defence (Kiếm Khách parries, Ảnh Vệ perfect dodges);
+   * at `count` the mark is set.
+   */
+  training?: { count: number; mark: string };
   /** Diệp fights beside him here (Ch. I–IV ally, DB N6). `x` is where she starts (default: just behind him). */
-  ally?: { x?: number };
+  ally?: { x?: number;
+    /** she waits where she is (talkable, not following) until this mark (Mộc Thành: at the infirmary until he finds her) */
+    waitFor?: string };
   /** Floor texture: grass and dirt outdoors, boards indoors. */
   floor?: "ground" | "wood";
   /** A cutscene that runs when the stage starts. */
@@ -108,5 +122,8 @@ export interface StageDef {
     outcome: string;
     /** Where the story goes once the choice is carried out (S7 → S8). */
     next?: { to: string; card?: StringKey[] };
+    /** Ch. I: a scene as the arena locks (the boss waits it out), and scenes as the boss enters phase 2, 3… */
+    introScene?: string;
+    phaseScenes?: string[];
   };
 }

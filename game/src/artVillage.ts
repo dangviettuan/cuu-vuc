@@ -207,6 +207,14 @@ export interface Look {
   stoop?: number;
   /** a walking staff in the front hand (the shrine keeper) */
   staff?: boolean;
+  /** a scar across the bridge of the nose (Lâm Trưởng Ngàn, prose Ch. 3) */
+  scarNose?: boolean;
+  /** a craftsman's leather apron over the tunic (Toản) */
+  apron?: string;
+  /** a spear across the back (the Hộ Lâm wardens) */
+  spear?: boolean;
+  /** a short blade at the hip (Cương's people) */
+  blade?: boolean;
 }
 
 export const LOOKS = {
@@ -224,6 +232,27 @@ export const LOOKS = {
   man3: { skin: "#c69270", top: "#7a6a52", pants: "#2e2c28", hair: "#2a2420", hat: "none", beard: "#2a2420" },
   man4: { skin: "#bb855f", top: "#5a4a3a", pants: "#3a3a34", hair: "#1c1a18", hat: "non", hatC: "#b8a26a" },
   woman1: { skin: "#c99572", top: "#6a6a7a", pants: "#2a2626", hair: "#1e1a18", hat: "khan", hatC: "#5a4a5a", short: 3 },
+  // ---- Chapter I (Mộc Thành, the forest, the Cut)
+  /** Lâm Trưởng Ngàn: a woman past fifty, short hair streaked grey, a scar across the bridge of her nose (prose Ch. 3). */
+  ngan: { skin: "#c08a66", top: "#4e5e4e", pants: "#2e3430", hair: "#8e8a84", hat: "none", long: true, scarNose: true },
+  /** Lão Trụ: an old soldier from Trung Vực, decades of border wars; upright, grey beard, a sword at his side. */
+  laoTru: { skin: "#b48060", top: "#5a4a40", pants: "#2e2a28", hair: "#c8c4bc", hat: "none", long: true, beard: "#c8c4bc", blade: true },
+  /** Én: a young Hộ Lâm scout, Diệp's former trainee: light, a short warden coat, hair tied back. */
+  en: { skin: "#c99572", top: "#5e705e", pants: "#3a4238", hair: "#1a1614", hat: "none", short: 4 },
+  /** Bà Rêu: an herbalist hermit who speaks with forest spirits: old, bent, moss-green wraps, a staff. */
+  baReu: { skin: "#b88462", top: "#4e6040", pants: "#2e3428", hair: "#d8d4cc", hat: "khan", hatC: "#3e5030", short: 6, stoop: 3, staff: true, long: true },
+  /** Toản: a former Thiên Mạch Ty craftsman who builds traps for the Hộ Lâm: a leather apron, sleeves rolled. */
+  toan: { skin: "#bb855f", top: "#6a6a5a", pants: "#3a3630", hair: "#2a2420", hat: "none", apron: "#6a4a2e", beard: "#2a2420" },
+  /** A Hộ Lâm warden: Diệp's green-grey layered coat, a spear across the back. */
+  warden: { skin: "#bb855f", top: "#56685a", pants: "#3d4640", hair: "#1c1a18", hat: "none", spear: true },
+  warden2: { skin: "#c99572", top: "#56685a", pants: "#3d4640", hair: "#2a2420", hat: "none", spear: true, short: 2 },
+  /** Cương: thin and dry, an earth-coloured coat, a Ty-alloy blade, eyes that count (FF K2). Unnamed in Ch. I. */
+  cuong: { skin: "#b98460", top: "#6a5a3e", pants: "#3a342a", hair: "#2a2420", hat: "none", long: true, blade: true },
+  /** Sẻ: about nineteen, one of Cương's operatives, left behind at the Cut. */
+  se: { skin: "#c28d68", top: "#6a5a3e", pants: "#3a342a", hair: "#1e1a18", hat: "none", short: 2 },
+  /** The Tư mother (if the village was told: found alive in a hollow tree, Ch. I §12). */
+  tuWife: { skin: "#c08a66", top: "#5a4a42", pants: "#2a2626", hair: "#1e1a18", hat: "khan", hatC: "#3a3030", short: 4 },
+  tuChild: { skin: "#c99572", top: "#6a5a4a", pants: "#3a3430", hair: "#1e1a18", hat: "none", short: 18 },
 } satisfies Record<string, Look>;
 export type LookId = keyof typeof LOOKS;
 
@@ -269,6 +298,9 @@ export function villager(L: Look, p: VPose): Px {
   if (L.long) { P.tri(X(-5) + ln, Y(24) + b, X(-7), hemY, X(-5) + ln, hemY, L.top); P.tri(X(5) + ln, Y(24) + b, X(7), hemY, X(5) + ln, hemY, L.top); }
   P.rect(X(-5) + ln, hemY - 1, 10, 1, topS);
   P.line(X(1) + ln, Y(11) + b, X(1) + ln, hemY - 2, topS); // the button line
+  if (L.apron) { P.rect(X(-2) + ln, Y(15) + b, 7, hemY - (Y(15) + b) + 3, L.apron); P.rect(X(-2) + ln, Y(15) + b, 7, 1, shade(L.apron, 0.7)); }
+  if (L.spear) { P.line(X(-8), Y(30) + b, X(6), Y(-6) + b, "#6e5233", 1); P.line(X(6), Y(-6) + b, X(8), Y(-10) + b, "#b9c2c4", 2); }
+  if (L.blade) { P.line(X(3) + ln, Y(21) + b, X(-6) + ln, Y(33) + b, "#4a3a28", 2); P.set(X(4) + ln, Y(20) + b, "#7a8a96"); }
   leg(p.front?.dx ?? 0, p.front?.lift ?? 0, L.pants, true);
   // head
   const hx0 = ln + 1;
@@ -282,6 +314,7 @@ export function villager(L: Look, p: VPose): Px {
   else if (hat === "non") { P.tri(X(-8) + hx0, Y(2) + b, X(1) + hx0, Y(-5) + b, X(10) + hx0, Y(2) + b, hc); P.rect(X(-8) + hx0, Y(2) + b, 18, 1, shade(hc, 0.8)); }
   else { P.rect(X(-3) + hx0, Y(1) + b, 7, 2, L.hair); P.rect(X(-3) + hx0, Y(3) + b, 2, 3, L.hair); }
   if (L.beard) { P.rect(X(1) + hx0, Y(8) + b, 4, 2, L.beard); }
+  if (L.scarNose) { P.set(X(3) + hx0, Y(5) + b, "#e8c8b0"); P.set(X(4) + hx0, Y(6) + b, "#e8c8b0"); }
   const [fx, fy] = arm(FA[p.arm ?? "rest"], L.top, L.skin);
   if (L.staff && !p.kneel) P.line(fx + 2, fy - 4, fx + 3, base, "#6a5232", 1);
   if (p.torch !== undefined) { // a bamboo torch with a two-frame flame

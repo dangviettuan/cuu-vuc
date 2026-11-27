@@ -8,6 +8,11 @@ import type { NpcClip } from "../clips";
 import type { Track } from "../music";
 import type { When } from "./stage";
 import type { FlagName, FlagValue } from "../core/flags";
+import { SCENES as CH1_I1 } from "./ch1/text-i1";
+import { SCENES as CH1_I2I3 } from "./ch1/text-i2i3";
+import { SCENES as CH1_I4I5 } from "./ch1/text-i4i5";
+import { SCENES as CH1_I6I7 } from "./ch1/text-i6i7";
+import { STAGING as CH1_STAGING } from "./ch1/staging";
 
 /** Sounds a cutscene can play (src/sfx.ts). */
 export type CutSfx = "roar" | "far" | "heartbeat" | "peck" | "bark" | "door" | "bolt" | "creak" | "board" | "crash" | "hush" | "roots" | "rod";
@@ -29,8 +34,11 @@ type StepBody =
   | { mark: string }
   | { sfx: CutSfx }
   | { shake: number }
-  /** The scar on his chest flares with the Mạch Ấn, `n` beats, the last on his own heartbeat (S5; Ch1). */
-  | { pulse: number }
+  /**
+   * The scar on his chest flares with the Mạch Ấn, `n` beats, the last on his own heartbeat (S5; Ch1). `heart: false`:
+   * it beats with something else (a roar, the forest), "không phải nhịp tim anh" (Ch. 3, Ch. 5).
+   */
+  | { pulse: number; heart?: boolean }
   /** Move a prop by (dx, dy) over `ms`; `hide` it at the end (a bird flying off, the bed pushed aside). */
   | { tween: { id: string; dx?: number; dy?: number; ms: number; hide?: boolean } }
   | { setProp: { id: string; key: string } }
@@ -50,6 +58,14 @@ type StepBody =
   | { shiver: string }
   /** The end of the playable slice: the closing card with this text. */
   | { end: StringKey }
+  /** Absorb a Mạch Ấn (Ch. I: Rễ Giữ, from Mộc Giác): saved, active at once. */
+  | { machAn: string }
+  /** A key item gone (the half Mạch Ấn crumbles to ash at the first absorption). */
+  | { dropItem: string }
+  /** Play another scene here, in full (Ch. I: the staging scenes play the text scenes written from the prose). */
+  | { play: string }
+  /** Antidote slots (Diệp's leaves after Độc Đằng, Ch. I §10): the pouch holds this many, filled. */
+  | { antidotes: number }
   | { wait: number }
   | { leaf: { from: number; to: number; top: number } }
   | { hideProp: string }
@@ -466,7 +482,7 @@ export const CUTSCENES: Record<string, Step[]> = {
     { say: "s8.t18" }, { say: "s8.t19" }, { say: "s8.t20" }, { say: "s8.t21" },
     { say: "s8.t22" }, { say: "s8.t23" },
     { walk: "player", to: 960 },
-    { end: "end.prologue" },
+    { goto: "ch1-road", card: ["card.ch1"] },
   ],
 
   "s6.square.told": [
@@ -479,4 +495,8 @@ export const CUTSCENES: Record<string, Step[]> = {
     { goto: "prologue-s7", card: ["card.s6s7.a", "card.s6s7.b"] },
   ],
 };
+
+// Chapter I's scenes (src/data/ch1), written from prose Chương 3–6; staged by the Ch. I stages.
+Object.assign(CUTSCENES, CH1_I1, CH1_I2I3, CH1_I4I5, CH1_I6I7, CH1_STAGING);
+
 

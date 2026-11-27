@@ -14,6 +14,14 @@ export const FLAG_TYPES = {
   PRO_STATION_READ: "bool",
   /** Ch. I I-2: the class chosen from the four mentors ("kiem" | "anh" | "linh" | "co"). Owner: chapter-01-thanh-moc §14. */
   CH1_CLASS: "enum",
+  /** Ch. I C1: what became of Sẻ ("handed" | "released" | "forced"). Owner: chapter-01-thanh-moc §13–14. */
+  CH1_SE_FATE: "enum",
+  /** Ch. I: visited the Làng Khê ruins (optional). Owner: chapter-01-thanh-moc §4, §14. */
+  CH1_KHE_VISITED: "bool",
+  /** Ch. I I-3 (if PRO_VILLAGE_TOLD): the Tư family found ("rescued": mother and child alive, father dead). */
+  CH1_TU_FAMILY: "enum",
+  /** Ch. I: standing with the Hộ Lâm (C1, side requests). Owner: chapter-01-thanh-moc §14. */
+  CH1_HOLAM_STANDING: "int",
 } as const;
 
 export type FlagName = keyof typeof FLAG_TYPES;

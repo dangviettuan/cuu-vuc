@@ -221,5 +221,21 @@ export const MOC_GIAC: FoeDef = {
   ],
 };
 
-export const FOES = { rootDeer: ROOT_DEER, greatCat: GREAT_CAT, sporePod: SPORE_POD, operative: OPERATIVE, docDang: DOC_DANG, hung: HUNG, mocGiac: MOC_GIAC } satisfies Record<string, FoeDef>;
+/**
+ * Diệp sparring (I-2 training): her thrust to parry, her sweep to dodge, slow and plainly told, barely a scratch.
+ * The training stage counts the defences the class is learning.
+ */
+export const SPAR_DIEP: FoeDef = {
+  id: "sparDiep", hp: 999, body: [10, 46, 43, 30],
+  frames: { idle: ["d_idle0", "d_idle1"], walk: ["d_walk0", "d_walk1", "d_walk2", "d_walk3"], hurt: "d_hurt", stun: "d_hurt", down: "d_down" },
+  walkSpeed: 50, keepDist: 60, sight: 300, idleMs: 1100, stunMs: 800, parriedStunMs: 900, leash: 200,
+  moves: [
+    { id: "thrust", range: [0, 90], weight: 1, tell: 720, active: 160, recovery: 700, box: [-2, 46, 12, 30], damage: 2, knockback: 120, parryable: true,
+      motion: { during: "active", vx: 80 }, cue: "tellBlade", frames: fr("d", "thrustW", "thrustA", "thrustR") },
+    { id: "sweep", range: [0, 70], weight: 0.8, tell: 760, active: 180, recovery: 760, box: [-2, 38, 0, 40], damage: 2, knockback: 140, parryable: false,
+      cue: "tellSwipe", frames: fr("d", "sweepW", "sweepA", "thrustR") },
+  ],
+};
+
+export const FOES = { rootDeer: ROOT_DEER, greatCat: GREAT_CAT, sporePod: SPORE_POD, operative: OPERATIVE, docDang: DOC_DANG, hung: HUNG, mocGiac: MOC_GIAC, sparDiep: SPAR_DIEP } satisfies Record<string, FoeDef>;
 export type FoeId = keyof typeof FOES;

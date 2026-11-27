@@ -115,6 +115,12 @@ export function addItem(id: string): void {
   write();
 }
 
+export function removeItem(id: string): void {
+  if (!current) return;
+  current.items = current.items.filter((x) => x !== id);
+  write();
+}
+
 export function markDone(stage: string): void {
   if (!current) return;
   if (!current.done.includes(stage)) current.done.push(stage);

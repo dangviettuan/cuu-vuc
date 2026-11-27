@@ -14,7 +14,7 @@ import { input } from "../core/input";
 import { t, StringKey } from "../core/i18n";
 import { Rng, runSeed } from "../core/rng";
 import { onSettings, settings } from "../core/settings";
-import { addItem, addMachAn, enterStage, getFlag, hasMachAn, markDone, save, saveAtCheckpoint, setFlag } from "../core/save";
+import { addItem, addMachAn, enterStage, getFlag, hasMachAn, markDone, removeItem, save, saveAtCheckpoint, setFlag } from "../core/save";
 import { DIFFICULTY } from "../data/difficulty";
 import { FIRST_STAGE, STAGES } from "../data/stages";
 import type { StageDef, When } from "../data/stage";
@@ -101,6 +101,8 @@ export class StageScene extends Phaser.Scene {
   private stampedeCue = 0;
   private birds: Bird[] = [];
   private stageRng = new Rng(1);
+  /** I-2 training: the defences counted so far. */
+  trained = 0;
   private mists: Mist[] = [];
   /** Rễ Giữ: the hero carries it, and when it can fire again (sim time). */
   reGiu = false;
@@ -157,7 +159,7 @@ export class StageScene extends Phaser.Scene {
     this.boars = []; this.bushes = []; this.roots = []; this.herbs = []; this.signs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     this.gone = false;
     this.npcs = new Map(); this.props = new Map(); this.interactables = []; this.cutscene = null; this.skipping = false; this.heroWalk = null; this.leaving = false; this.boss = null;
-    this.mists = []; this.reGiuReady = 0; this.ally = null; this.foes = []; this.shots = [];
+    this.mists = []; this.reGiuReady = 0; this.ally = null; this.foes = []; this.shots = []; this.trained = 0;
     this.marks = new Set(); this.played = new Set(); this.propAnims = []; this.blocks = []; this.runners = []; this.birds = []; this.stampedeAt = 0; this.stampedeCue = 0; this.inChoice = false;
     // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
     this.taken = new Set(sv?.taken ?? []);
@@ -193,6 +195,10 @@ export class StageScene extends Phaser.Scene {
       this.cameras.main.setBackgroundColor("#0a0e14");
     } else if (def.time === "noon") {
       this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0xfff2c8, 0.08).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+    } else if (def.time === "deep") {
+      // Rừng Sâu (Ch. I): the canopy closes; green-black over the backdrop, the lane still lit enough to fight in
+      this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0x0a1a10, 0.55).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
+      this.cameras.main.setBackgroundColor("#0c160e");
     } else if (def.time === "dawn") {
       // S8: the cold grey before the sun, the sky paling (the lane keeps its colours)
       this.add.rectangle(0, 0, VIEW.width, VIEW.height, 0x2a3a52, 0.42).setOrigin(0).setScrollFactor(0).setDepth(-4.5);
@@ -280,7 +286,7 @@ export class StageScene extends Phaser.Scene {
     // People, and things to look at or use.
     for (const n of def.npcs ?? []) {
       if (!this.ok(n.when)) continue;
-      const npc = new Npc(this, n.x, def.groundY, n.id, n.clip, n.facing ?? 1, n.kind === "villager" ? n.look : undefined, n.rest);
+      const npc = new Npc(this, n.x, n.y ?? def.groundY, n.id, n.clip, n.facing ?? 1, n.kind === "villager" ? n.look : undefined, n.rest);
       if (n.bag) { npc.bag = true; npc.pose(n.clip); }
       if (n.hidden) npc.setVisible(false);
       this.npcs.set(n.id, npc);
@@ -293,10 +299,11 @@ export class StageScene extends Phaser.Scene {
           && !(ex.once && this.marks.has(ex.id)) && !this.cutscene });
     }
     for (const tk of def.talk ?? []) {
-      const npc = this.npcs.get(tk.npc);
+      const npc = this.npcs.get(tk.npc) ?? (tk.npc === "diep" ? this.ally : undefined);
       if (!npc || !this.ok(tk.when)) continue;
-      this.interactables.push({ x: npc.x, range: 30, y: def.groundY - 56, priority: 1, act: () => void this.runCutscene(tk.cutscene),
-        when: () => !this.cutscene && !this.leaving && this.has(tk.after) && !(tk.once && this.played.has(tk.cutscene)), at: () => npc.x });
+      // Diệp following keeps a step behind him (DIEP.followGap): her reach is wider, or she could never be talked to
+      this.interactables.push({ x: npc.x, range: npc === this.ally ? 52 : 30, y: def.groundY - 56, priority: 1, act: () => void this.runCutscene(tk.cutscene),
+        when: () => !this.cutscene && !this.leaving && this.has(tk.after) && !(tk.unless ?? []).some((m) => this.marks.has(m)) && !(tk.once && this.played.has(tk.cutscene)), at: () => npc.x });
     }
     // Ways shut until something happens.
     for (const bl of def.blocks ?? []) {
@@ -336,7 +343,8 @@ export class StageScene extends Phaser.Scene {
       boss.onPhase = (p) => {
         sfx.roar(); music.setIntensity(p); this.cameras.main.shake(220, 0.006 * settings().shake);
         const msg = ar.boss.kind === "nanhRe" ? (p === 2 ? "boss.nanhRe.p2" : "boss.nanhRe.p3") : ar.boss.phases?.[p - 2];
-        if (msg) this.ui.toast(t(msg), 2400);
+        const scene = ar.phaseScenes?.[p - 2];
+        if (scene) void this.runCutscene(scene); else if (msg) this.ui.toast(t(msg), 2400);
         // Mộc Giác's recognition: it lowers its head to his chest, and the half Mạch Ấn pulses wildly (spec §8)
         if (boss instanceof Fighter && boss.def.phaseBeat?.[p]) { this.hitstop(120); void this.pulse(4); }
       };
@@ -424,8 +432,14 @@ export class StageScene extends Phaser.Scene {
     return out;
   }
 
+  /** A scene that plays the first time something happens in a fight (stage `cues`), once. */
+  private cue(on: "reGiu" | "snared" | "poisoned"): void {
+    const c = this.def.cues?.find((x) => x.on === on);
+    if (c && !this.played.has(c.cutscene) && !this.cutscene) this.time.delayedCall(250, () => void this.runCutscene(c.cutscene));
+  }
+
   /** A flag condition from the stage data (C1 shapes S6). An unset flag counts as false: the prose branch. */
-  ok(w?: When): boolean { return !w || (getFlag(w.flag) ?? false) === w.is; }
+  ok(w?: When): boolean { return !w || (getFlag(w.flag) ?? (w.flag === "CH1_CLASS" ? "kiem" : false)) === w.is; } // unset: the prose's branch
   private has(marks?: string[]): boolean { return !marks || marks.every((m) => this.marks.has(m)); }
 
   private platform(x: number, y: number, w: number, h: number, oneWay = false, wood = false): void {
@@ -545,6 +559,7 @@ export class StageScene extends Phaser.Scene {
     }
     sfx.roots(); this.fx.ring(p.x, p.y - 20);
     this.ui.toast(t(near.length ? "toast.reGiu" : "toast.reGiu.none"), 700);
+    if (near.length) this.cue("reGiu");
   }
 
   private float(x: number, y: number, s: string): void {
@@ -631,6 +646,7 @@ export class StageScene extends Phaser.Scene {
     for (const st of steps) {
       if (this.gone) return false; // the stage was left (title, restart) mid-scene
       if ((st.when && !this.ok(st.when)) || (st.marks && !this.has(st.marks))) continue;
+      if ("play" in st) { const inner = CUTSCENES[st.play]; if (inner && !(await this.runSteps(inner))) return false; continue; }
       if ("choose" in st) {
         // A choice is never skipped: skipping stops here, and the branch after it plays normally.
         this.skipping = false; this.inChoice = true;
@@ -712,6 +728,7 @@ export class StageScene extends Phaser.Scene {
     if ("pose" in st) { if (st.pose === "diep") this.ally?.pose(st.clip as unknown as DiepClip); else this.npcs.get(st.pose)?.pose(st.clip); return done; }
     if ("wait" in st) return fast ? done : this.delay(st.wait);
     if ("leaf" in st) return this.leafFall(st.leaf);
+    if ("hideProp" in st && st.hideProp === "boss") { this.boss?.setVisible(false); return done; }
     if ("hideProp" in st) { (this.props.get(st.hideProp) ?? this.npcs.get(st.hideProp))?.setVisible(false); return done; }
     if ("bag" in st) { const n = this.npcs.get(st.bag); if (n) { n.bag = true; n.pose(n.clip === "walk" ? "walk" : "idle"); } return done; }
     if ("camera" in st) {
@@ -726,7 +743,7 @@ export class StageScene extends Phaser.Scene {
     if ("mark" in st) { this.marks.add(st.mark); return done; }
     if ("sfx" in st) { if (!fast) sfx[st.sfx](); return done; }
     if ("shake" in st) { if (!fast) this.shake(st.shake); return done; }
-    if ("pulse" in st) return fast ? done : this.pulse(st.pulse);
+    if ("pulse" in st) return fast ? done : this.pulse(st.pulse, st.heart !== false);
     if ("tween" in st) {
       const tw = st.tween, o = this.props.get(tw.id) ?? this.npcs.get(tw.id);
       if (!o) return done;
@@ -762,6 +779,9 @@ export class StageScene extends Phaser.Scene {
       const x0 = img.x;
       return new Promise((res) => this.tweens.add({ targets: img, x: x0 + 1, duration: 45, yoyo: true, repeat: 4, onComplete: () => { img.x = x0; res(); } }));
     }
+    if ("machAn" in st) { addMachAn(st.machAn); if (st.machAn === "reGiu") this.reGiu = true; if (!fast) this.ui.toast(t("toast.machAn", { item: t(`ma.${st.machAn}` as StringKey) }), 3000); return done; }
+    if ("dropItem" in st) { removeItem(st.dropItem); return done; }
+    if ("antidotes" in st) { this.player.antidoteCap = Math.max(this.player.antidoteCap, st.antidotes); this.player.refillHerbs(); if (!fast) this.ui.toast(t("toast.antidotes", { n: st.antidotes }), 2400); return done; }
     if ("end" in st) {
       this.finished = true; markDone(this.def.id);
       this.ui.endCard(t(st.end));
@@ -771,13 +791,13 @@ export class StageScene extends Phaser.Scene {
   }
 
   /** The scar flares with the Mạch Ấn (S5): `n` beats, a warm ring at his chest and his heartbeat. */
-  private pulse(n: number): Promise<void> {
+  private pulse(n: number, heart = true): Promise<void> {
     return new Promise((res) => {
       let k = 0;
       const beat = () => {
         if (this.gone) { res(); return; }
         const p = this.player, x = p.x + p.facing * 1, y = p.y - 30;
-        sfx.heartbeat();
+        if (heart) sfx.heartbeat(); // not his heart: the glow only, its beat is the roar or the forest
         const ring = this.add.circle(x, y, 3, settings().reduceFlashes ? 0x8a3a20 : 0xff6a3a, 0.8).setDepth(12);
         this.tweens.add({ targets: ring, scale: 5, alpha: 0, duration: 600, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
         const m = this.props.get("machAn"); if (m) { m.setTexture("mach_an1"); this.time.delayedCall(260, () => m.active && m.setTexture("mach_an0")); }
@@ -802,6 +822,13 @@ export class StageScene extends Phaser.Scene {
 
   private onPlayerEvent(k: PlayerEvent): void {
     const p = this.player, f = p.facing;
+    // I-2 training: the class's own defence, counted (Kiếm Khách parries; Ảnh Vệ perfect dodges)
+    const tr = this.def.training;
+    if (tr && !this.marks.has(tr.mark) && ((k === "parry" && KIT.id !== "anh") || (k === "perfectDodge" && KIT.id === "anh"))) {
+      this.trained++;
+      this.ui.toast(t("toast.trained", { n: this.trained, of: tr.count }), 900);
+      if (this.trained >= tr.count) this.marks.add(tr.mark);
+    }
     switch (k) {
       case "step": this.fx.dust(p.x - f * 4, p.y, 1, -f, 0.6); sfx.step(); break;
       case "skid": this.fx.dust(p.x + f * 6, p.y, 3, f, 0.8); sfx.step(); break;
@@ -838,8 +865,8 @@ export class StageScene extends Phaser.Scene {
       case "blink": sfx.dodge(); sfx.swing(2); this.ui.toast(t("toast.anhKich"), 600); this.fx.dust(p.x, p.y, 4, -f, 1.2); break;
       case "anh": this.float(p.x, p.y - 52, t("toast.anhGain")); this.fx.sparkle(p.x, p.y - 30, 5, 0xb8a0f0); break;
       case "crit": this.float(p.x, p.y - 58, t("toast.crit")); break;
-      case "snared": sfx.block(); this.ui.toast(t("toast.snared"), 1000); this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
-      case "poisoned": sfx.hurt(); this.ui.toast(t("toast.poisoned"), 1600); this.fx.sparkle(p.x, p.y - 30, 8, 0x9ab84a); break;
+      case "snared": this.cue("snared"); sfx.block(); this.ui.toast(t("toast.snared"), 1000); this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
+      case "poisoned": this.cue("poisoned"); sfx.hurt(); this.ui.toast(t("toast.poisoned"), 1600); this.fx.sparkle(p.x, p.y - 30, 8, 0x9ab84a); break;
       case "cured": sfx.heal(); this.ui.toast(t("toast.cured"), 1200); this.fx.sparkle(p.x, p.y - 30, 8, 0xb8a0f0); break;
       case "riposte": this.ui.toast(t("toast.riposte"), 600); break;
       case "heal": sfx.heal(); this.float(p.x, p.y - 50, `+${PLAYER.herbHeal}`); this.fx.sparkle(p.x, p.y - 30, 8, 0x9cf0a4); break;
@@ -898,8 +925,9 @@ export class StageScene extends Phaser.Scene {
     if (this.ally && this.ally.x < ar.min + ARENA_WALL + 8) this.ally.reset(ar.min + ARENA_WALL + 20, this.def.groundY);
     this.ui.showBoss(t(ar.boss.name));
     music.play("boss", 1);
-    this.ui.toast(t(ar.boss.intro), 2000);
-    this.time.delayedCall(900, () => { this.boss?.wake(); sfx.roar(); });
+    const wake = () => this.time.delayedCall(900, () => { this.boss?.wake(); sfx.roar(); });
+    if (ar.introScene) void this.runCutscene(ar.introScene).then(wake); // the boss waits the scene out
+    else { this.ui.toast(t(ar.boss.intro), 2000); wake(); }
   }
 
   private bossDown(): void {
@@ -1002,7 +1030,8 @@ export class StageScene extends Phaser.Scene {
     this.player.update(now, dt, c);
     for (const n of this.npcs.values()) n.tick(dt);
     if (this.ally) {
-      this.ally.scripted = !!this.cutscene || this.leaving || this.choosing || this.finished;
+      const waiting = !!this.def.ally?.waitFor && !this.marks.has(this.def.ally.waitFor);
+      this.ally.scripted = waiting || !!this.cutscene || this.leaving || this.choosing || this.finished;
       this.ally.tick(now, dt, this.player.x, this.player.facing, this.boss && this.engaged ? [...this.boars, ...this.foes, this.boss] : [...this.boars, ...this.foes]);
     }
     const exit = this.def.exit;
@@ -1042,20 +1071,26 @@ export class StageScene extends Phaser.Scene {
     // Enemies and hazards (simulation time).
     const px = this.player.x;
     this.boars = this.boars.filter((b) => b.active);
-    for (const b of this.boars) b.tick(now, dt, px);
+    // While a scene plays, the fight holds: enemies stand where they are and nothing strikes (Ch. I: a boss's phase
+    // scene must never cost him a hit he could not answer).
+    const frozen = !!this.cutscene;
     this.foes = this.foes.filter((f) => f.active);
     const view = { x: px, guarding: this.player.state === "parry" || this.player.state === "block" };
-    for (const f of this.foes) f.tick(now, dt, px, view);
-    for (const s of this.shots) s.tick(dt, this.def.groundY, this.cameras.main.scrollX, this.cameras.main.scrollX + VIEW.width);
-    for (const s of this.shots) if (s.done && s.landedAt !== null && s.kind === "spore") this.addMist(s.landedAt - 24, 48, 60, 2400);
-    this.shots = this.shots.filter((s) => !s.done);
-    if (this.boss?.active) {
+    if (frozen) { for (const e of this.fighters) if (e.active && e.body) (e.body as Phaser.Physics.Arcade.Body).setVelocityX(0); }
+    else {
+      for (const b of this.boars) b.tick(now, dt, px);
+      for (const f of this.foes) f.tick(now, dt, px, view);
+      for (const s of this.shots) s.tick(dt, this.def.groundY, this.cameras.main.scrollX, this.cameras.main.scrollX + VIEW.width);
+      for (const s of this.shots) if (s.done && s.landedAt !== null && s.kind === "spore") this.addMist(s.landedAt - 24, 48, 60, 2400);
+      this.shots = this.shots.filter((s) => !s.done);
+    }
+    if (this.boss?.active && !frozen) {
       if (this.engaged && this.player.state === "heal") this.boss.punishHeal(Math.abs(px - this.boss.x));
       if (this.boss instanceof Fighter) this.boss.tick(now, dt, px, view); else this.boss.tick(now, dt, px);
     }
     for (const b of this.bushes) b.tick(time);
     this.separate();
-    for (const r of this.roots) {
+    for (const r of frozen ? [] : this.roots) {
       if (r.tick(now)) { this.fx.dust(r.x, this.def.groundY, 2, 0, 0.8); sfx.roots(); }
       else if (r.warning(now) && Math.random() < dt / 110) this.fx.dust(r.x + (Math.random() - 0.5) * 10, this.def.groundY, 1, 0, 0.35); // low dirt specks: "this spot"
     }
@@ -1086,12 +1121,11 @@ export class StageScene extends Phaser.Scene {
     }
     // Enemies → player.
     const inc = this.incoming; inc.length = 0;
-    for (const b of this.boars) for (const h of b.hits()) inc.push(h);
+    if (!frozen) for (const b of this.boars) for (const h of b.hits()) inc.push(h);
     if (!this.cutscene) for (const r of this.runners) for (const h of r.hits()) inc.push(h);
-    for (const f of this.foes) if (f.active) for (const h of f.hits()) inc.push(h);
-    for (const s of this.shots) inc.push(s.hits());
-    if (this.boss?.active) for (const h of this.boss.hits()) inc.push(h);
-    for (const r of this.roots) { const h = r.hitbox(now); if (h) inc.push(h); }
+    if (!frozen) { for (const f of this.foes) if (f.active) for (const h of f.hits()) inc.push(h); for (const s of this.shots) inc.push(s.hits()); }
+    if (this.boss?.active && !frozen) for (const h of this.boss.hits()) inc.push(h);
+    if (!frozen) for (const r of this.roots) { const h = r.hitbox(now); if (h) inc.push(h); }
     const hb = this.player.hurtbox();
     for (const h of inc) if (overlaps(h.rect, hb)) { const r = this.player.receive(h); if (r !== "ignored") this.shots.find((s) => s.hit === h)?.spend(); }
     if (this.ally) { const abx = this.ally.hurtbox(); for (const h of inc) if (overlaps(h.rect, abx)) this.ally.receive(h); }

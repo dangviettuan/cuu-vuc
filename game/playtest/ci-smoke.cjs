@@ -252,8 +252,8 @@ const { launch, withQuick } = require("./harness.cjs");
   for (const x of [800, 732, 850]) await use(x);
   await tp(900); await h.wait(200); await h.tap("e", 60); await h.wait(300); await skipAll();
   await h.wait(500);
-  const fin = await scene(() => ({ read: window.__cuuVucSave().flags.PRO_STATION_READ, items: window.__cuuVucSave().items, card: !!window.__cuuVuc.scene.getScene("UI").card }));
-  step("S8: every clue read, then the rod: PRO_STATION_READ, the rod kept, the end card", fin.read === true && fin.items.includes("thirdRod") && fin.card, fin);
+  const fin = await scene(() => ({ read: window.__cuuVucSave().flags.PRO_STATION_READ, items: window.__cuuVucSave().items, stage: window.__cuuVucSave().stage }));
+  step("S8: every clue read, then the rod: PRO_STATION_READ, the rod kept, on into Chapter I", fin.read === true && fin.items.includes("thirdRod") && fin.stage === "ch1-road", fin);
 
   await openAt("prologue-s8-station");
   await h.wait(600); await skipAll();

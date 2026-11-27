@@ -2,6 +2,7 @@
 # The smoke test (game/playtest/ci-smoke.cjs) drives the real build in headless Chromium and fails on any broken step
 # or console error. It runs for the canon Prologue kit, the Kiếm Khách and Ảnh Vệ kits, and the Canvas renderer fallback.
 # The shell test (game/playtest/ci-shell.cjs) walks the real boot flow: title, name entry, pause, options, Continue.
+# The Chapter I test (game/playtest/ci-ch1.cjs) walks I-1 → I-7 on two branches (class, and choice C1).
 name: CI
 
 on:
@@ -22,7 +23,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: game
@@ -58,6 +59,16 @@ jobs:
         env:
           GAME_URL: http://localhost:4173/
           NO_WEBGL: "1"
+      - name: Chapter I end to end — Kiếm Khách, Sẻ handed over (the prose's branch)
+        run: node playtest/ci-ch1.cjs
+        env:
+          GAME_URL: http://localhost:4173/
+      - name: Chapter I end to end — Ảnh Vệ, Sẻ let go
+        run: node playtest/ci-ch1.cjs
+        env:
+          GAME_URL: http://localhost:4173/
+          CLASS: "2"
+          C1: "2"
       - name: Shell — title, name entry, pause, options, rebinding, Continue
         run: node playtest/ci-shell.cjs
         env:
