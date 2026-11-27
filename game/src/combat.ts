@@ -10,6 +10,10 @@ export interface EnemyHit {
   knockback: number; // px/s, signed by direction
   parryable: boolean; // heavy/unblockable attacks must be dodged
   onParried?: () => void;
+  /** Ch. I: poison buildup this hit adds if it lands (Thanh Mộc độc thảo, Độc Đằng). */
+  poison?: number;
+  /** Ch. I: a net or a vine that holds him this long (ms) if it lands (Cương's operatives). */
+  snare?: number;
 }
 
 /** A damaging area produced by the player this frame. */

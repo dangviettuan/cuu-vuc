@@ -7,7 +7,7 @@ import type { StageDef } from "../stage";
 
 export const CH1_SANDBOX = {
   id: "ch1-sandbox",
-  width: 1600,
+  width: 3000,
   height: 360,
   groundY: 304,
   start: { x: 60 },
@@ -28,6 +28,15 @@ export const CH1_SANDBOX = {
     { x: 1300, min: 1220, max: 1380, rooted: true },
   ],
   shrines: [{ id: "sb-shrine", x: 820 }],
+  // Ch. I enemies, left to right: a rooted deer, a great cat, two spore pods, two of Cương's operatives
+  foes: [
+    { kind: "rootDeer", x: 1640, min: 1560, max: 1720 },
+    { kind: "greatCat", x: 1960, min: 1880, max: 2040 },
+    { kind: "sporePod", x: 2180, min: 2180, max: 2180 },
+    { kind: "sporePod", x: 2230, min: 2230, max: 2230 },
+    { kind: "operative", x: 2560, min: 2480, max: 2640 },
+    { kind: "operative", x: 2640, min: 2560, max: 2720 },
+  ],
   grants: ["reGiu"],
   ally: {},
 } satisfies StageDef;

@@ -10,22 +10,23 @@ import { Rng } from "./core/rng";
 import { settings } from "./core/settings";
 
 let uid = 0;
-const nextId = (p: string) => `${p}-${++uid}`;
+export const nextId = (p: string) => `${p}-${++uid}`;
 const NONE: EnemyHit[] = [];
 
 /**
  * Per-run context for enemy AI, set by the stage: the seeded RNG for decisions (src/core/rng.ts) and the difficulty
  * (src/data/difficulty.ts). Numbers live in the tuning tables (src/data/enemies.ts), not here.
  */
-const ctx: { rng: Rng; diff: DifficultyDef } = { rng: new Rng(1), diff: DIFFICULTY.standard };
+export const ctx: { rng: Rng; diff: DifficultyDef } = { rng: new Rng(1), diff: DIFFICULTY.standard };
 export function configureEnemies(rng: Rng, diff: DifficultyDef): void { ctx.rng = rng; ctx.diff = diff; }
 export function setEnemyDifficulty(diff: DifficultyDef): void { ctx.diff = diff; }
 /** A telegraph duration on the current difficulty. */
-const tell = (ms: number) => ms * ctx.diff.telegraph;
+export const tell = (ms: number) => ms * ctx.diff.telegraph;
 
-export type EnemyEvent = "step" | "paw" | "stomp" | "thud" | "dead" | "skid" | "tellBoar" | "tellCharge" | "tellSwipe" | "tellStomp" | "glint";
+export type EnemyEvent = "step" | "paw" | "stomp" | "thud" | "dead" | "skid" | "tellBoar" | "tellCharge" | "tellSwipe" | "tellStomp" | "glint"
+  | "tellBlade" | "tellThrow" | "tellSpore" | "tellPounce" | "tellAntler" | "burst";
 
-abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
+export abstract class Enemy extends Phaser.Physics.Arcade.Sprite implements Hittable {
   hp: number;
   facing: 1 | -1 = -1;
   readonly anim: Animator;

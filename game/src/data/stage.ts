@@ -7,6 +7,7 @@ import type { Track } from "../music";
 import type { NpcClip } from "../clips";
 import type { LookId } from "../artVillage";
 import type { FlagName, FlagValue } from "../core/flags";
+import type { FoeId } from "./foes";
 
 /** A condition on the save's story flags: the thing exists only when `flag` equals `is` (C1 shapes S6). */
 export interface When { flag: FlagName; is: FlagValue }
@@ -79,6 +80,11 @@ export interface StageDef {
   blocks?: { id: string; x: number; until?: string }[];
   /** Panicked animals running through (S6): while the hero is between `min` and `max`, until mark `until` is set. */
   stampede?: { min: number; max: number; until?: string };
+  /**
+   * Ch. I enemies (src/data/foes.ts), read by the one fighter AI. `min`/`max`: their ground (default: 80 px around x).
+   * `id`, `after`, `when` as for boars.
+   */
+  foes?: { kind: FoeId; x: number; min?: number; max?: number; id?: string; after?: string; when?: When }[];
   /** Diệp fights beside him here (Ch. I–IV ally, DB N6). `x` is where she starts (default: just behind him). */
   ally?: { x?: number };
   /** Floor texture: grass and dirt outdoors, boards indoors. */

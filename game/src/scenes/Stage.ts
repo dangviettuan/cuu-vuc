@@ -23,6 +23,8 @@ import { SCRIPTS } from "../data/dialogue";
 import { CUTSCENES, CutSfx, Step } from "../data/cutscenes";
 import { Npc } from "../npc";
 import { Ally } from "../ally";
+import { Fighter, Shot } from "../foe";
+import { FOES } from "../data/foes";
 import type { DiepClip } from "../clips";
 import { text } from "../ui/text";
 import type { UIScene } from "./UI";
@@ -37,7 +39,7 @@ export type StageMode = "new" | "continue" | "enter" | "quick";
 export interface StageInit { mode: StageMode }
 
 interface Herb { id: string; img: Phaser.GameObjects.Image; anim: Animator; baseY: number; phase: number; taken: boolean; kind: "herb" | "antidote"; }
-interface Mist { x: number; w: number; rate: number; puffs: { img: Phaser.GameObjects.Image; x: number; y: number; phase: number }[] }
+interface Mist { x: number; w: number; rate: number; puffs: { img: Phaser.GameObjects.Image; x: number; y: number; phase: number }[]; until: number; haze: Phaser.GameObjects.Rectangle[] }
 interface Drift { img: Phaser.GameObjects.Image; x: number; y: number; vx: number; vy: number; phase: number; }
 interface Sign { x: number; key: StringKey; label: Phaser.GameObjects.Text; }
 /** Something the interact key does when the hero stands near it: rest at a shrine, look at a thing, talk to someone. */
@@ -69,6 +71,9 @@ export class StageScene extends Phaser.Scene {
   private walls!: Phaser.Physics.Arcade.StaticGroup;
   private fx!: Fx;
   boars: Boar[] = [];
+  /** Ch. I enemies (the data-driven fighter, src/foe.ts). */
+  foes: Fighter[] = [];
+  private shots: Shot[] = [];
   bushes: Bush[] = [];
   boss: NanhRe | null = null;
   private roots: RootSpike[] = [];
@@ -152,7 +157,7 @@ export class StageScene extends Phaser.Scene {
     this.boars = []; this.bushes = []; this.roots = []; this.herbs = []; this.signs = []; this.piglets = []; this.tufts = []; this.motes = []; this.leaves = [];
     this.gone = false;
     this.npcs = new Map(); this.props = new Map(); this.interactables = []; this.cutscene = null; this.skipping = false; this.heroWalk = null; this.leaving = false; this.boss = null;
-    this.mists = []; this.reGiuReady = 0; this.ally = null;
+    this.mists = []; this.reGiuReady = 0; this.ally = null; this.foes = []; this.shots = [];
     this.marks = new Set(); this.played = new Set(); this.propAnims = []; this.blocks = []; this.runners = []; this.birds = []; this.stampedeAt = 0; this.stampedeCue = 0; this.inChoice = false;
     // what was used up and the pouch carry across stages (the save holds them; a fresh game starts empty)
     this.taken = new Set(sv?.taken ?? []);
@@ -239,6 +244,7 @@ export class StageScene extends Phaser.Scene {
     for (const id of def.grants ?? []) addMachAn(id);
     this.reGiu = hasMachAn("reGiu") || (typeof location !== "undefined" && new URLSearchParams(location.search).get("ma") === "regiu");
     this.spawnBoars();
+    this.spawnFoes();
 
     // Shrine checkpoint (ADR-0006).
     const sh = def.shrines[0];
@@ -382,6 +388,32 @@ export class StageScene extends Phaser.Scene {
     }
   }
 
+  private foeDue(f: NonNullable<StageDef["foes"]>[number]): boolean {
+    return this.ok(f.when) && (!f.after || this.marks.has(f.after)) && !(f.id && this.marks.has(`${f.id}.down`));
+  }
+
+  /** Ch. I fighters from the stage data (`only`: one that arrives on a mark). */
+  private spawnFoes(only?: NonNullable<StageDef["foes"]>[number]): void {
+    for (const f of only ? [only] : this.def.foes ?? []) {
+      if (!this.foeDue(f) || (!only && f.after)) continue;
+      const foe = new Fighter(this, f.x, FOES[f.kind], f.min ?? f.x - 80, f.max ?? f.x + 80);
+      this.physics.add.collider(foe, this.solids);
+      foe.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, foe.facing, 1);
+      foe.onShot = (kind, x, y, vx, vy, hit, g) => this.shots.push(new Shot(this, kind, x, y, vx, vy, hit, g));
+      foe.onRoots = (xs, warn, dmg) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, this.sim, warn + i * 40, dmg)));
+      if (f.id) foe.onDeath = () => { this.marks.add(`${f.id}.down`); };
+      foe.setData("spawn", f);
+      this.foes.push(foe);
+    }
+  }
+
+  /** Every living enemy body the hero, Diệp and Rễ Giữ deal with. */
+  private get fighters(): (Boar | NanhRe | Fighter)[] {
+    const out: (Boar | NanhRe | Fighter)[] = [...this.boars, ...this.foes];
+    if (this.boss) out.push(this.boss);
+    return out;
+  }
+
   /** A flag condition from the stage data (C1 shapes S6). An unset flag counts as false: the prose branch. */
   ok(w?: When): boolean { return !w || (getFlag(w.flag) ?? false) === w.is; }
   private has(marks?: string[]): boolean { return !marks || marks.every((m) => this.marks.has(m)); }
@@ -471,15 +503,16 @@ export class StageScene extends Phaser.Scene {
   }
 
   /** Poison mist over ground (độc thảo): a low haze and drifting spore puffs, so the danger is visible before it is felt. */
-  private addMist(x: number, w: number, rate: number): void {
-    const gy = this.def.groundY;
-    for (let i = 0; i < 4; i++) this.add.rectangle(x + w / 2, gy - 6 - i * 7, w - i * 10, 8, 0x9ab84a, 0.17 - i * 0.035).setDepth(7);
+  private addMist(x: number, w: number, rate: number, lifeMs = 0): void {
+    const gy = this.def.groundY, haze: Phaser.GameObjects.Rectangle[] = [];
+    for (let i = 0; i < 4; i++) haze.push(this.add.rectangle(x + w / 2, gy - 6 - i * 7, w - i * 10, 8, 0x9ab84a, 0.17 - i * 0.035).setDepth(7));
     const puffs: Mist["puffs"] = [];
     for (let i = 0; i < Math.max(4, Math.round(w / 14)); i++) {
       const img = this.add.image(0, 0, i % 3 ? "spore0" : "spore1").setDepth(7).setAlpha(0.7);
       puffs.push({ img, x: x + Math.random() * w, y: gy - 4 - Math.random() * 30, phase: Math.random() * 6 });
     }
-    this.mists.push({ x, w, rate, puffs });
+    // a cloud (a burst pod, a spore gob) thins out and is gone; a mist over ground stays
+    this.mists.push({ x, w, rate, puffs, until: lifeMs ? this.sim + lifeMs : 0, haze });
   }
 
   /**
@@ -490,7 +523,7 @@ export class StageScene extends Phaser.Scene {
     const p = this.player;
     if (!this.reGiu || this.sim < this.reGiuReady) return;
     this.reGiuReady = this.sim + RE_GIU.cooldownMs;
-    const near: (Boar | NanhRe)[] = [...this.boars, ...(this.boss ? [this.boss] : [])].filter((e) => e.active && e.isAlive() && Math.abs(e.x - p.x) < RE_GIU.radius);
+    const near = this.fighters.filter((e) => e.active && e.isAlive() && Math.abs(e.x - p.x) < RE_GIU.radius);
     for (const e of near) {
       e.bind(e instanceof NanhRe ? RE_GIU.bossMs : RE_GIU.bindMs, this.sim);
       for (let i = -1; i <= 1; i++) {
@@ -539,6 +572,9 @@ export class StageScene extends Phaser.Scene {
     if (!this.shrineLit) this.lightShrine(true);
     const missing = this.def.boars.filter((b) => this.boarDue(b) && !b.after).length - this.boars.filter((b) => b.active && b.isAlive()).length;
     if (missing > 0) { this.boars.forEach((b) => b.destroy()); this.boars = []; this.spawnBoars(); }
+    // Ch. I enemies come back too (Bible §10), except humans who broke off and story enemies (`id`)
+    const foesMissing = (this.def.foes ?? []).filter((f) => this.foeDue(f) && !f.after && !f.id).length - this.foes.filter((f) => f.active && f.isAlive() && !(f.getData("spawn") as { id?: string }).id).length;
+    if (foesMissing > 0) { this.foes.filter((f) => !(f.getData("spawn") as { id?: string }).id).forEach((f) => f.destroy()); this.foes = this.foes.filter((f) => f.active); this.spawnFoes(); }
     saveAtCheckpoint(this.def.id, sh.id, this.player.herbCap, this.taken, this.player.antidoteCap);
     this.ui.toast(t("toast.shrine"));
   }
@@ -792,6 +828,7 @@ export class StageScene extends Phaser.Scene {
       case "blink": sfx.dodge(); sfx.swing(2); this.ui.toast(t("toast.anhKich"), 600); this.fx.dust(p.x, p.y, 4, -f, 1.2); break;
       case "anh": this.float(p.x, p.y - 52, t("toast.anhGain")); this.fx.sparkle(p.x, p.y - 30, 5, 0xb8a0f0); break;
       case "crit": this.float(p.x, p.y - 58, t("toast.crit")); break;
+      case "snared": sfx.block(); this.ui.toast(t("toast.snared"), 1000); this.fx.dust(p.x, p.y, 4, 0, 0.8); break;
       case "poisoned": sfx.hurt(); this.ui.toast(t("toast.poisoned"), 1600); this.fx.sparkle(p.x, p.y - 30, 8, 0x9ab84a); break;
       case "cured": sfx.heal(); this.ui.toast(t("toast.cured"), 1200); this.fx.sparkle(p.x, p.y - 30, 8, 0xb8a0f0); break;
       case "riposte": this.ui.toast(t("toast.riposte"), 600); break;
@@ -813,6 +850,13 @@ export class StageScene extends Phaser.Scene {
     if (e === "tellSwipe") sfx.tellSwipe();
     if (e === "glint") this.fx.sparkle(x, y, 6, 0xfff6d8);
     if (e === "tellStomp") { sfx.tellStomp(); for (let i = -2; i <= 2; i++) this.fx.dust(x + i * 14, y, 1, 0, 0.5); }
+    // Ch. I cues: each attack family sounds different (playtest I-03: a localised cue per attack)
+    if (e === "tellBlade") { sfx.tellSwipe(); this.fx.sparkle(x, y - 30, 3, 0xb8c4cc); }
+    if (e === "tellThrow") sfx.tellBoar();
+    if (e === "tellAntler") { sfx.tellBoar(); this.fx.dust(x, y, 2, -facing, 0.8); }
+    if (e === "tellPounce") { sfx.tellSwipe(); this.fx.dust(x - facing * 6, y, 3, -facing, 0.9); }
+    if (e === "tellSpore") { sfx.roots(); this.fx.sparkle(x - facing * 16, y - 14, 4, 0xc8d870); }
+    if (e === "burst") { sfx.stomp(); this.addMist(x - 40, 80, 70, 3000); }
   }
 
   private respawn(): void {
@@ -930,7 +974,7 @@ export class StageScene extends Phaser.Scene {
     for (const n of this.npcs.values()) n.tick(dt);
     if (this.ally) {
       this.ally.scripted = !!this.cutscene || this.leaving || this.choosing || this.finished;
-      this.ally.tick(now, dt, this.player.x, this.player.facing, this.boss && this.engaged ? [...this.boars, this.boss] : this.boars);
+      this.ally.tick(now, dt, this.player.x, this.player.facing, this.boss && this.engaged ? [...this.boars, ...this.foes, this.boss] : [...this.boars, ...this.foes]);
     }
     const exit = this.def.exit;
     if (exit && !this.leaving && !locked && this.player.x > exit.x) this.leave(exit.to, exit.card);
@@ -970,6 +1014,12 @@ export class StageScene extends Phaser.Scene {
     const px = this.player.x;
     this.boars = this.boars.filter((b) => b.active);
     for (const b of this.boars) b.tick(now, dt, px);
+    this.foes = this.foes.filter((f) => f.active);
+    const view = { x: px, guarding: this.player.state === "parry" || this.player.state === "block" };
+    for (const f of this.foes) f.tick(now, dt, px, view);
+    for (const s of this.shots) s.tick(dt, this.def.groundY, this.cameras.main.scrollX, this.cameras.main.scrollX + VIEW.width);
+    for (const s of this.shots) if (s.done && s.landedAt !== null && s.kind === "spore") this.addMist(s.landedAt - 24, 48, 60, 2400);
+    this.shots = this.shots.filter((s) => !s.done);
     if (this.boss?.active) {
       if (this.engaged && this.player.state === "heal") this.boss.punishHeal(Math.abs(px - this.boss.x));
       this.boss.tick(now, dt, px);
@@ -986,7 +1036,7 @@ export class StageScene extends Phaser.Scene {
     const ph = this.player.currentHit();
     if (ph) {
       this.targets.length = 0;
-      this.targets.push(...this.bushes, ...this.boars);
+      this.targets.push(...this.bushes, ...this.boars, ...this.foes);
       if (this.boss) this.targets.push(this.boss);
       for (const tg of this.targets) {
         if (!tg.isAlive() || !overlaps(ph.rect, tg.hurtbox())) continue;
@@ -998,7 +1048,7 @@ export class StageScene extends Phaser.Scene {
     // Diệp → enemies (never the brush: the chores are his).
     const ah = this.ally?.currentHit();
     if (ah) {
-      const foes: Hittable[] = [...this.boars, ...(this.boss && this.engaged ? [this.boss] : [])];
+      const foes: Hittable[] = [...this.boars, ...this.foes, ...(this.boss && this.engaged ? [this.boss] : [])];
       for (const tg of foes) {
         if (!tg.isAlive() || !overlaps(ah.rect, tg.hurtbox())) continue;
         const before = tg.hp; tg.takeHit(ah);
@@ -1009,10 +1059,12 @@ export class StageScene extends Phaser.Scene {
     const inc = this.incoming; inc.length = 0;
     for (const b of this.boars) for (const h of b.hits()) inc.push(h);
     if (!this.cutscene) for (const r of this.runners) for (const h of r.hits()) inc.push(h);
+    for (const f of this.foes) if (f.active) for (const h of f.hits()) inc.push(h);
+    for (const s of this.shots) inc.push(s.hits());
     if (this.boss?.active) for (const h of this.boss.hits()) inc.push(h);
     for (const r of this.roots) { const h = r.hitbox(now); if (h) inc.push(h); }
     const hb = this.player.hurtbox();
-    for (const h of inc) if (overlaps(h.rect, hb)) this.player.receive(h);
+    for (const h of inc) if (overlaps(h.rect, hb)) { const r = this.player.receive(h); if (r !== "ignored") this.shots.find((s) => s.hit === h)?.spend(); }
     if (this.ally) { const abx = this.ally.hurtbox(); for (const h of inc) if (overlaps(h.rect, abx)) this.ally.receive(h); }
 
     this.syncOutline();
@@ -1050,6 +1102,10 @@ export class StageScene extends Phaser.Scene {
     for (const b of this.def.boars) {
       if (b.after && this.boarDue(b) && this.marks.has(b.after) && !this.marks.has(`spawned.${b.after}`)) { this.marks.add(`spawned.${b.after}`); this.spawnBoars(b); }
     }
+    for (const f of this.def.foes ?? []) {
+      const key = `spawned.foe.${f.after}.${f.x}`;
+      if (f.after && this.foeDue(f) && this.marks.has(f.after) && !this.marks.has(key)) { this.marks.add(key); this.spawnFoes(f); }
+    }
     if (!this.cutscene && !this.leaving && !this.ui.busy) {
       for (const tr of this.def.triggers ?? []) {
         if (this.played.has(tr.cutscene) || !this.ok(tr.when) || !this.has(tr.after)) continue;
@@ -1074,6 +1130,8 @@ export class StageScene extends Phaser.Scene {
     }
     // poison mist: the puffs drift; standing in it builds poison (gameplay time, and not while dodging through)
     const p = this.player;
+    for (const m of this.mists) if (m.until && this.sim > m.until) { m.puffs.forEach((pf) => pf.img.destroy()); m.haze.forEach((r) => r.destroy()); m.until = -1; }
+    this.mists = this.mists.filter((m) => m.until !== -1);
     for (const m of this.mists) {
       for (const pf of m.puffs) {
         pf.x += Math.sin(time / 800 + pf.phase) * 0.15; pf.y -= delta * 0.006;
@@ -1108,7 +1166,7 @@ export class StageScene extends Phaser.Scene {
     const p = this.player, ar = this.def.arena;
     if (p.state === "dodge" || p.isDead()) return;
     const pb = p.body2;
-    const bodies: (Boar | NanhRe)[] = this.boss ? [...this.boars, this.boss] : this.boars;
+    const bodies = this.fighters;
     for (const e of bodies) {
       if (!e.active || !e.isAlive() || !(e.body as Phaser.Physics.Arcade.Body).enable) continue;
       const eb = e.body as Phaser.Physics.Arcade.Body;
@@ -1153,7 +1211,7 @@ export class StageScene extends Phaser.Scene {
     const hb = this.player.hurtbox();
     g.lineStyle(1, 0x62d3c3, 1).strokeRect(hb.x, hb.y, hb.width, hb.height);
     if (ph) g.lineStyle(1, 0xf6e7a0, 1).strokeRect(ph.x, ph.y, ph.width, ph.height);
-    const bodies: (Boar | NanhRe)[] = this.boss ? [...this.boars, this.boss] : this.boars;
+    const bodies = this.fighters;
     for (const e of bodies) if (e.isAlive()) { const r = e.hurtbox(); g.lineStyle(1, 0x9aa1ad, 1).strokeRect(r.x, r.y, r.width, r.height); }
     for (const h of incoming) g.lineStyle(1, h.parryable ? 0xe8b04a : 0xff5050, 1).strokeRect(h.rect.x, h.rect.y, h.rect.width, h.rect.height);
   }

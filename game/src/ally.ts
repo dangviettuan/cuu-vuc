@@ -16,7 +16,7 @@ export interface AllyTarget {
 }
 
 /** Enemy states she reads as danger and gives way to (the boar's tell and charge; Nanh Rễ's windups and attacks). */
-const DANGER = new Set(["notice", "charge", "tCharge", "tSwipe", "tStomp", "swipe", "stomp"]);
+const DANGER = new Set(["notice", "charge", "tCharge", "tSwipe", "tStomp", "swipe", "stomp", "tell", "active"]);
 
 type AllyState = "follow" | "engage" | "thrust" | "sweep" | "retreat" | "hurt" | "down" | "scripted";
 export type AllyEvent = "down" | "up" | "swing" | "step";

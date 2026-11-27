@@ -18,10 +18,10 @@ export interface Controls {
   herbPressed: boolean;
 }
 
-type State = "move" | "light" | "air" | "charge" | "heavy" | "riposte" | "phaThe" | "blink" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "dead";
+type State = "move" | "light" | "air" | "charge" | "heavy" | "riposte" | "phaThe" | "blink" | "dodge" | "parry" | "block" | "unguard" | "heal" | "hurt" | "snared" | "dead";
 export type PlayerEvent =
   | "parry" | "block" | "guardBreak" | "perfectDodge" | "hurt" | "riposte" | "phaThe" | "blink" | "anh" | "crit" | "heal" | "dead"
-  | "poisoned" | "cured"
+  | "poisoned" | "cured" | "snared"
   | "jump" | "land" | "dodge" | "step" | "skid" | "swing" | "slam" | "ghost" | "thud";
 
 const ATTACKING: ReadonlySet<State> = new Set(["light", "air", "heavy", "riposte", "phaThe", "blink"]);
@@ -57,6 +57,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   antidotes = 0;
   antidoteCap = 0;
   private usingAntidote = false;
+  private snareMs = 0;
   herbs = 0;
   /**
    * Herb pouch capacity (review D4): each herb found adds a slot, up to PLAYER.herbCapMax. Respawning and resting at a
@@ -324,6 +325,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.horizontal(0, sec, 0.3); // knockback eases out through deceleration
         if (t >= PLAYER.hurtStun) this.enter("move");
         break;
+      case "snared": // a net or a vine holds him: he can only wait it out
+        this.horizontal(0, sec, 0.5);
+        if (t >= this.snareMs) this.enter("move");
+        break;
       case "dead":
         body.setVelocityX(body.velocity.x * 0.85);
         break;
@@ -443,6 +448,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
     if (now < this.invulnUntil) return "ignored";
     this.hitIds.add(hit.id);
+    if (hit.snare && hit.damage <= 0) { // a net: no wound, but it holds him
+      this.snareMs = hit.snare; this.attack = null; this.invulnUntil = now + hit.snare + 200;
+      this.body2.setVelocityX(0); this.enter("snared"); this.anim.play(PC.hurt, true, true); this.onEvent("snared");
+      return "hit";
+    }
+    if (hit.poison) this.addPoison(hit.poison);
     let damage = Math.max(1, Math.round(hit.damage * this.damageScale));
     // Block (review D6): only parryable hits, only from the front. Chip damage plus a stamina drain; a drain that
     // would empty stamina breaks the guard and the rest of the hit lands.

@@ -95,6 +95,7 @@ export const vi = {
   "toast.cured": "Đã giải độc.",
   "toast.reGiu": "Rễ Giữ!",
   "toast.diepDown": "Diệp ngã!",
+  "toast.snared": "Dính lưới!",
   "toast.diepUp": "Diệp đứng dậy.",
   "toast.reGiu.none": "Rễ Giữ: rễ trồi lên, không bắt được gì.",
   "hud.antidotes": "Thuốc giải {n}/{cap}",

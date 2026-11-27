@@ -305,6 +305,32 @@ const { launch, withQuick } = require("./harness.cjs");
   const down = await scene(() => { const a = window.__cuuVuc.scene.getScene("Stage").ally; a.receive({ id: "ci-ko", rect: a.hurtbox(), damage: 999, knockback: 0, parryable: false }); return { state: a.state, hp: a.hp, active: a.active }; });
   step("Ch. I: Diệp knocked down goes down, not dead", down.state === "down" && down.active, down);
 
+  // Ch. I enemies (the data-driven fighter): their rules, checked directly
+  await openAt("ch1-sandbox");
+  const foesOk = await scene(async () => {
+    const st = window.__cuuVuc.scene.getScene("Stage"), p = st.player;
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const op = st.foes.find((f) => f.def.id === "operative"), deer = st.foes.find((f) => f.def.id === "rootDeer"), pod = st.foes.find((f) => f.def.id === "sporePod");
+    const strike = (f, id) => { f.move = f.def.moves.find((m) => m.id === id); f.state = "active"; f.stateAt = f.now; return f.hits()[0]; };
+    const out = {};
+    // a parried cut staggers the operative
+    p.x = op.x - 40; p.body.reset(p.x, p.y - p.body.height - 4); p.facing = 1; p.state = "parry"; p.parryAt = p.now; p.stateAt = p.now;
+    const cut = strike(op, "cut"); cut.rect = p.hurtbox(); out.parry = p.receive(cut); await wait(50); out.opStun = op.state;
+    // the deer's rush cannot be parried
+    p.state = "parry"; p.parryAt = p.now; p.invulnUntil = 0;
+    const rush = strike(deer, "rush"); rush.rect = p.hurtbox(); out.rush = p.receive(rush);
+    // a net holds him
+    p.invulnUntil = 0; p.state = "move";
+    out.net = p.receive({ id: "ci-net", rect: p.hurtbox(), damage: 0, knockback: 0, parryable: false, snare: 1100 }); out.snared = p.state;
+    // beaten down to a third, an operative breaks off and runs (he does not die)
+    op.takeHit({ id: 77001, rect: null, damage: 55, guardBreak: false, poise: 0, direction: 1 }); out.opAfter = op.state;
+    // a pod's burst leaves poison in the air
+    const n0 = st.mists.length; pod.onFx("burst", pod.x, pod.y); out.cloud = st.mists.length > n0;
+    return out;
+  });
+  step("Ch. I enemies: a parried cut staggers; a rush can't be parried; a net holds; a beaten operative runs; a pod's burst leaves poison",
+    foesOk.parry === "parried" && foesOk.opStun === "stun" && foesOk.rush === "hit" && foesOk.snared === "snared" && foesOk.opAfter === "flee" && foesOk.cloud, foesOk);
+
   /* ---------------- Ch. I: the class from the save sets the kit (no ?kit= override) ---------------- */
   if (!/[?&]kit=/.test(process.env.GAME_URL || "")) {
     await openAt("prologue-s1");
