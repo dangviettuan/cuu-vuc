@@ -111,6 +111,19 @@ export const vi = {
   "boss.nanhRe.p2": "Nanh Rễ gào lên. Rễ mọc dày hơn.",
   "boss.nanhRe.p3": "Nanh Rễ liều mạng!",
 
+  // ---- Ch. I bosses
+  "boss.docDang": "ĐỘC ĐẰNG",
+  "boss.docDang.intro": "Độc Đằng: khối dây leo độc, cuộn quanh hai thân cây.",
+  "boss.docDang.p2": "Độc Đằng trổ bào tử khắp thân.",
+  "boss.hung": "HÙNG",
+  "boss.hung.intro": "Gã chỉ huy toán cắt Mạch. Hắn đọc được thế đỡ.",
+  "boss.hung.p2": "Hùng đổi thế. Nhanh hơn.",
+  "boss.mocGiac": "MỘC GIÁC",
+  "boss.mocGiac.intro": "Mộc Giác, vật giữ Mạch của Thanh Mộc. Nó nhìn anh.",
+  "boss.mocGiac.p2": "Những đường gân đen vỡ ra. Nhựa đen phun thành sương.",
+  "boss.mocGiac.p3": "Mộc Giác dừng lại. Chậm rãi cúi đầu xuống ngực anh.",
+  "test.bossDown": "(Thử nghiệm) Trùm đã ngã.",
+
   // ---- dialogue: C2 (prologue §7)
   "c2.cry": "Bầy con kêu ré từ bụi rậm.",
   "c2.think": "Nó không còn sức đứng dậy. Rễ vẫn quằn quại dưới da nó.",

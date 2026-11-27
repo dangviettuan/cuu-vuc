@@ -6,7 +6,7 @@ import { WORLD } from "./tuning";
 import type { FoeDef, FoeMove, ShotKind } from "./data/foes";
 
 const NONE: EnemyHit[] = [];
-type FoeState = "dormant" | "idle" | "tell" | "active" | "recover" | "stun" | "stagger" | "dead" | "flee" | "down" | "leave";
+type FoeState = "dormant" | "idle" | "tell" | "active" | "recover" | "stun" | "stagger" | "beat" | "dead" | "flee" | "down" | "leave";
 
 /** What the stage tells a fighter about the hero each frame (Hùng reads guards; some moves care where he stands). */
 export interface HeroView { x: number; guarding: boolean; }
@@ -96,7 +96,10 @@ export class Fighter extends Enemy {
   tick(now: number, dt: number, playerX: number, hero?: HeroView): void {
     this.now = now;
     if (this.holdIfBound(dt)) return;
-    if (this.def.phaseAt && this.phase !== this.lastPhase && this.isAlive()) { this.lastPhase = this.phase; this.onPhase(this.phase); }
+    if (this.def.phaseAt && this.phase !== this.lastPhase && this.isAlive()) {
+      this.lastPhase = this.phase; this.onPhase(this.phase);
+      if (this.def.phaseBeat?.[this.phase] && this.state !== "down") { this.move = null; this.enter("beat"); }
+    }
     const d = this.def, t = now - this.stateAt, dx = playerX - this.x, dist = Math.abs(dx), k = this.speedK();
     let vx = 0;
     this.anim.timeScale = 1;
@@ -134,6 +137,7 @@ export class Fighter extends Enemy {
         this.pose(m.frames.active);
         if (m.motion?.during === "active") vx = this.facing * m.motion.vx;
         if (m.leap && this.b.blocked.down && t > 60) vx = 0; else if (m.leap) vx = this.facing * m.leap.vx;
+        if (d.anchored) vx = 0;
         if (t > m.active) {
           if (m.chain) { const next = d.moves.find((mm) => mm.id === m.chain); if (next) { this.facing = dx > 0 ? 1 : -1; this.begin(next, 0.5); break; } }
           this.enter("recover");
@@ -150,6 +154,12 @@ export class Fighter extends Enemy {
         this.pose(d.frames.stun);
         if (t > (this.stunFor || d.stunMs)) { this.enter("idle"); this.show(this.clips.idle, true); }
         break;
+      case "beat": { // a story beat (Mộc Giác lowers its head to his chest): no attack, then it fights on
+        const bt = d.phaseBeat![this.phase];
+        this.pose(bt.frame); this.facing = dx > 0 ? 1 : -1;
+        if (t > bt.ms) { this.enter("idle"); this.show(this.clips.idle, true); }
+        break;
+      }
       case "stagger":
         this.pose(d.frames.stun);
         if (t > (d.staggerMs ?? 1200)) { this.poise = 0; this.enter("idle"); this.show(this.clips.idle, true); }
@@ -166,6 +176,7 @@ export class Fighter extends Enemy {
       case "down": break;
       case "leave": vx = 60; this.show(this.clips.walk); this.anim.timeScale = 0.6; break;
     }
+    if (this.def.anchored) { vx = 0; this.kb = 0; }
     this.finish(dt, vx);
   }
   private stunFor = 0;
@@ -223,6 +234,14 @@ export class Fighter extends Enemy {
     hit.rect.setTo(x, this.y - yFeet - h, w, h);
     return this.hitList;
   }
+
+  /** Armoured (Độc Đằng): only a fraction of a hit gets through unless it is open (stunned, staggered). */
+  takeHit(hit: PlayerHit): void {
+    const a = this.def.armor;
+    super.takeHit(a && this.state !== "stun" && this.state !== "stagger" ? { ...hit, damage: Math.max(1, Math.round(hit.damage * a)) } : hit);
+  }
+  /** Open to full damage right now (for feedback). */
+  get open(): boolean { return !this.def.armor || this.state === "stun" || this.state === "stagger"; }
 
   private parried(): void { this.stunFor = this.def.parriedStunMs; this.enter("stun"); this.kb = -this.facing * 120 / this.kbResist; }
 

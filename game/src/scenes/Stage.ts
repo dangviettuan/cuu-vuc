@@ -75,7 +75,7 @@ export class StageScene extends Phaser.Scene {
   foes: Fighter[] = [];
   private shots: Shot[] = [];
   bushes: Bush[] = [];
-  boss: NanhRe | null = null;
+  boss: NanhRe | Fighter | null = null;
   private roots: RootSpike[] = [];
   private herbs: Herb[] = [];
   private signs: Sign[] = [];
@@ -319,9 +319,13 @@ export class StageScene extends Phaser.Scene {
       }
       // at the entrance, so its dark roots frame the way in rather than sitting behind the fight
       if (ar.landmark) this.add.image(ar.landmark.x, def.groundY + 3, ar.landmark.key).setOrigin(0.5, 1).setDepth(-3);
-      const boss = new NanhRe(this, ar.boss.x, ar.min, ar.max);
+      const boss = ar.boss.kind === "nanhRe" ? new NanhRe(this, ar.boss.x, ar.min, ar.max) : new Fighter(this, ar.boss.x, FOES[ar.boss.kind], ar.min + 20, ar.max - 20);
       boss.facing = -1;
       this.boss = boss;
+      if (boss instanceof Fighter) {
+        boss.onShot = (kind, x, y, vx, vy, hit, g) => this.shots.push(new Shot(this, kind, x, y, vx, vy, hit, g));
+        boss.onDeath = () => {};
+      }
       this.physics.add.collider(boss, this.solids);
       // Registered once: the walls group is filled on engage and emptied on reset (review B1).
       this.physics.add.collider(this.player, this.walls);
@@ -329,8 +333,14 @@ export class StageScene extends Phaser.Scene {
       this.physics.add.collider(boss, this.walls);
       boss.onRoots = (xs, warn, dmg) => xs.forEach((x, i) => this.roots.push(new RootSpike(this, x, this.sim, warn + i * 40, dmg)));
       boss.onDown = () => this.bossDown();
-      boss.onPhase = (p) => { sfx.roar(); music.setIntensity(p); this.ui.toast(t(p === 2 ? "boss.nanhRe.p2" : "boss.nanhRe.p3")); this.cameras.main.shake(220, 0.006 * settings().shake); };
-      boss.onFx = (e, ex, ey) => this.onEnemyFx(e, ex, ey, boss.facing, 2.2);
+      boss.onPhase = (p) => {
+        sfx.roar(); music.setIntensity(p); this.cameras.main.shake(220, 0.006 * settings().shake);
+        const msg = ar.boss.kind === "nanhRe" ? (p === 2 ? "boss.nanhRe.p2" : "boss.nanhRe.p3") : ar.boss.phases?.[p - 2];
+        if (msg) this.ui.toast(t(msg), 2400);
+        // Mộc Giác's recognition: it lowers its head to his chest, and the half Mạch Ấn pulses wildly (spec §8)
+        if (boss instanceof Fighter && boss.def.phaseBeat?.[p]) { this.hitstop(120); void this.pulse(4); }
+      };
+      boss.onFx = (e, ex, ey) => { if (e === "burst" && boss instanceof Fighter) { sfx.stomp(); this.addMist(boss.x - boss.b.width / 2 - 50, boss.b.width + 100, 60, 3500); return; } this.onEnemyFx(e, ex, ey, boss.facing, 2.2); };
       if (ar.litter) {
         this.add.image(ar.litter.bushX, def.groundY, "bush0").setOrigin(0.5, 1).setDepth(7);
         for (let i = 0; i < ar.litter.n; i++) {
@@ -894,6 +904,7 @@ export class StageScene extends Phaser.Scene {
 
   private bossDown(): void {
     const ar = this.def.arena!, boss = this.boss!;
+    if (!SCRIPTS[ar.outcome]) { this.bossDefeated(); return; }
     this.choosing = true;
     this.shake(30); this.hitstop(160); sfx.bossDown();
     music.play("aftermath");
@@ -906,6 +917,24 @@ export class StageScene extends Phaser.Scene {
     this.ui.hideBoss();
     // The choice opens with the fall (the camera pans behind it), so `choosing` always means the choice is on screen.
     this.ui.runScript(SCRIPTS[ar.outcome], (outcome) => this.resolve(outcome));
+  }
+
+  /**
+   * A Ch. I boss beaten: the arena opens, the camera comes back to him, and its outcome cutscene plays (Mộc Giác's
+   * absorption, Hùng's escape). The mark `<kind>.down` opens anything waiting on it.
+   */
+  private bossDefeated(): void {
+    const ar = this.def.arena!, boss = this.boss!;
+    this.shake(30); this.hitstop(160); sfx.bossDown();
+    music.play("aftermath");
+    this.roots.forEach((r) => r.destroy()); this.roots = [];
+    this.shots.forEach((s) => s.spend()); this.shots = [];
+    this.ui.hideBoss();
+    this.engaged = false; this.walls.clear(true, true);
+    this.cameras.main.setBounds(0, this.def.height - VIEW.height, this.def.width, VIEW.height);
+    this.marks.add(`${ar.boss.kind}.down`);
+    boss.b.enable = false;
+    if (CUTSCENES[ar.outcome]) this.time.delayedCall(900, () => void this.runCutscene(ar.outcome));
   }
 
   /** Carry out the C2 outcome; its flags were saved by the dialogue runner. */
@@ -1022,7 +1051,7 @@ export class StageScene extends Phaser.Scene {
     this.shots = this.shots.filter((s) => !s.done);
     if (this.boss?.active) {
       if (this.engaged && this.player.state === "heal") this.boss.punishHeal(Math.abs(px - this.boss.x));
-      this.boss.tick(now, dt, px);
+      if (this.boss instanceof Fighter) this.boss.tick(now, dt, px, view); else this.boss.tick(now, dt, px);
     }
     for (const b of this.bushes) b.tick(time);
     this.separate();

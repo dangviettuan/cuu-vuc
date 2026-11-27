@@ -93,6 +93,21 @@ Each mentor briefly states a view on *what strength is for* **[PB L9]**, as a li
 - **Mini-boss: Độc Đằng (Poison Vine Colossus),** in I-4. A mass of corrupted vine that teaches poison management and cutting off its weak points.
 - **Mini-boss: the cell's squad leader, Hùng,** in I-6 (a burn-scarred man with a Ty-alloy blade, who reads the protagonist's parries; he escapes into the trench). A human duel that teaches the class kit against a thinking opponent.
 
+**Enemies as built** *(2026-11-27, greybox; the numbers are first guesses, to be tuned by play)*:
+- **Rooted deer:** an antler thrust you can parry, a rush you must dodge.
+- **Great cat:** a pounce, parryable in the air; a two-hit claw; a back-step.
+- **Spore pod:** swells, then bursts into a short poison cloud.
+- **Operatives:**
+  - a parryable cut, and a thrown net that holds him;
+  - at 30% health they break off and run.
+- **Độc Đằng:**
+  - **Armoured:** only a third of each hit gets through the vines, until a parried lash wraps a trunk and leaves the core open.
+  - **Its attacks:** spore gobs, a low lash to jump, and a bloom of mist in phase 2.
+- **Hùng** reads parries:
+  - **Feint:** if the hero is already guarding at the end of the tell, the cut waits him out.
+  - **Kick:** goes through a block.
+  - **At range:** a lunge and a net.
+
 ## 8. Main boss — Mộc Giác
 
 - **Form:** a vast antlered guardian beast. Its antlers are living trees, and its hide is cracked with dark veins (Linh Suy). **[WB; Ch1 leaf imagery]**
@@ -102,6 +117,10 @@ Each mentor briefly states a view on *what strength is for* **[PB L9]**, as a li
   2. **Wounded Mạch:** poison bleeds from its veins and the arena's roots turn hostile. It focuses on the protagonist and ignores Diệp: *it is after what is in him*.
   3. **Recognition:** it stops attacking for a moment and lowers its head toward his chest, then attacks with desperate force. The half Mạch Ấn pulses wildly through this phase.
 - **Ending:** Mộc Giác dies of its wounds and the Linh Suy, not from a killing blow. The absorption happens *to* him.
+- **As built:**
+  - **Phase 1:** antler sweeps (parryable, as in the prose), a charge across the grove, and roots under him.
+  - **Phase 2 (at 60%):** its veins burst into poison mist and the roots come five at a time.
+  - **Phase 3 (at 30%):** a 3.2 s beat in which it stops and lowers its head to his chest while the half Mạch Ấn pulses. Then it fights faster, and its sweeps chain into roots.
 
 ## 9. Mạch Ấn reward — Mạch Ấn Mộc Giác
 

@@ -63,6 +63,8 @@ const SPARED = { flag: "PRO_SOW_SPARED", is: true } as const, KILLED = { flag: "
 const TOLD = { flag: "PRO_VILLAGE_TOLD", is: true } as const, KEPT = { flag: "PRO_VILLAGE_TOLD", is: false } as const;
 
 export const CUTSCENES: Record<string, Step[]> = {
+  /** Test arenas (ch1-bosses): the boss is down. */
+  "test.bossDown": [{ say: "test.bossDown" }],
   /* ---------------- S2 "Cái giếng cạn" (Ch1; spec §3 S2, §13 beat 1) ---------------- */
 
   "s2.open": [

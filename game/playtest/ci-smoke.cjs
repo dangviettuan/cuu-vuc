@@ -331,6 +331,32 @@ const { launch, withQuick } = require("./harness.cjs");
   step("Ch. I enemies: a parried cut staggers; a rush can't be parried; a net holds; a beaten operative runs; a pod's burst leaves poison",
     foesOk.parry === "parried" && foesOk.opStun === "stun" && foesOk.rush === "hit" && foesOk.snared === "snared" && foesOk.opAfter === "flee" && foesOk.cloud, foesOk);
 
+  // Ch. I bosses in their test arenas: they wake, their rules hold, and their defeat plays the outcome scene
+  for (const kind of ["docDang", "hung", "mocGiac"]) {
+    await openAt(`ch1-boss-${kind}`);
+    await tp(kind === "docDang" ? 600 : 440); await h.wait(2200);
+    const r = await scene(async (k) => {
+      const st = window.__cuuVuc.scene.getScene("Stage"), b = st.boss, wait = (ms) => new Promise((res) => setTimeout(res, ms));
+      const out = { engaged: st.engaged, awake: b.state !== "dormant" };
+      if (k === "docDang") { // a third of a hit through the vines; all of it once it is open
+        b.state = "idle"; const h0 = b.hp; b.takeHit({ id: 88001, rect: null, damage: 30, guardBreak: false, poise: 0, direction: 1 }); out.closed = h0 - b.hp;
+        b.state = "stun"; b.stateAt = b.now; const h1 = b.hp; b.takeHit({ id: 88002, rect: null, damage: 30, guardBreak: false, poise: 0, direction: 1 }); out.open = h1 - b.hp;
+      }
+      if (k === "hung") { // a held guard at the end of his tell makes the cut wait
+        b.move = b.def.moves.find((m) => m.id === "cut"); b.state = "tell"; b.stateAt = b.now - 360; b.cued = true; b.feinted = false;
+        b.tick(b.now + 16, 16, st.player.x, { x: st.player.x, guarding: true }); out.feinted = b.feinted;
+      }
+      if (k === "mocGiac") { b.hp = Math.round(b.maxHp * 0.25); await wait(300); out.beat = b.state; out.phase = b.phase; }
+      b.takeHit({ id: 88003, rect: null, damage: 99999, guardBreak: false, poise: 0, direction: 1 });
+      await wait(1400);
+      out.down = st.marks.has(`${k}.down`); out.cut = st.cutscene; out.engagedAfter = st.engaged;
+      return out;
+    }, kind);
+    const ok = r.engaged && r.awake && r.down && r.cut === "test.bossDown" && !r.engagedAfter
+      && (kind !== "docDang" || (r.closed === 11 && r.open === 30)) && (kind !== "hung" || r.feinted) && (kind !== "mocGiac" || (r.beat === "beat" && r.phase === 3));
+    step(`Ch. I boss ${kind}: wakes, its rule holds, its defeat opens the arena and plays the outcome`, ok, r);
+  }
+
   /* ---------------- Ch. I: the class from the save sets the kit (no ?kit= override) ---------------- */
   if (!/[?&]kit=/.test(process.env.GAME_URL || "")) {
     await openAt("prologue-s1");

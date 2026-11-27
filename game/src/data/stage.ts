@@ -94,14 +94,17 @@ export interface StageDef {
   arena?: {
     min: number;
     max: number;
-    boss: { kind: "nanhRe"; x: number; name: StringKey; intro: StringKey };
+    /** Nanh Rễ (bespoke AI) or a Ch. I boss from src/data/foes.ts (the data-driven fighter). */
+    boss: { kind: "nanhRe" | FoeId; x: number; name: StringKey; intro: StringKey;
+      /** toasts as it enters phase 2, 3… */
+      phases?: StringKey[] };
     /** Darkens the backdrop behind the arena, faded in over the approach. */
     grove?: boolean;
     /** A landmark image placed at the arena entrance. */
     landmark?: { x: number; key: string };
     /** Decorative bush and the litter behind it (Nanh Rễ's piglets). */
     litter?: { bushX: number; x: number; n: number };
-    /** The choice that ends the encounter (src/data/dialogue). */
+    /** What ends the encounter: a choice (src/data/dialogue, C2), or a cutscene (Ch. I: the absorption, Hùng's escape). */
     outcome: string;
     /** Where the story goes once the choice is carried out (S7 → S8). */
     next?: { to: string; card?: StringKey[] };
